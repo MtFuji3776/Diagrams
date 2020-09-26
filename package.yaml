@@ -26,6 +26,9 @@ dependencies:
 - diagrams-svg
 - diagrams-core
 - containers
+- diagrams-builder
+- diagrams-pgf
+
 
 library:
   source-dirs: src
@@ -40,6 +43,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - diagrams
+    
 
 tests:
   diagrams-test:

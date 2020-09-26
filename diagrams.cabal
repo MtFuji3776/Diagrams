@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b7c36bbe85eb3bb6cd9dab1cc38e495819b19c36a9b599271b8a61a13d2660d6
+-- hash: c25fe69d002ddb73c5c11e4e477a48e03daeda4c5a08c80508868f8ea6af77f1
 
 name:           diagrams
 version:        0.1.0.0
@@ -36,9 +36,11 @@ library
   build-depends:
       base >=4.7 && <5
     , containers
+    , diagrams-builder
     , diagrams-contrib
     , diagrams-core
     , diagrams-lib
+    , diagrams-pgf
     , diagrams-svg
   default-language: Haskell2010
 
@@ -53,9 +55,11 @@ executable diagrams-exe
       base >=4.7 && <5
     , containers
     , diagrams
+    , diagrams-builder
     , diagrams-contrib
     , diagrams-core
     , diagrams-lib
+    , diagrams-pgf
     , diagrams-svg
   default-language: Haskell2010
 
@@ -71,8 +75,10 @@ test-suite diagrams-test
       base >=4.7 && <5
     , containers
     , diagrams
+    , diagrams-builder
     , diagrams-contrib
     , diagrams-core
     , diagrams-lib
+    , diagrams-pgf
     , diagrams-svg
   default-language: Haskell2010
