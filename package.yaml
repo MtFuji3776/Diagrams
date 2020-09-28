@@ -28,6 +28,7 @@ dependencies:
 - containers
 - diagrams-builder
 - diagrams-pgf
+- time
 
 
 library:
