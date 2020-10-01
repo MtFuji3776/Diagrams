@@ -17,7 +17,7 @@ myCircle :: Diagram B
 myCircle = circle 1
 
 --easyRender :: (Show n, RealFloat n) => FilePath -> QDiagram SVG V2 n Any -> IO ()
-easyRender name diag = renderPretty ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202009/img/" ++ name) fixedSize diag
+easyRender name diag = renderPretty ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202010/img/" ++ name) fixedSize diag
 
 setSize :: Num n => n -> n -> SizeSpec V2 n
 setSize w h = mkSizeSpec2D (Just w) (Just h)
@@ -85,7 +85,7 @@ hcat_vcat = let circles = hcat (map circle [1..6]) in vcat $ replicate 3 circles
 
 expvect = lwG 0.05 . mconcat . map fromOffsets $ [ [r *^ e (r @@ rad)] | r <- [33 * tau/32, 34 * tau/32 .. 2 * tau]]
 
-vectopr1 =
-    let vs = take 33 . iterate (scale (2**(1/32)) . rotateBy (1/32) $ unitX)
-    in mconcat $ map fromOffsets (map (:[]) vs)
+-- vectopr1 =
+--     let vs = take 33 . iterate (scale (2**(1/32)) . rotateBy (1/32) $ unitX)
+--     in mconcat $ map fromOffsets (map (:[]) vs)
 

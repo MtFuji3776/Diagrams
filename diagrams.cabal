@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f54a7e311e82459a93480045443aa5536d3ea5703a4f989dfc31328646a14c8d
+-- hash: 9139ee74bf3241b14c5da9451b3bdd83e79b295e38ceed2fed0dbf8d3b97dde0
 
 name:           diagrams
 version:        0.1.0.0
@@ -27,6 +27,7 @@ source-repository head
 
 library
   exposed-modules:
+      DrawCD
       Lib
       Tutorial
   other-modules:
