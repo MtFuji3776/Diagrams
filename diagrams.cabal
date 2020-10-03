@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9139ee74bf3241b14c5da9451b3bdd83e79b295e38ceed2fed0dbf8d3b97dde0
+-- hash: da96ff9801886392a989f5396fef4831309b21cb4f1b7729adba4f13c10a5ea0
 
 name:           diagrams
 version:        0.1.0.0
@@ -28,6 +28,7 @@ source-repository head
 library
   exposed-modules:
       DrawCD
+      Guide_Arrows
       Lib
       Tutorial
   other-modules:
@@ -43,6 +44,7 @@ library
     , diagrams-lib
     , diagrams-pgf
     , diagrams-svg
+    , lens
     , time
   default-language: Haskell2010
 
@@ -63,6 +65,7 @@ executable diagrams-exe
     , diagrams-lib
     , diagrams-pgf
     , diagrams-svg
+    , lens
     , time
   default-language: Haskell2010
 
@@ -84,5 +87,6 @@ test-suite diagrams-test
     , diagrams-lib
     , diagrams-pgf
     , diagrams-svg
+    , lens
     , time
   default-language: Haskell2010

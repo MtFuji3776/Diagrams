@@ -22,3 +22,4 @@ coor x y d = d # translateX x # translateY y
 
 example1 = sqr <> mconcat (map (uncurry coor) [(0,0),(1,0),(1,1),(0,1)] <*> [obj]) <> square 1 -- :: Diagram B
 
+easyRenderReact name = renderPretty ("/Users/fujimotomakoto/PureScriptProjects/react/tutorial/src/img/" <> name) fixedSize

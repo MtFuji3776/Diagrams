@@ -29,6 +29,7 @@ dependencies:
 - diagrams-builder
 - diagrams-pgf
 - time
+- lens
 
 
 library:
