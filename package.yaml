@@ -30,6 +30,7 @@ dependencies:
 - diagrams-pgf
 - time
 - lens
+- SVGFonts
 
 
 library:

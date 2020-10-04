@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: da96ff9801886392a989f5396fef4831309b21cb4f1b7729adba4f13c10a5ea0
+-- hash: 86b57c1e90fae584cc4796623d0135ede05d3e63547bbb4e37ef33e8c06ea7ab
 
 name:           diagrams
 version:        0.1.0.0
@@ -29,6 +29,7 @@ library
   exposed-modules:
       DrawCD
       Guide_Arrows
+      Guide_Text
       Lib
       Tutorial
   other-modules:
@@ -36,7 +37,8 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      SVGFonts
+    , base >=4.7 && <5
     , containers
     , diagrams-builder
     , diagrams-contrib
@@ -56,7 +58,8 @@ executable diagrams-exe
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      SVGFonts
+    , base >=4.7 && <5
     , containers
     , diagrams
     , diagrams-builder
@@ -78,7 +81,8 @@ test-suite diagrams-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      SVGFonts
+    , base >=4.7 && <5
     , containers
     , diagrams
     , diagrams-builder
