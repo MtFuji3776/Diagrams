@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+    "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" height="300.0000" stroke-opacity="1" viewBox="0.0 0.0 400.0 300.0" font-size="1" width="400.0000" xmlns:xlink="http://www.w3.org/1999/xlink" stroke="rgb(0,0,0)" version="1.1">
+  <defs>
+  </defs>
+  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="0.0" stroke="rgb(0,0,0)" stroke-width="1.2393546707863734" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
+    <path d="M 400.0000,250.0000 v -160.0000 c 0.0000,-11.0457 -8.9543,-20.0000 -20.0000 -20.0000h -360.0000 c -11.0457,-0.0000 -20.0000,8.9543 -20.0000 20.0000v 160.0000 c -0.0000,11.0457 8.9543,20.0000 20.0000 20.0000h 360.0000 c 11.0457,0.0000 20.0000,-8.9543 20.0000 -20.0000Z"/>
+  </g>
+  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1.0" stroke="rgb(0,0,0)" stroke-width="0.0" fill="rgb(255,255,255)" stroke-linecap="butt" stroke-miterlimit="10.0">
+    <path d="M 280.0000,110.0000 l -0.0000,-80.0000 h -160.0000 l -0.0000,80.0000 Z"/>
+  </g>
+  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1.0" font-size="60.0px" stroke="rgb(0,0,0)" stroke-width="1.2393546707863734" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
+    <text dominant-baseline="middle" transform="matrix(1.0000,0.0000,0.0000,1.0000,200.0000,70.0000)" stroke="none" text-anchor="middle">話題
+    </text>
+  </g>
+</svg>

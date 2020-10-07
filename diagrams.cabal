@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 86b57c1e90fae584cc4796623d0135ede05d3e63547bbb4e37ef33e8c06ea7ab
+-- hash: fd6fc65c7cba6a33a1e07693aba000d430d93bae2368f4d58f300053092b7e6a
 
 name:           diagrams
 version:        0.1.0.0
@@ -31,13 +31,17 @@ library
       Guide_Arrows
       Guide_Text
       Lib
+      Parts
+      TextDiagrams.Fingertrees
       Tutorial
   other-modules:
       Paths_diagrams
   hs-source-dirs:
       src
+  default-extensions: TypeFamilies FlexibleContexts NoMonomorphismRestriction
   build-depends:
       SVGFonts
+    , algebraic-graphs
     , base >=4.7 && <5
     , containers
     , diagrams-builder
@@ -56,9 +60,11 @@ executable diagrams-exe
       Paths_diagrams
   hs-source-dirs:
       app
+  default-extensions: TypeFamilies FlexibleContexts NoMonomorphismRestriction
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       SVGFonts
+    , algebraic-graphs
     , base >=4.7 && <5
     , containers
     , diagrams
@@ -79,9 +85,11 @@ test-suite diagrams-test
       Paths_diagrams
   hs-source-dirs:
       test
+  default-extensions: TypeFamilies FlexibleContexts NoMonomorphismRestriction
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       SVGFonts
+    , algebraic-graphs
     , base >=4.7 && <5
     , containers
     , diagrams

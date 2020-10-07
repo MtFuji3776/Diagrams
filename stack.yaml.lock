@@ -858,4 +858,11 @@ packages:
       sha256: 13f2c1b8ad72eefc1adb87229a2ccdc11be680dafe2fd7c65d52d751dcf885c8
   original:
     hackage: SVGFonts-1.7.0.1@sha256:af422f17a3a87f2d7185ba7ea4b1cf693f71c164e99ce7386f1902145db25df0,3909
+- completed:
+    hackage: algebraic-graphs-0.5@sha256:6eeec5ed1687ff7aa916e7bf9f02f51aaabde6f314dc0b7b1a84156974d7da73,8071
+    pantry-tree:
+      size: 4128
+      sha256: cca4a0348bb126506cacd8436948a68aad62e75d45df8c71f4090a00e69b45ee
+  original:
+    hackage: algebraic-graphs-0.5@sha256:6eeec5ed1687ff7aa916e7bf9f02f51aaabde6f314dc0b7b1a84156974d7da73,8071
 snapshots: []
