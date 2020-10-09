@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+    "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" height="300.0000" stroke-opacity="1" viewBox="0.0 0.0 400.0 300.0" font-size="1" width="400.0000" xmlns:xlink="http://www.w3.org/1999/xlink" stroke="rgb(0,0,0)" version="1.1">
+  <defs>
+  </defs>
+  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="0.0" stroke="rgb(0,0,0)" stroke-width="0.7901226696120236" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
+    <path d="M 265.0306,110.7488 l -0.0000,-110.7488 h -110.7488 l -0.0000,110.7488 Z"/>
+  </g>
+  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="0.0" stroke="rgb(0,0,0)" stroke-width="1.975306674030059" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
+    <path d="M 144.6256,78.5025 v 221.4975 "/>
+  </g>
+  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1.0" stroke="rgb(0,0,0)" stroke-width="0.5" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
+    <path d="M 147.1726,67.0667 ZM 152.3692,43.3211 c 0.8661,-0.0000 1.9126,0.6857 1.9126 2.6344c 0.0000,2.3457 -0.5052,3.8614 -0.8661 6.9649c -0.4691,3.8975 -0.4691,6.0627 -0.5413 6.5679c -0.0361,0.3970 -0.1444,0.7218 -0.5052 0.7218c -0.3609,-0.0000 -0.4691,-0.2526 -0.5052 -0.4691c -0.0722,-0.7578 -0.2887,-4.0057 -0.5774 -6.8206c -0.3248,-3.1757 -0.8300,-4.4388 -0.8300 -6.9649c 0.0000,-1.9487 1.0465,-2.6344 1.9126 -2.6344ZM 152.3692,43.3211 ZM 150.4566,65.5150 c 0.0000,-1.0465 0.8661,-1.9126 1.9126 -1.9126c 1.0465,-0.0000 1.9126,0.8661 1.9126 1.9126c 0.0000,1.0465 -0.8661,1.9126 -1.9126 1.9126c -1.0465,-0.0000 -1.9126,-0.8661 -1.9126 -1.9126Z"/>
+  </g>
+  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1.0" stroke="rgb(0,0,0)" stroke-width="0.5" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
+    <path d="M 133.5660,66.8422 ZM 148.2416,43.9065 v 22.9357 h -13.2722 v -2.6063 h 10.5055 v -8.3001 h -9.8639 v -2.6063 h 9.8639 v -6.8165 h -10.2649 v -2.6063 h 13.0316 Z"/>
+  </g>
+</svg>

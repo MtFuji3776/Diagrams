@@ -2,7 +2,18 @@ module Parts where
 
 import Diagrams.Prelude
 import Algebra.Graph
+import Diagrams.Backend.SVG
 
+
+-- ブラウザで確認するためのお手軽レンダリング関数
+renderTest = renderPretty "test.svg" (mkSizeSpec2D (Just 400) (Just 300))
+
+-- 文字に正方形〜長方形のenvelopeを与える
+boxedText xs s =
+    let n = fromIntegral $ length xs
+    in text xs # fontSize (local s) # withEnvelope (rect (0.73 * n * s) s :: D V2 Double)
+-- 標準的関数
+regText xs = boxedText xs 0.2
 
 -- 黒円。点を表す基本パーツ
     -- 半径は、矢印の長さが1であることを前提としている
