@@ -4,7 +4,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" height="300.0000" stroke-opacity="1" viewBox="0.0 0.0 400.0 300.0" font-size="1" width="400.0000" xmlns:xlink="http://www.w3.org/1999/xlink" stroke="rgb(0,0,0)" version="1.1">
   <defs>
   </defs>
-  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="0.0" stroke="rgb(0,0,0)" stroke-width="1.131370849898476" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
-    <path d="M 0.0000,150.0000 l 140.0000,-100.0000 h 120.0000 l 140.0000,100.0000 l -140.0000,100.0000 h -120.0000 l -140.0000,-100.0000 h 400.0000 "/>
+  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1.0" font-size="117.3913043478261px" stroke="rgb(0,0,0)" stroke-width="1.1190057698883764" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
+    <text dominant-baseline="middle" transform="matrix(1.0000,0.0000,0.0000,1.0000,200.0000,241.3043)" stroke="none" text-anchor="middle">1
+    </text>
+  </g>
+  <defs>
+    <linearGradient x2="0.0000" y1="0.0000" gradientUnits="userSpaceOnUse" spreadMethod="pad" gradientTransform="matrix(130.4348,-0.0000,0.0000,-130.4348,69.5652,78.2609)" id="gradient2" y2="0.5000" x1="0.0000">
+      <stop stop-opacity="1.0000" offset="0.0000" stop-color="rgb(165,42,42)"/>
+      <stop stop-opacity="2.0000" offset="1.0000" stop-color="rgb(255,255,255)"/>
+    </linearGradient>
+  </defs>
+  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1" stroke="rgb(0,0,0)" stroke-width="1.1190057698883764" fill="url(#gradient2)" stroke-linecap="butt" stroke-miterlimit="10.0">
+    <path d="M 69.5652,78.2609 l 104.3478,78.2609 h 52.1739 l 104.3478,-78.2609 Z"/>
+  </g>
+  <defs>
+    <linearGradient x2="0.0000" y1="0.0000" gradientUnits="userSpaceOnUse" spreadMethod="pad" gradientTransform="matrix(130.4348,-0.0000,0.0000,-130.4348,69.5652,78.2609)" id="gradient4" y2="0.5000" x1="0.0000">
+      <stop stop-opacity="1.0000" offset="0.0000" stop-color="rgb(165,42,42)"/>
+      <stop stop-opacity="2.0000" offset="1.0000" stop-color="rgb(255,255,255)"/>
+    </linearGradient>
+  </defs>
+  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1" stroke="rgb(0,0,0)" stroke-width="1.1190057698883764" fill="url(#gradient4)" stroke-linecap="butt" stroke-miterlimit="10.0">
+    <path d="M 69.5652,78.2609 l 104.3478,-78.2609 h 52.1739 l 104.3478,78.2609 Z"/>
   </g>
 </svg>
