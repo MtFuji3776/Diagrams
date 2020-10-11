@@ -3,6 +3,7 @@ module Parts where
 import Diagrams.Prelude
 import Algebra.Graph
 import Diagrams.Backend.SVG
+import Data.Typeable
 
 
 -- ブラウザで確認するためのお手軽レンダリング関数
@@ -26,8 +27,10 @@ genBCs g = let xs = vertexList g in zipWith named xs bcs
 -- Trail系統のデータとグラフからQDiagramを構成する
     -- 対象が黒円の可換図式ができる
     -- 矢印にはラベルをつけられるだろうか？
+genBCDia :: (IsName n, Renderable (Path V2 n) b , RealFloat n, Typeable n) => [Point V2 n] -> Graph n -> QDiagram b V2 n Any
 genBCDia trl g =
     let es     = edgeList g
         arrows = foldr (.) id . map (uncurry connectOutside) $ es
         objs   = genBCs g
     in pad 1.3 $ arrows $ atPoints trl objs
+-- 頂点が黒丸の可換図式だが、作図全般で骨格をとりあえず作るのに便利なのでここに配置する
