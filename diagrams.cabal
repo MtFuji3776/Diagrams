@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ff020835616f485a61ad485e92308948a64e5a4d14a1018eeff8d353e6f35810
+-- hash: 9afeb77fa006f8eef8d7c6ba7a78660dc50fa9c18ae92cc2526f52a58e9a31e0
 
 name:           diagrams
 version:        0.1.0.0
@@ -28,13 +28,16 @@ source-repository head
 library
   exposed-modules:
       AbacusDesign
+      AnalyticTableau
       DiagramLanguage
       DrawCD
+      FreeNote.FN202010
       Guide_Arrows
       Guide_Text
       Lib
       Parts
       TextDiagrams.Fingertrees
+      TextDiagrams.Freyd_CatAll.Freyd1_8
       Tutorial
   other-modules:
       Paths_diagrams
