@@ -171,3 +171,20 @@ example1_Trace = hsep 1
                  ]
 
 
+-- text,boxes,arrowsのギャラリー
+    -- ここら辺のセットは部品化しとくと汎用性がすごく高そう
+box innards padding =
+    let padded = strutY padding
+                 ===
+                 (strutX padding ||| centerXY innards ||| strutX padding)
+                 ===
+                 strutY padding
+        height = diameter (r2 (0,1)) padded
+        width  = diameter (r2 (1,0)) padded
+    in centerXY innards <> roundedRect width height 0.1
+
+textOpts n = TextOpts lin2 INSIDE_H KERN False 1 n
+
+text' :: String -> Double -> Diagram B
+text' s n = textSVG_ (textOpts n) s # fc white # lw none
+

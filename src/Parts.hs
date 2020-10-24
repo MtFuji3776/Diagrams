@@ -5,6 +5,7 @@ module Parts (
   , module Diagrams.TwoD.Layout.Tree
   , module Diagrams.Backend.SVG
   , module Data.Typeable
+  , module Graphics.SVGFonts
 ) where
 
 import Diagrams.Prelude
@@ -12,8 +13,11 @@ import Algebra.Graph hiding((===))
 import Data.Tree
 import Diagrams.TwoD.Layout.Tree
 import Diagrams.Backend.SVG
+--import Diagrams.Trail
 import Data.Typeable
 import Diagrams.TwoD.Size
+import Graphics.SVGFonts
+import Data.Maybe(fromMaybe)
 
 
 --easyRender :: (Show n, RealFloat n) => FilePath -> QDiagram SVG V2 n Any -> IO ()
@@ -23,7 +27,7 @@ setSize :: Num n => n -> n -> SizeSpec V2 n
 setSize w h = mkSizeSpec2D (Just w) (Just h)
 
 fixedSize :: Num n => SizeSpec V2 n
-fixedSize = setSize 400 300
+fixedSize = setSize 800 600
 
 -- ブラウザで確認するためのお手軽レンダリング関数
 renderTest = renderPretty "test.svg" (mkSizeSpec2D (Just 400) (Just 300))
@@ -44,16 +48,19 @@ bc = circle 0.05 # fc black
 -- 黒円無限リスト。atPointsなどに。
 bcs = repeat bc
 -- グラフの頂点で名前付け
-genBCs g = let xs = vertexList g in zipWith named xs bcs
+genBCs = zipWith named ([1..] :: [Int]) bcs
 
 -- Trail系統のデータとグラフからQDiagramを構成する
     -- 対象が黒円の可換図式ができる
     -- 矢印にはラベルをつけられるだろうか？
-genBCDia :: (IsName n, Renderable (Path V2 n) b , RealFloat n, Typeable n) => [Point V2 n] -> Graph n -> QDiagram b V2 n Any
+genBCDia :: (IsName n, Renderable (Path V2 n) b , RealFloat n, Typeable n) => [Point V2 n] -> Graph Int -> QDiagram b V2 n Any
 genBCDia trl g =
-    let es     = edgeList g
-        arrows = foldr (.) id . map (uncurry connectOutside) $ es
-        objs   = genBCs g
+    let n_vs      = length $ vertexList g
+        es      = edgeList g
+        arrOpts = with & headLength .~  (local 0.07)
+                       & gaps    .~  (local 0.03)
+        arrows = foldr (.) id . map (uncurry (connectOutside' arrOpts)) $ es
+        objs   = genBCs # take n_vs
     in pad 1.3 $ arrows $ atPoints trl objs
 -- 頂点が黒丸の可換図式だが、作図全般で骨格をとりあえず作るのに便利なのでここに配置する
 
@@ -81,6 +88,29 @@ genLabelTree n xs = renderTree (\n -> boxedText (xs !! (n-1)) 0.2) (~~) . symmLa
 
 genLabelTree' opts n f = 
     renderTree id (~~) .  symmLayout' opts . fmap f . genTree n
-    
+
 -- connectOutside'のアレンジ実装
     -- ラベルなどのオブジェクトを配置するための透明Trailを導出する
+
+
+-- connectOutside'から、Trace上で出入りするTrailの作り方だけ抽出
+    -- subdiagramの位置を取得して、その中間点から各位置にTraceを出す
+    -- TracePに失敗するとsubdiagramの位置が利用される
+trailOutside n1 n2 =
+    withName n1 $ \b1 ->
+    withName n2 $ \b2 ->
+        let v = location b2 .-. location b1
+            midpoint = location b1 .+^ (v ^/ 2)
+            s' = fromMaybe (location b1) $ traceP midpoint (negated v) b1
+            e' = fromMaybe (location b2) $ traceP midpoint v b2
+        in atop (strokeTrail $ trailFromVertices [s',e']) --とりあえずTrailを返す関数。Locatedにする操作と分けておく
+
+pointTrailOS p1 p2 o1 o2 =
+    let v = p2 .-. p1
+        midpoint = p1 .+^ (v ^/ 2)
+        s' = fromMaybe p1 $ traceP midpoint (negated v) o1
+        e' = fromMaybe p2 $ traceP midpoint v o2
+    in trailFromVertices [s',e']
+
+-- subdiagram関連
+getCoor n = location . fromMaybe (mkSubdiagram mempty) . lookupName n

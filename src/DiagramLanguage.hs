@@ -9,19 +9,30 @@ import Algebra.Graph hiding((===))
 import Data.Tree
 import Diagrams.TwoD.Layout.Tree
 import Parts
+import qualified Data.Map as Map
 
 
 -- ラベルにグラフの頂点で名前をつける
 genLabels xs g = 
     let vs = vertexList g
-    in zipWith named vs (map (\x -> boxedText x 0.2) xs)
+    --in zipWith named vs (map (\x -> boxedText x 0.2) xs)
+    in zipWith named vs (map (\x -> boxedText x 0.12 # centerXY) xs)
 
--- 
+-- genBCDiaの仕様をちょっと変更し、ラベル用の文字列リストを受け取るようになっている
+    -- 文字ラベルはatPointsに渡す[Point]の順序と対応させる必要がある
+    -- Stringリストを渡す仕様上、黒円と文字ラベルが混じり合った図式は作れない
+    -- そっちは別に定義する必要ありか。
 genLabelDia trl xs g =
-    let es = edgeList g
-        arrows = foldr (.) id . map (uncurry connectOutside) $ es
+    let vs = vertexList g
+        es = edgeList g
+        arrOpts = with & headLength .~ (local 0.05)
+                       & gaps       .~ (local 0.03)
+        arrows = foldr (.) id . map (uncurry (connectOutside' arrOpts)) $ es
         objs = genLabels xs g
-    in pad 1.3 $ arrows $ atPoints trl objs
+        labelmap = Map.fromList $ zip vs objs
+    in pad 1.3 $ arrows $ atPoints trl [labelmap Map.! k | k <- vs]
+
+
 
 -- 特別な形状の射を示す矢印
 -- monicの見本
@@ -61,6 +72,24 @@ vline l q =
 -- レティクル記号
 reticle = mconcat [ (0 ^& 0) ~~ (0.05^&0), (0.15 ^& 0) ~~ (0.2 ^& 0)] # translateX (-0.1) <> mconcat [(0 ^& 0) ~~ (0 ^& 0.05), (0 ^& 0.15) ~~ (0 ^& 0.2)] # translateY (-0.1)
 
+-- 引き戻し記号
+plb = fromOffsets [unitX,unitY] # scale (1/4)
+
+-- 積記号
+prd = fromOffsets [2*^unitX , unit_X , unitY , 2 *^ unit_Y] # scale (1/4)
+
+-- 同型射を表す記号
+sim = cubicSpline False [0^&0,1^&0.2, 2^&0, 3^&(-0.2) , 4^&0]
+    # scale (1/8)
+    # translateX 0.25 
+    # translateY 0.05
+
+-- X方向の単位ベクトルの同型射サンプル
+isomUnitX = dia21_1 <> arrowV unitX
+    where dia21_1 = cubicSpline False [0^&0,1^&0.2, 2^&0, 3^&(-0.2) , 4^&0]
+                  # scale (1/8)
+                  # translateX 0.25 
+                  # translateY 0.05
 
 -- example
 example1 =
@@ -68,3 +97,4 @@ example1 =
         g2' = genBCDia (regPoly 1 1) 4 
         g2 = connectOutside (4 :: Int) (2 :: Int) $ g1 <> g2' # translateY 1.2 
     in hsep 0.05 [vline 2 (Forall) , g1, vline 2 Exists, g2]
+

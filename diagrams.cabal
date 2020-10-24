@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9afeb77fa006f8eef8d7c6ba7a78660dc50fa9c18ae92cc2526f52a58e9a31e0
+-- hash: 42f0362c7b2106a1345ac6b936584d65b7bd7023c8988998c5a94eb1e2cc517a
 
 name:           diagrams
 version:        0.1.0.0
@@ -36,6 +36,7 @@ library
       Guide_Text
       Lib
       Parts
+      Project.Drill.Functors
       TextDiagrams.Fingertrees
       TextDiagrams.Freyd_CatAll.Freyd1_8
       Tutorial
