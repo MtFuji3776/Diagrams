@@ -151,5 +151,21 @@ dia24_2' =
         l_red = p1 ~~ p2 :: Trail V2 Double
         p3 = P $ atParam l_red 0.5
         c_blue = place (circle 0.1 # fc blue # lw none) p3
-        label = beside (unit_X + unitY) c_blue (boxedText "f" 0.1)
-    in g1 <> strokeTrail l_red # lc red <> c_blue <> label
+        ln = strokeTrail l_red # lc red
+    in g1 <> ln 
+
+-- Traceにラベルを付ける方法の模索
+dia24_3 =
+    let g1 = genBCDia (fromOffsets [unitX,unitY]) $ (1+3)*2 :: Diagram B
+        getCoor n = location . fromMaybe (mkSubdiagram mempty) $ lookupName n g1
+        p1 = getCoor (1::Int)
+        p2 = getCoor (3::Int)
+        l_red = p1 ~~ p2 :: Trail V2 Double
+        p3 = P $ atParam l_red 0.5
+        c_blue = place (circle 0.05 # fc blue # lw none) p3 # withEnvelope (circle 0.07 :: Diagram B) # showEnvelope
+        p4             = p3 .+^ normalize (perp $ p2 .-. p1) ^* 0.1
+        circleAndLabel = c_blue <> place (boxedText "f" 0.1) p4 # withEnvelope (circle 0.08 :: Diagram B) # showEnvelope
+        ln = strokeTrail l_red # lc red # withEnvelope (circle 0.06 :: Diagram B) # showEnvelope
+        ln1 = strokeLine (p3 ~~ p4) # lc green
+    in  ln1  <> g1 <> ln <> circleAndLabel
+

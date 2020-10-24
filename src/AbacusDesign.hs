@@ -15,7 +15,7 @@ beed =
     in  mconcat . map (stroke . glueLine . fromOffsets) $ [xs,ys]
 
 -- そろばんの珠（半分バージョン）
-halfBeed = strokeLoop . glueLine $ fromOffsets [8 ^& 6 , 4 ^& 0, 8 ^& (-6) , (-20) ^& 0] # scale 0.1
+halfBeed = strokeLoop . glueLine $ fromOffsets [8 ^& 6 , 2 ^& 0, 8 ^& (-6) , (-18) ^& 0] # scale 0.1
 
 
 beedflash = mkLinearGradient (mkStops [(brown,0,1),(white,1,2)])

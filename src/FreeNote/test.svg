@@ -4,20 +4,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" height="300.0000" stroke-opacity="1" viewBox="0.0 0.0 400.0 300.0" font-size="1" width="400.0000" xmlns:xlink="http://www.w3.org/1999/xlink" stroke="rgb(0,0,0)" version="1.1">
   <defs>
   </defs>
-  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1.0" stroke="rgb(0,0,0)" stroke-width="1.2393546707863734" fill="rgb(120,28,28)" stroke-linecap="butt" stroke-miterlimit="10.0">
-    <path d="M 0.0000,150.0000 l 160.0000,120.0000 h 80.0000 l 160.0000,-120.0000 Z"/>
+  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1.0" stroke="rgb(0,0,0)" stroke-width="1.306394529484362" fill="rgb(120,28,28)" stroke-linecap="butt" stroke-miterlimit="10.0">
+    <path d="M 0.0000,150.0000 l 177.7778,133.3333 h 44.4444 l 177.7778,-133.3333 Z"/>
   </g>
   <defs>
-    <radialGradient gradientUnits="userSpaceOnUse" spreadMethod="pad" fx="0.9000" fy="0.0500" gradientTransform="matrix(200.0000,-0.0000,0.0000,-200.0000,0.0000,150.0000)" cy="0.0000" r="0.0100" id="gradient2" cx="1.0000">
-      <stop stop-opacity="1.0000" offset="200.0000" stop-color="rgb(165,42,42)"/>
-      <stop stop-opacity="1.0000" offset="200.0000" stop-color="rgb(165,42,42)"/>
-      <stop stop-opacity="1.0000" offset="1.0000" stop-color="rgb(255,255,255)"/>
-    </radialGradient>
+    <linearGradient x2="0.0000" y1="0.3000" gradientUnits="userSpaceOnUse" spreadMethod="pad" gradientTransform="matrix(222.2222,-0.0000,0.0000,-222.2222,0.0000,150.0000)" id="gradient2" y2="0.0000" x1="0.0000">
+      <stop stop-opacity="1.0000" offset="0.0000" stop-color="rgb(165,42,42)"/>
+      <stop stop-opacity="2.0000" offset="1.0000" stop-color="rgb(255,255,255)"/>
+    </linearGradient>
   </defs>
   <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1" stroke="rgb(0,0,0)" stroke-width="0.5" fill="url(#gradient2)" stroke-linecap="butt" stroke-miterlimit="10.0">
-    <path d="M 0.0000,150.0000 l 160.0000,-120.0000 h 80.0000 l 160.0000,120.0000 Z"/>
-  </g>
-  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1.0" stroke="rgb(0,0,0)" stroke-width="0.0" fill="rgb(255,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
-    <path d="M 208.0000,150.0000 c 0.0000,-4.4183 -3.5817,-8.0000 -8.0000 -8.0000c -4.4183,-0.0000 -8.0000,3.5817 -8.0000 8.0000c -0.0000,4.4183 3.5817,8.0000 8.0000 8.0000c 4.4183,0.0000 8.0000,-3.5817 8.0000 -8.0000Z"/>
+    <path d="M 0.0000,150.0000 l 177.7778,-133.3333 h 44.4444 l 177.7778,133.3333 Z"/>
   </g>
 </svg>
