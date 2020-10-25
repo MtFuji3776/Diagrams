@@ -115,3 +115,16 @@ pointTrailOS p1 p2 o1 o2 =
 
 -- subdiagram関連
 getCoor n = location . fromMaybe (mkSubdiagram mempty) . lookupName n
+
+
+
+-- LocatedTrailにラベル付けして描画する関数
+    -- ただしこの関数はまだラベルを配置するだけ
+    -- LocatedTrailの描画やarrowFromLocatedTrail化はこの関数と組み合わせて実行すればよし
+attachLabel loctrl lbl n =
+    let p1 = atParam loctrl 0 :: P2 Double
+        p2 = atParam loctrl 1 :: P2 Double
+        p3 = atParam loctrl n :: P2 Double
+        v = (0.1 *^) . normalize . perp $ p2 .-. p1
+        p4 = p3 .+^ v
+    in place lbl p4 :: Diagram B

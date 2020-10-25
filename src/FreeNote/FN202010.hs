@@ -212,16 +212,44 @@ dia24_6 =
 
 -- 問題なさそうならばPartsもしくはDiagramLanguage行き
     -- 多分Partsが適する。図式言語以外でも活用できる。
-attachLabel loctrl lbl n =
-    let p1 = atParam loctrl 0 :: P2 Double
-        p2 = atParam loctrl 1 :: P2 Double
-        p3 = atParam loctrl n :: P2 Double
-        v = (0.1 *^) . normalize . perp $ p2 .-. p1
-        p4 = p3 .+^ v
-    in place lbl p4 :: Diagram B
+    -- Partsに移行したのでこちらはコメントアウト
+-- attachLabel loctrl lbl n =
+--     let p1 = atParam loctrl 0 :: P2 Double
+--         p2 = atParam loctrl 1 :: P2 Double
+--         p3 = atParam loctrl n :: P2 Double
+--         v = (0.1 *^) . normalize . perp $ p2 .-. p1
+--         p4 = p3 .+^ v
+--     in place lbl p4 :: Diagram B
 
 -- 矢印にラベルをつける実験
 dia24_7 =
     let loc = at (arcBetween zero unitX 0.1) origin :: Located (Trail V2 Double)
         lbl = boxedText "f" 0.1
     in attachLabel loc lbl 0.5 <> arrowFromLocatedTrail loc
+
+
+-- 家系図やあみだくじ的な辺を描画する関数
+dia25_1 =
+    let f v = 
+            let vx = project unitX v 
+                vy = 0.5 *^ (project unitY v)
+            in fromOffsets [vy,vx,vy]
+    in strokeTrail $ f (1.3 ^& 5.4)
+
+-- ベクトルを渡すと、その始点と終点を結ぶあみだくじの辺っぽいTrailを返す関数
+    -- 二点を渡された時に、.-.と併用することであみだっぽく辺を結べる
+    -- 特にsymmLayoutのRoseTreeに向いている
+    -- これもParts行きか？
+familytreeEdge v =
+    let vx = project unitX v
+        vy = 0.5 *^ (project unitY v)
+    in fromOffsets [vy,vx,vy]
+
+dia25_2 =
+    let g = Alga.path [1,2,3,4] + 3*5 + 2*6 + 1*8 + 8*(9+10)
+        t = genTree 1 g
+        sym = symmLayout t
+        amidaTrail p1 p2 = (familytreeEdge $ p2 .-. p1) `at` p1 
+    in pad 1.2 $ renderTree (const bc) (\o1 o2 -> strokeLocTrail $ amidaTrail o1 o2) sym
+
+dia25_2' = scaleY (-1) dia25_2

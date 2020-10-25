@@ -4,24 +4,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" height="300.0000" stroke-opacity="1" viewBox="0.0 0.0 400.0 300.0" font-size="1" width="400.0000" xmlns:xlink="http://www.w3.org/1999/xlink" stroke="rgb(0,0,0)" version="1.1">
   <defs>
   </defs>
-  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="0.0" stroke="rgb(0,0,0)" stroke-width="0.8000000000000004" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
-    <path d="M -0.0000,200.0000 c 104.2401,-44.4248 221.9062,-45.3753 326.8503 -2.6400"/>
+  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="0.0" stroke="rgb(0,0,0)" stroke-width="1.1313708498984762" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
+    <path d="M -0.0000,250.0000 l 324.4790,-162.2395 "/>
   </g>
   <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1.0" stroke="rgb(0,0,0)" stroke-width="0.0" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
   </g>
   <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1.0" stroke="rgb(0,0,0)" stroke-width="0.0" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
   </g>
   <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1.0" stroke="rgb(0,0,0)" stroke-width="0.0" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
-    <path d="M 333.3333,200.0000 l -6.5803,-5.5524 l 0.2920,2.9917 l -2.2989,1.9366 Z"/>
+    <path d="M 333.3333,83.3333 l -12.0404,1.8134 l 3.4520,2.4808 l -0.0866,4.2501 Z"/>
   </g>
   <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1.0" stroke="rgb(0,0,0)" stroke-width="0.0" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
-    <path d="M 327.0450,197.4393 l -0.1948,-0.0793 l 0.1509,-0.3705 l 0.0439,0.4498 l -0.1948,-0.0793 l -0.1509,0.3705 Z"/>
+    <path d="M 324.7450,87.6275 l -0.2660,0.1330 l -0.2530,-0.5060 l 0.5190,0.3730 l -0.2660,0.1330 l 0.2530,0.5060 Z"/>
+  </g>
+  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="0.0" stroke="rgb(0,0,0)" stroke-width="1.1313708498984762" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
+    <path d="M -0.0000,250.0000 l 333.3333,-166.6667 "/>
   </g>
   <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="0.0" stroke="rgb(0,0,0)" stroke-width="0.0" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
-    <path d="M 178.8333,150.0000 l -0.0000,-33.3333 h -24.3333 l -0.0000,33.3333 Z"/>
+    <path d="M 183.5464,185.0929 l -0.0000,-66.6667 h -48.6667 l -0.0000,66.6667 Z"/>
   </g>
-  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1.0" font-size="33.333333333333336px" stroke="rgb(0,0,0)" stroke-width="0.8000000000000004" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
-    <text dominant-baseline="middle" transform="matrix(1.0000,0.0000,0.0000,1.0000,166.6667,133.3333)" stroke="none" text-anchor="middle">f
+  <g stroke-linejoin="miter" stroke-opacity="1.0" fill-opacity="1.0" font-size="66.66666666666667px" stroke="rgb(0,0,0)" stroke-width="1.1313708498984762" fill="rgb(0,0,0)" stroke-linecap="butt" stroke-miterlimit="10.0">
+    <text dominant-baseline="middle" transform="matrix(1.0000,0.0000,0.0000,1.0000,159.2131,151.7595)" stroke="none" text-anchor="middle">f
     </text>
   </g>
 </svg>
