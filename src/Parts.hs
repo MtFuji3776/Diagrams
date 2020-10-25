@@ -14,6 +14,7 @@ import Data.Tree
 import Diagrams.TwoD.Layout.Tree
 import Diagrams.Backend.SVG
 --import Diagrams.Trail
+import Diagrams.TwoD.Arrow
 import Data.Typeable
 import Diagrams.TwoD.Size
 import Graphics.SVGFonts

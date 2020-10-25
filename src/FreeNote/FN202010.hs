@@ -5,6 +5,7 @@ import DiagramLanguage
 import qualified Algebra.Graph as Alga hiding((===))
 import Diagrams.Prelude
 import Data.Maybe (fromMaybe)
+import Diagrams.TwoD.Arrow
 
 
 -- ArrowOptsを先に生成してからconnectOutside'などに渡す仕組みのフローチャートの原案
@@ -169,3 +170,58 @@ dia24_3 =
         ln1 = strokeLine (p3 ~~ p4) # lc green
     in  ln1  <> g1 <> ln <> circleAndLabel
 
+-- TrailとatParamの検証
+dia24_4 =
+    let t1 = fromOffsets [unitX,unitY,unit_X,unit_X+unit_Y,unit_X] :: Trail V2 Double -- ここで型Annotationすべし
+        p = P $ atParam t1 0.5
+    in place (circle 0.05 # fc red # lw none) p <> stroke t1
+
+dia24_4' = 
+    let t1 = fromOffsets [unitX,unitY,unit_X,unit_X+unit_Y, 2 *^ unit_X, 2 *^ unitY] :: Trail V2 Double
+        p = P $ atParam t1 0.5
+    in pad 1.2 $ place (circle 0.05 # fc red # lw none) p <> stroke t1
+
+
+-- これなんでうまくいかないんだろうか
+    -- p1,p2を結んだはずのLineがdのOriginから出発するんだが。
+dia24_5 =
+    let d = genBCDia (fromOffsets [unitX,unitY,unit_X]) $ 4*(1+3) + (1+3)*2 :: Diagram B
+        p1 = getCoor (4 :: Int) d
+        p2 = getCoor (2 :: Int) d
+        l = p1 ~~ p2 `at` p1 :: Located (Trail V2 Double)
+        v = (0.1 *^ ) . normalize . perp $ p2 .-. p1
+        p3 = atParam l 0.5
+        p4 = p3 .+^ v
+        lab = place (boxedText "f" 0.1) p4 -- # moveOriginTo p1
+        labeledLine = lab <> stroke l -- # moveOriginTo p1
+    in d <> labeledLine
+
+-- Located Trailにラベルをつける関数の模索
+    -- 正直最後のQDiagramはTrailのチョイスをミスった感あるが、Arrowにラベルをつける上では問題なく使えそう
+    -- 地味にラベルの位置を微調整できるように定義した
+dia24_6 =
+    let f loctrl lbl n = 
+            let p1 = atParam loctrl 0 :: P2 Double
+                p2 = atParam loctrl 1 :: P2 Double
+                p3 = atParam loctrl n :: P2 Double
+                v =  (0.1 *^) . normalize . perp $ p2 .-. p1
+                p4 = p3 .+^ v
+            in place lbl p4 :: Diagram B
+    in f (at (fromOffsets [unitX,unitY,unit_X,unitY]) origin :: Located (Trail V2 Double)) (boxedText "f" 0.1) 0.48 
+      <> (strokeLocTrail (at (fromOffsets [unitX,unitY,unit_X,unitY]) origin) :: Diagram B)
+
+-- 問題なさそうならばPartsもしくはDiagramLanguage行き
+    -- 多分Partsが適する。図式言語以外でも活用できる。
+attachLabel loctrl lbl n =
+    let p1 = atParam loctrl 0 :: P2 Double
+        p2 = atParam loctrl 1 :: P2 Double
+        p3 = atParam loctrl n :: P2 Double
+        v = (0.1 *^) . normalize . perp $ p2 .-. p1
+        p4 = p3 .+^ v
+    in place lbl p4 :: Diagram B
+
+-- 矢印にラベルをつける実験
+dia24_7 =
+    let loc = at (arcBetween zero unitX 0.1) origin :: Located (Trail V2 Double)
+        lbl = boxedText "f" 0.1
+    in attachLabel loc lbl 0.5 <> arrowFromLocatedTrail loc
