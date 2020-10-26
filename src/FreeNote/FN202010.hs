@@ -6,6 +6,10 @@ import qualified Algebra.Graph as Alga hiding((===))
 import Diagrams.Prelude
 import Data.Maybe (fromMaybe)
 import Diagrams.TwoD.Arrow
+import Diagrams.BoundingBox
+import Data.List.Split
+import Diagrams.Core.Points
+
 
 
 -- ArrowOptsを先に生成してからconnectOutside'などに渡す仕組みのフローチャートの原案
@@ -253,3 +257,107 @@ dia25_2 =
     in pad 1.2 $ renderTree (const bc) (\o1 o2 -> strokeLocTrail $ amidaTrail o1 o2) sym
 
 dia25_2' = scaleY (-1) dia25_2
+
+-- attachLabelで使った方法の抽出で、特定のPointとベクトルから0.1だけ離れた点を導出する関数
+    -- Trailだけでなく一般のオブジェクトに対してラベル付けする際に利用できる
+    -- subdiagramのlocationと組み合わせることで
+dia25_3 =
+    let f p v d =
+            let v' = d *^ (normalize v)
+            in p .+^ v'
+    in place (circle 1) (f origin unitY 0.4) # showOrigin
+
+-- テキストとボックスの例（Gallaryより）
+-- なぜか型推論がうまくいかない
+-- dia26_1 = do
+--     l2 <- lin2
+--     let box innards padding = 
+--             let padded = strutY padding 
+--                             ===
+--                         (strutX padding ||| centerXY innards ||| strutX padding)
+--                             ===
+--                         strutY padding
+--                 height = diameter (r2 (0,1)) padding
+--                 width = diameter (r2 (1,0)) padding
+--             in centerXY innards <> roundedRect width height 0.1
+--         textOpts n = TextOpts l2 INSIDE_H KERN False 1 n
+--         text' :: String -> Double -> Diagram B
+--         text' s n = textSVG_ (textOpts n) s # fc white # lw none :: Diagram B
+--         centredText ls n = vcat' (with & catMethod .~ Distrib & sep .~ n)
+--                             (map (\l -> centerX (text' l n)) ls) :: Diagram B
+--         centredText' s = centredText (splitOn "\n" s)
+--         padAmount = 0.5 :: Double
+--         down = r2 (0,-10)
+--         upright = r2 (7,5)
+--         right = r2 (15,0)
+--         mybox s n = (box (centredText' s 1) padAmount) # named n
+--         sCube = fc navy $ mconcat
+--             [ mybox "Permutation" "perm"
+--             , mybox "Permutation\ngroup" "permgroup"                     # translate right
+--             , mybox "Symmetry" "sym"                                     # translate upright
+--             , mybox "Parameterised\npermutation" "paramperm"             # translate down
+--             , mybox "Parameterised\npermutation\ngroup" "parampermgroup" # translate (right ^+^ down)
+--             , mybox "parameterised\nsymmetry" "paramsym"                 # translate (upright ^+^ right)
+--             , mybox "Symmetry\ngroup" "symgroup"                         # translate (upright ^+^ right)
+--             , mybox "Parameterised\nsymmetry\ngroup" "paramsymgroup"     # translate (down ^+^ right ^+^ upright) ] :: Diagram B
+--         drawLines cube = foldr (.) id (map (uncurry (connectOutside' (with
+--                                 & headLength .~ small
+--                                 & shaftStyle %~ lw thin))) pairs) cube :: Diagram B
+--                 where pairs = [ ("prem", "permgroup")
+--                               , ("perm", "sym")
+--                               , ("perm", "paramperm")
+--                               , ("paramperm", "paramsym")
+--                               , ("sym", "symgroup")
+--                               , ("paramsym", "paramsymgroup")
+--                               , ("permgroup", "parampermgroup")
+--                               , ("symgroup", "paramsymgroup")
+--                               , ("sym", "paramsym")
+--                               , ("permgroup", "parampermgroup")
+--                               , ("parampermgroup", "paramsymgroup")]
+--         example = 
+--             let c = sCube
+--             in pad 1.1 . centerXY $ c <> drawLines c <> square 30
+--                                   # fc whitesmoke
+--                                   # scaleY 0.94
+--                                   # translateX 11
+--                                   # translateY (-3)
+--     return example
+
+-- ちょっとした可換図式の試作
+dia26_2 =
+    let sh1 = boxedText "Sh(X)" 0.15
+        sh2 = boxedText "Sh(Y)" 0.15
+        fsup = boxedText "f^*" 0.1
+        fsub = boxedText "f_*" 0.1
+        d = genLabelDia (fromOffsets [unitX]) ["Sh(X)","Sh(Y)"] (1+2 :: Alga.Graph Int)
+        trl = origin ~~ unitX :: Trail V2 Double
+        trl1 = at trl (0 ^& 0.8)
+        trl2 = at trl (0 ^& (-0.8))
+        mor1 = arrowFromLocatedTrail trl1 <> attachLabel trl1 fsup 0.5
+        mor2 = arrowFromLocatedTrail trl2 <> attachLabel trl2 fsub 0.5
+    in d <> mor1 # translateY 0.8 <> mor2 # translateY 0.8
+
+-- オブジェクトの境界上を結ぶLocatedTrail
+dia26_3 = 
+    let p2 = 2 ^& 3
+        d1 = place (circle 0.1 # fc red # lw none :: Diagram B) origin
+        d2 = place (square 0.2 # fc blue # lw none :: Diagram B) p2
+        v = 0.5 *^ (p2 .-. origin)
+        midpoint = origin .+^ v
+        q1 = fromMaybe origin $ rayTraceP midpoint (negated v) d1
+        q2 = fromMaybe p2 $ rayTraceP midpoint v d2
+    in strokeLocTrail (q1 ~~ q2 :: Located (Trail V2 Double)) <> d1 <> d2
+
+-- LocTrailを矢印にしてラベルもつけてみた
+dia26_3' = 
+    let p2 = 2 ^& 3
+        d1 = place (circle 0.1 # fc red # lw none :: Diagram B) origin
+        d2 = place (square 0.2 # fc blue # lw none :: Diagram B) p2
+        v = 0.5 *^ (p2 .-. origin)
+        u = 0.1 *^ (perp $ normalize v)
+        midpoint = origin .+^ v
+        q1 = fromMaybe origin $ rayTraceP midpoint (negated v) d1
+        q2 = fromMaybe p2 $ rayTraceP midpoint v d2
+        trl = q1 ~~ q2 :: Located (Trail V2 Double)
+        arr = (arrowFromLocatedTrail trl <> attachLabel trl (boxedText "f" 0.3) 0.5) # translate u
+    in arr <> d1 <> d2
