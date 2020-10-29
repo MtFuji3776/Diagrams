@@ -10,6 +10,8 @@ import Data.Tree
 import Diagrams.TwoD.Layout.Tree
 import Parts
 import qualified Data.Map as Map
+import qualified Control.Lens as Lens ((?~),at)
+import Data.Maybe (fromMaybe)
 
 
 -- ラベルにグラフの頂点で名前をつける
@@ -98,3 +100,24 @@ example1 =
         g2 = connectOutside (4 :: Int) (2 :: Int) $ g1 <> g2' # translateY 1.2 
     in hsep 0.05 [vline 2 (Forall) , g1, vline 2 Exists, g2]
 
+-- 離散圏図式生成機。対象だけ描画する
+genDiscrete trl objs g =
+    let vs = vertexList g
+        es = edgeList g
+        objsMap = Map.fromList $ zip vs (zipWith named ([1..] :: [Int]) objs)
+        d = atPoints trl [objsMap Map.! i | i <- vs ]
+    in d
+
+-- 名前二つとQDiagramからLocatedTrailを導出
+mkLocTrail (nm1,nm2) d =
+    let findSub = fromMaybe (mkSubdiagram mempty) . flip lookupName d
+        sub1 = findSub nm1
+        sub2 = findSub nm2
+        p1 = location sub1
+        p2 = location sub2
+    in pointLocTrailOS p1 p2 sub1 sub2
+
+-- LocatedTrailを生成し、Edges値をキーとしてMapに格納する
+genLocTrails es d =
+    let loctrlMap = foldr (\(nm1,nm2) mp -> Lens.at (nm1,nm2) Lens.?~ (mkLocTrail (nm1,nm2) d) $ mp) Map.empty es
+    in loctrlMap

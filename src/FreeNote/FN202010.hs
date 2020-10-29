@@ -269,59 +269,61 @@ dia25_3 =
 
 -- テキストとボックスの例（Gallaryより）
 -- なぜか型推論がうまくいかない
--- dia26_1 = do
---     l2 <- lin2
---     let box innards padding = 
---             let padded = strutY padding 
---                             ===
---                         (strutX padding ||| centerXY innards ||| strutX padding)
---                             ===
---                         strutY padding
---                 height = diameter (r2 (0,1)) padding
---                 width = diameter (r2 (1,0)) padding
---             in centerXY innards <> roundedRect width height 0.1
---         textOpts n = TextOpts l2 INSIDE_H KERN False 1 n
---         text' :: String -> Double -> Diagram B
---         text' s n = textSVG_ (textOpts n) s # fc white # lw none :: Diagram B
---         centredText ls n = vcat' (with & catMethod .~ Distrib & sep .~ n)
---                             (map (\l -> centerX (text' l n)) ls) :: Diagram B
---         centredText' s = centredText (splitOn "\n" s)
---         padAmount = 0.5 :: Double
---         down = r2 (0,-10)
---         upright = r2 (7,5)
---         right = r2 (15,0)
---         mybox s n = (box (centredText' s 1) padAmount) # named n
---         sCube = fc navy $ mconcat
---             [ mybox "Permutation" "perm"
---             , mybox "Permutation\ngroup" "permgroup"                     # translate right
---             , mybox "Symmetry" "sym"                                     # translate upright
---             , mybox "Parameterised\npermutation" "paramperm"             # translate down
---             , mybox "Parameterised\npermutation\ngroup" "parampermgroup" # translate (right ^+^ down)
---             , mybox "parameterised\nsymmetry" "paramsym"                 # translate (upright ^+^ right)
---             , mybox "Symmetry\ngroup" "symgroup"                         # translate (upright ^+^ right)
---             , mybox "Parameterised\nsymmetry\ngroup" "paramsymgroup"     # translate (down ^+^ right ^+^ upright) ] :: Diagram B
---         drawLines cube = foldr (.) id (map (uncurry (connectOutside' (with
---                                 & headLength .~ small
---                                 & shaftStyle %~ lw thin))) pairs) cube :: Diagram B
---                 where pairs = [ ("prem", "permgroup")
---                               , ("perm", "sym")
---                               , ("perm", "paramperm")
---                               , ("paramperm", "paramsym")
---                               , ("sym", "symgroup")
---                               , ("paramsym", "paramsymgroup")
---                               , ("permgroup", "parampermgroup")
---                               , ("symgroup", "paramsymgroup")
---                               , ("sym", "paramsym")
---                               , ("permgroup", "parampermgroup")
---                               , ("parampermgroup", "paramsymgroup")]
---         example = 
---             let c = sCube
---             in pad 1.1 . centerXY $ c <> drawLines c <> square 30
---                                   # fc whitesmoke
---                                   # scaleY 0.94
---                                   # translateX 11
---                                   # translateY (-3)
---     return example
+    -- height,widthのところでpaddedをpaddingにしてたのが敗因の模様。paddingはただのDouble値。
+dia26_1 = do
+    l2 <- lin2
+    let box innards padding = 
+            let padded = strutY padding 
+                            ===
+                        (strutX padding ||| centerXY innards ||| strutX padding)
+                            ===
+                        strutY padding
+                height = diameter (r2 (0,1)) padded
+                width = diameter (r2 (1,0)) padded
+            in centerXY innards <> roundedRect width height 0.1
+        textOpts n = TextOpts l2 INSIDE_H KERN False 1 n
+        text' :: String -> Double -> Diagram B
+        text' s n = textSVG_ (textOpts n) s # fc white # lw none :: Diagram B
+        centredText ls n = vcat' (with & catMethod .~ Distrib & sep .~ n)
+                            (map (\l -> centerX (text' l n)) ls) :: Diagram B
+        centredText' s = centredText (splitOn "\n" s)
+        padAmount = 0.5 :: Double
+        down = r2 (0,-10)
+        upright = r2 (7,5)
+        right = r2 (15,0)
+        mybox s n = (box (centredText' s 1) padAmount) # named n
+        sCube = fc navy $ mconcat
+            [ mybox "Permutation" "perm"
+            , mybox "Permutation\ngroup" "permgroup"                     # translate right
+            , mybox "Symmetry" "sym"                                     # translate upright
+            , mybox "Parameterised\npermutation" "paramperm"             # translate down
+            , mybox "Parameterised\npermutation\ngroup" "parampermgroup" # translate (right ^+^ down)
+            , mybox "parameterised\nsymmetry" "paramsym"                 # translate (upright ^+^ down)
+            , mybox "Symmetry\ngroup" "symgroup"                         # translate (upright ^+^ right)
+            , mybox "Parameterised\nsymmetry\ngroup" "paramsymgroup"     # translate (down ^+^ right ^+^ upright) ] :: Diagram B
+        drawLines cube = foldr (.) id (map (uncurry (connectOutside' (with
+                                & headLength .~ small
+                                & shaftStyle %~ lw thin))) pairs) cube :: Diagram B
+                where pairs = [ ("perm", "permgroup")
+                              , ("perm", "sym")
+                              , ("perm", "paramperm")
+                              , ("paramperm", "paramsym")
+                              , ("sym", "symgroup")
+                              , ("paramsym", "paramsymgroup")
+                              , ("permgroup", "parampermgroup")
+                              , ("peramperm","parampermgroup")
+                              , ("symgroup", "paramsymgroup")
+                              , ("sym", "paramsym")
+                              , ("permgroup", "parampermgroup")
+                              , ("parampermgroup", "paramsymgroup")]
+        example = 
+            let c = sCube
+            in pad 1.1 . centerXY $ c <> drawLines c <> square 30
+                                  # fc whitesmoke
+                                  # scaleY 0.94
+                                  # translateX 11
+                                  # translateY (-3)
+    return example
 
 -- ちょっとした可換図式の試作
 dia26_2 =
@@ -348,6 +350,20 @@ dia26_3 =
         q2 = fromMaybe p2 $ rayTraceP midpoint v d2
     in strokeLocTrail (q1 ~~ q2 :: Located (Trail V2 Double)) <> d1 <> d2
 
+
+-- オブジェクト２つとそれぞれの中心点とラベルを渡すと、境界で出入りする矢印とその中央部分にラベルをつけて返す関数
+    -- これ、あとはArrowOptsも渡せるようにすれば完成では？Monic、Epicなど具体名を指定すればその装飾がなされるようになるぞ。
+-- connectTrail o1 o2 p1 p2 lbl =
+--     let v = 0.5 *^ (p2 .-. p1)
+--         midpoint = p1 .+^ v
+--         u = 0.1 *^ (perp $ normalize v)
+--         q1 = fromMaybe origin $ rayTraceP midpoint (negated v) d1
+--         q2 = fromMaybe p2 $ rayTraceP midpoint v d2
+--         loctrl = q1 ~~ q2 :: Located (Trail V2 Double)
+--         arr = arrowFromLocatedTrail loctrl
+--         lab = attachLabel loctrl (boxedText lbl 0.15) 0.5
+--     in lab <> arr :: Diagram B
+
 -- LocTrailを矢印にしてラベルもつけてみた
 dia26_3' = 
     let p2 = 2 ^& 3
@@ -361,3 +377,71 @@ dia26_3' =
         trl = q1 ~~ q2 :: Located (Trail V2 Double)
         arr = (arrowFromLocatedTrail trl <> attachLabel trl (boxedText "f" 0.3) 0.5) # translate u
     in arr <> d1 <> d2
+
+dia27_1 =
+    let box innards padding = 
+            let padded = strutY padding 
+                            ===
+                        (strutX padding ||| centerXY innards ||| strutX padding)
+                            ===
+                        strutY padding
+                height = diameter (r2 (0,1)) padded  
+                width  = diameter (r2 (1,0)) padded 
+            in centerXY innards <> roundedRect width height 0.1 :: Diagram B
+    in box (fc red $ lw none $ strokePath $ textSVG "Test.Test.Test." 0.15) 0.2
+
+dia27_2 =
+    let labdia = (genLabelDia 
+                    (fromOffsets [(sqrt 3 / 2) *^ unit_X + unit_Y , 2 *^ unitX ,(sqrt (3/2)) *^ unit_X + unitY ])
+                    ["A","B","C"]
+                    (1+2+3 :: Alga.Graph Int)) :: Diagram B
+        f = fromMaybe (mkSubdiagram mempty) . flip lookupName labdia :: Int -> Subdiagram B V2 Double Any
+        s1 = f 1
+        s2 = f 2
+        s3 = f 3
+        c1 = location s1 
+        c2 = location s2 
+        c3 = location s3 
+        loctrl1 = pointLocTrailOS c1 c2 s1 s2
+        p1 = atParam loctrl1 0
+        p2 = atParam loctrl1 1
+        v1 = p2 .-. p1
+        u1 = 0.07 *^ (normalize $ perp v1)
+        trl = fromOffsets [u1,-u1,-u1,u1,v1] `at` p1
+        d = (arrowFromLocatedTrail $ trl)
+         <> (arrowFromLocatedTrail $ pointLocTrailOS c2 c3 s2 s3)
+         <> (arrowFromLocatedTrail $ pointLocTrailOS c1 c3 s1 s3)
+         <> labdia
+    in d
+
+
+
+dia27_3 =
+    let pararr v d =
+            let u = 0.1 *^ (perp $ normalize v)
+                arr1 = arrowV v # translate u
+                arr2 = arrowV v # translate (-u)
+                d' = place d (origin .+^ (0.5 *^ v))
+            in arr1 <> arr2 <> d' # scale 0.9
+    in pararr (unitX +(sqrt 2) *^ unitY) reticle
+
+vectorStoT loctrl =
+    let p1 = atParam loctrl 0 :: P2 Double
+        p2 = atParam loctrl 1 :: P2 Double
+    in p2 .-. p1
+
+parrarelArrows loctrl d =
+    let v = vectorStoT loctrl
+        u = perp $ 0.1 *^ (normalize $ v)
+        loctrl1 = loctrl # translate u
+        loctrl2 = loctrl # translate (-u)
+        arr1 = arrowFromLocatedTrail loctrl1
+        arr2 = arrowFromLocatedTrail loctrl2
+        s = atParam loctrl 0 :: P2 Double
+        midpoint = s .+^ (0.5 *^ v)
+        d' = place d midpoint
+    in arr1 <> arr2 <> d'
+
+
+-- dia28_1 =
+--     let d = 

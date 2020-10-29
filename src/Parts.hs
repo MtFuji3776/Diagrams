@@ -19,6 +19,7 @@ import Data.Typeable
 import Diagrams.TwoD.Size
 import Graphics.SVGFonts
 import Data.Maybe(fromMaybe)
+import Data.Char
 
 
 --easyRender :: (Show n, RealFloat n) => FilePath -> QDiagram SVG V2 n Any -> IO ()
@@ -36,7 +37,9 @@ renderTest = renderPretty "test.svg" (mkSizeSpec2D (Just 400) (Just 300))
 -- 文字に正方形〜長方形のenvelopeを与える
 boxedText xs s =
     let n = fromIntegral  (length xs)
-    in text xs # fontSize (local s) <> rect (0.73 * n * s) s # lw none
+        n1 = fromIntegral $ length $ filter (\c -> isAscii c || isDigit c || isControl c || isMark c)  xs--英数字半角を識別
+        n2 = n - n1
+    in text xs # fontSize (local s) <> rect ((0.73 * n1 + 1.0 * n2) * s) s # lw none
 
     --in text xs # fontSize (local s) # withEnvelope (rect (0.73 * n * s) s :: D V2 Double)
         -- EnvelopeはTraceと関係ないのでconnectOutsideに干渉できない。withEnvelopeは不適切
@@ -102,16 +105,23 @@ trailOutside n1 n2 =
     withName n2 $ \b2 ->
         let v = location b2 .-. location b1
             midpoint = location b1 .+^ (v ^/ 2)
-            s' = fromMaybe (location b1) $ traceP midpoint (negated v) b1
-            e' = fromMaybe (location b2) $ traceP midpoint v b2
-        in atop (strokeTrail $ trailFromVertices [s',e']) --とりあえずTrailを返す関数。Locatedにする操作と分けておく
+            s' = fromMaybe (location b1) $ rayTraceP midpoint (negated v) b1
+            e' = fromMaybe (location b2) $ rayTraceP midpoint v b2
+        in atop (strokeLocTrail $ trailFromVertices [s',e'] `at` s') 
 
-pointTrailOS p1 p2 o1 o2 =
+--とりあえずTrailを返す関数。Locatedにする操作と分けておく
+    -- これLocatedTrailにしないとtracePした意味が無くなる
+pointLocTrailOS p1 p2 o1 o2 =
     let v = p2 .-. p1
         midpoint = p1 .+^ (v ^/ 2)
         s' = fromMaybe p1 $ traceP midpoint (negated v) o1
         e' = fromMaybe p2 $ traceP midpoint v o2
-    in trailFromVertices [s',e']
+    in trailFromVertices [s',e'] `at` s'
+
+-- LocatedTrailを返す版
+    -- symmLayoutのTreeの描画に有効な関数でもある
+    -- 欠陥はっけん。p1をスタート地点にしてどうすんの。
+-- pointLocTrailOS p1 p2 o1 o2 = pointTrailOS p1 p2 o1 o2 `at` p1
 
 -- subdiagram関連
 getCoor n = location . fromMaybe (mkSubdiagram mempty) . lookupName n
