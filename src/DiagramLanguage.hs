@@ -46,7 +46,35 @@ monic =
     --ArrowShaftにTrailをくっつけることができるか？
     --指定した矢印のスタイルを更新してmonicにできるのが理想
 
+-- Trailで定義すればPathの連結モノイドが導入される
+    -- Arrowで使う直前にLocatedに持ち上げれば良し
+monicShaft trl =
+    let p1 = atParam trl 0
+        p2 = atParam trl 1
+        v  = p2 .-. p1 
+        u  = perp . (0.07 *^) . normalize $ v :: V2 Double
+        tailBar = fromOffsets [u,(-2) *^ u,u] :: Trail V2 Double
+    in tailBar <> trl
+
+measureTrail trl =
+    let p1 = atParam trl 0
+        p2 = atParam trl 1
+    in p2 .-. p1
+
+
+-- イコライザの二又の尻尾
+    -- Shaft中腹のドットはQDiagramの段階で合成しないといけないっぽい
+equalizerShaft trl =
+    let v = (0.1 *^) . normalize $ measureTrail trl
+        u = v # rotateBy (3/8)
+        u' = v # rotateBy (5/8)
+        eqTail = fromOffsets [u,-u,u',-u'] :: Trail V2 Double
+    in eqTail <> trl
+
 open = arrowV' (with & headStyle %~ fc white . lw 0.5) unitX 
+
+-- CoverやEpicなどのArrowHead系には、ArrowOpts単品を渡すことにする
+openHead = with & headStyle %~ fc white . lw 0.3
 
 
 -- 図式言語
@@ -118,6 +146,14 @@ mkLocTrail (nm1,nm2) d =
     in pointLocTrailOS p1 p2 sub1 sub2
 
 -- LocatedTrailを生成し、Edges値をキーとしてMapに格納する
-genLocTrails es d =
-    let loctrlMap = foldr (\(nm1,nm2) mp -> Lens.at (nm1,nm2) Lens.?~ (mkLocTrail (nm1,nm2) d) $ mp) Map.empty es
-    in loctrlMap
+genLocTrails es d 
+    = foldr (\(nm1,nm2) mp -> Lens.at (nm1,nm2) Lens.?~ (mkLocTrail (nm1,nm2) d) $ mp) Map.empty es
+
+-- Algaから図式の抽象グラフ構造を読み取り、Trailから座標情報を読み取り、離散グラフとLocatedTrailのMapの組を作って返す
+    -- このあと、LocatedTrailのMapを装飾しつつarrowFromLocatedTrailに適用し、離散圏に射を入れていく関数が続く
+genGraphLocTrail trl objs g =
+    let disd = genDiscrete trl objs g
+        es = edgeList g
+        locmap = genLocTrails es disd
+    in (disd,locmap)
+
