@@ -32,6 +32,8 @@ dependencies:
 - lens
 - SVGFonts
 - algebraic-graphs
+- data-default-class
+- split
 
 
 library:

@@ -1,0 +1,200 @@
+\documentclass[dvipdfmx,uplatex]{jsarticle}
+\usepackage[utf8]{inputenc}
+\usepackage{otf}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{mathpazo}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usepackage[epsilon]{backnaur}
+\usepackage{bussproofs}
+\usepackage{media9}
+\usepackage[dvipdfmx]{hyperref}
+\usepackage{pxjahyper}
+\usetikzlibrary{matrix}
+\usetikzlibrary{cd}
+\usepackage{pgfcore}
+\newtheorem{dfn}{Def}
+\newtheorem{thm}{Thm}
+\newtheorem{cor}{Cor}
+\newtheorem{prop}{Prop}
+\newtheorem{rk}{remark}
+\newtheorem{claim}{claim}
+\newtheorem{recall}{recall}
+\newtheorem{ques}{Q.}
+\newenvironment{diagram}{
+\begin{center}\begin{tikzpicture}[-stealth]}{\end{tikzpicture}
+\end{center}}
+\newenvironment{dialan}[1]
+{\begin{diagram}\node[matrix]}{\end{diagram}}
+\newcommand{\vertical}[2]{\draw[-Butt Cap] (0,-0.2) -- (0,#1.2) node[above]{\small #2};}
+\newcommand{\obj}[4]{\node #1 at (#2,#3) {#4};}
+\newcommand{\nolabel}[1]{\fill #1 circle(2pt);}
+\newcommand{\anglebrace}[1]{\langle #1 \rangle}
+\newcommand{\reticle}[2]{\draw[-Butt Cap] (#1 - 0.1,#2) -- (#1 + 0.1,#2);
+                         \draw[-Butt Cap] (#1 , #2 - 0.1) -- (#1 , #2 + 0.1);
+                         \fill[white] (#1 - 0.05,#2 - 0.05) rectangle (#1 + 0.05,#2 + 0.05);}
+\title{}
+\author{}
+\date{\today}
+
+\pdfpagewidth=2bp
+\pdfpageheight=1bp
+\textheight=1bp
+
+\begin{document}
+\begin{pgfpicture}
+  \pgfpathrectangle{\pgfpointorigin}{\pgfqpoint{2.0000bp}{1.0000bp}}
+  \pgfusepath{use as bounding box}
+  \begin{pgfscope}
+    \definecolor{fc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetfillcolor{fc}
+    \pgfsetfillopacity{0.0000}
+    \pgfpathqmoveto{0.4007bp}{0.0180bp}
+    \pgfpathqlineto{0.4007bp}{0.1380bp}
+    \pgfpathqlineto{0.3131bp}{0.1380bp}
+    \pgfpathqlineto{0.3131bp}{0.0180bp}
+    \pgfpathqlineto{0.4007bp}{0.0180bp}
+    \pgfpathclose
+    \pgfusepathqfill
+  \end{pgfscope}
+  \begin{pgfscope}
+    \definecolor{fc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetfillcolor{fc}
+    \pgftransformshift{\pgfqpoint{0.3569bp}{0.0780bp}}
+    \pgftransformscale{0.0150}
+    \pgftext[]{B}
+  \end{pgfscope}
+  \begin{pgfscope}
+    \definecolor{fc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetfillcolor{fc}
+    \pgfsetfillopacity{0.0000}
+    \pgfpathqmoveto{1.4007bp}{1.0180bp}
+    \pgfpathqlineto{1.4007bp}{1.1380bp}
+    \pgfpathqlineto{1.3131bp}{1.1380bp}
+    \pgfpathqlineto{1.3131bp}{1.0180bp}
+    \pgfpathqlineto{1.4007bp}{1.0180bp}
+    \pgfpathclose
+    \pgfusepathqfill
+  \end{pgfscope}
+  \begin{pgfscope}
+    \definecolor{fc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetfillcolor{fc}
+    \pgftransformshift{\pgfqpoint{1.3569bp}{1.0780bp}}
+    \pgftransformscale{0.0150}
+    \pgftext[]{C}
+  \end{pgfscope}
+  \begin{pgfscope}
+    \definecolor{fc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetfillcolor{fc}
+    \pgfsetfillopacity{0.0000}
+    \pgfpathqmoveto{2.4007bp}{0.0180bp}
+    \pgfpathqlineto{2.4007bp}{0.1380bp}
+    \pgfpathqlineto{2.3131bp}{0.1380bp}
+    \pgfpathqlineto{2.3131bp}{0.0180bp}
+    \pgfpathqlineto{2.4007bp}{0.0180bp}
+    \pgfpathclose
+    \pgfusepathqfill
+  \end{pgfscope}
+  \begin{pgfscope}
+    \definecolor{fc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetfillcolor{fc}
+    \pgftransformshift{\pgfqpoint{2.3569bp}{0.0780bp}}
+    \pgftransformscale{0.0150}
+    \pgftext[]{A}
+  \end{pgfscope}
+  \begin{pgfscope}
+    \pgfsetlinewidth{0.5000bp}
+    \definecolor{sc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetstrokecolor{sc}
+    \pgfsetmiterjoin
+    \pgfsetbuttcap
+    \pgfpathqmoveto{0.4220bp}{0.1430bp}
+    \pgfpathqlineto{0.1383bp}{-0.1406bp}
+    \pgfusepathqstroke
+  \end{pgfscope}
+  \begin{pgfscope}
+    \definecolor{fc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetfillcolor{fc}
+    \pgfusepathqfill
+  \end{pgfscope}
+  \begin{pgfscope}
+    \definecolor{fc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetfillcolor{fc}
+    \pgfusepathqfill
+  \end{pgfscope}
+  \begin{pgfscope}
+    \definecolor{fc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetfillcolor{fc}
+    \pgfpathqmoveto{1.2919bp}{1.0130bp}
+    \pgfpathqlineto{-0.4029bp}{0.1494bp}
+    \pgfpathqlineto{0.2313bp}{-0.0477bp}
+    \pgfpathqlineto{0.4284bp}{-0.6818bp}
+    \pgfpathqlineto{1.2919bp}{1.0130bp}
+    \pgfpathclose
+    \pgfusepathqfill
+  \end{pgfscope}
+  \begin{pgfscope}
+    \definecolor{fc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetfillcolor{fc}
+    \pgfpathqmoveto{0.2313bp}{-0.0477bp}
+    \pgfpathqlineto{0.1383bp}{-0.1406bp}
+    \pgfpathqlineto{-0.0384bp}{0.0362bp}
+    \pgfpathqlineto{0.2313bp}{-0.0477bp}
+    \pgfpathqlineto{0.1383bp}{-0.1406bp}
+    \pgfpathqlineto{0.3151bp}{-0.3174bp}
+    \pgfpathqlineto{0.2313bp}{-0.0477bp}
+    \pgfpathclose
+    \pgfusepathqfill
+  \end{pgfscope}
+  \begin{pgfscope}
+    \pgfsetlinewidth{0.5000bp}
+    \definecolor{sc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetstrokecolor{sc}
+    \pgfsetmiterjoin
+    \pgfsetbuttcap
+    \pgfpathqmoveto{2.2919bp}{0.1430bp}
+    \pgfpathqlineto{2.5756bp}{-0.1406bp}
+    \pgfusepathqstroke
+  \end{pgfscope}
+  \begin{pgfscope}
+    \definecolor{fc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetfillcolor{fc}
+    \pgfusepathqfill
+  \end{pgfscope}
+  \begin{pgfscope}
+    \definecolor{fc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetfillcolor{fc}
+    \pgfusepathqfill
+  \end{pgfscope}
+  \begin{pgfscope}
+    \definecolor{fc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetfillcolor{fc}
+    \pgfpathqmoveto{1.4220bp}{1.0130bp}
+    \pgfpathqlineto{2.2855bp}{-0.6818bp}
+    \pgfpathqlineto{2.4826bp}{-0.0477bp}
+    \pgfpathqlineto{3.1167bp}{0.1494bp}
+    \pgfpathqlineto{1.4220bp}{1.0130bp}
+    \pgfpathclose
+    \pgfusepathqfill
+  \end{pgfscope}
+  \begin{pgfscope}
+    \definecolor{fc}{rgb}{0.0000,0.0000,0.0000}
+    \pgfsetfillcolor{fc}
+    \pgfpathqmoveto{2.4826bp}{-0.0477bp}
+    \pgfpathqlineto{2.5756bp}{-0.1406bp}
+    \pgfpathqlineto{2.3988bp}{-0.3174bp}
+    \pgfpathqlineto{2.4826bp}{-0.0477bp}
+    \pgfpathqlineto{2.5756bp}{-0.1406bp}
+    \pgfpathqlineto{2.7523bp}{0.0362bp}
+    \pgfpathqlineto{2.4826bp}{-0.0477bp}
+    \pgfpathclose
+    \pgfusepathqfill
+  \end{pgfscope}
+\end{pgfpicture}
+\end{document}

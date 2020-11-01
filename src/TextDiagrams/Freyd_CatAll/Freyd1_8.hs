@@ -7,6 +7,6 @@ import Diagrams.Backend.SVG
 import Algebra.Graph
 import Data.Tree
 
-def_preadjoint =
-    let v q = vline 1.2 q
+-- def_preadjoint =
+--     let v q = vline 1.2 q
         

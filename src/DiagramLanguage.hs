@@ -132,7 +132,7 @@ example1 =
 genDiscrete trl objs g =
     let vs = vertexList g
         es = edgeList g
-        objsMap = Map.fromList $ zip vs (zipWith named ([1..] :: [Int]) objs)
+        objsMap = Map.fromList $ zip vs (zipWith named (vs :: [Int]) objs)
         d = atPoints trl [objsMap Map.! i | i <- vs ]
     in d
 
@@ -145,15 +145,38 @@ mkLocTrail (nm1,nm2) d =
         p2 = location sub2
     in pointLocTrailOS p1 p2 sub1 sub2
 
+
+
+-- genGraphLocTrailが生成するのはLocatedTrailのMapではなくMorphOptsのMapであるべきだ
+    -- arrOpts_,symbols_はwith,[]という初期値で、locTrail_だけ計算結果を入れる
+    -- arrOpts_,symbols_の更新を次の関数で実施
+data MorphOpts = Morph{ 
+                 locTrail_ :: Located (Trail V2 Double)
+               , arrOpts_  :: ArrowOpts Double
+               , symbols_  :: [Diagram B]
+               } deriving(Typeable)
+
+instance Default MorphOpts where
+    def = Morph ((mempty :: Trail V2 Double) `at` origin) with []
+
 -- LocatedTrailを生成し、Edges値をキーとしてMapに格納する
-genLocTrails es d 
-    = foldr (\(nm1,nm2) mp -> Lens.at (nm1,nm2) Lens.?~ (mkLocTrail (nm1,nm2) d) $ mp) Map.empty es
+genMorphOpts es d = 
+        foldr (\(nm1,nm2) mp -> Lens.at (nm1,nm2) Lens.?~ def{locTrail_ = (mkLocTrail (nm1,nm2) d)} $ mp) Map.empty es
 
 -- Algaから図式の抽象グラフ構造を読み取り、Trailから座標情報を読み取り、離散グラフとLocatedTrailのMapの組を作って返す
     -- このあと、LocatedTrailのMapを装飾しつつarrowFromLocatedTrailに適用し、離散圏に射を入れていく関数が続く
 genGraphLocTrail trl objs g =
     let disd = genDiscrete trl objs g
         es = edgeList g
-        locmap = genLocTrails es disd
-    in (disd,locmap)
+        morphmap = genMorphOpts es disd
+    in (disd :: Diagram B,morphmap)
 
+-- MorphOptsを受け取り、矢印のDiagram Bを導出する関数
+genArrow (Morph loc opts symbs) =
+    mconcat $ (arrowFromLocatedTrail' opts loc):symbs
+
+mkDiagram (disd,morphmap) =
+    let arrowDia = foldr (\x y -> genArrow x <> y) mempty morphmap 
+    in arrowDia <> disd :: Diagram B
+
+genDiagram trl objs g = mkDiagram $ genGraphLocTrail trl objs g :: Diagram B

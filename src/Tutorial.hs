@@ -12,6 +12,7 @@ import qualified Data.Set as Set
 import Data.Time
 import Diagrams.TwoD.Vector
 import Data.Maybe(fromMaybe)
+import Graphics.SVGFonts
 
 
 myCircle :: Diagram B
@@ -183,8 +184,8 @@ box innards padding =
         width  = diameter (r2 (1,0)) padded
     in centerXY innards <> roundedRect width height 0.1
 
-textOpts n = TextOpts lin2 INSIDE_H KERN False 1 n
+textOpts n = lin2 >>= \x -> return $ TextOpts x INSIDE_H KERN False 1 n
 
-text' :: String -> Double -> Diagram B
-text' s n = textSVG_ (textOpts n) s # fc white # lw none
+text' :: String -> Double -> IO (Diagram B)
+text' s n = textOpts n >>= \x -> return $ textSVG_ x s # fc white # lw none
 

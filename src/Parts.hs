@@ -6,6 +6,7 @@ module Parts (
   , module Diagrams.Backend.SVG
   , module Data.Typeable
   , module Graphics.SVGFonts
+  --, module Diagrams.Backend.PGF
 ) where
 
 import Diagrams.Prelude
@@ -13,6 +14,7 @@ import Algebra.Graph hiding((===))
 import Data.Tree
 import Diagrams.TwoD.Layout.Tree
 import Diagrams.Backend.SVG
+--import Diagrams.Backend.PGF
 --import Diagrams.Trail
 import Diagrams.TwoD.Arrow
 import Data.Typeable
@@ -23,7 +25,7 @@ import Data.Char
 
 
 --easyRender :: (Show n, RealFloat n) => FilePath -> QDiagram SVG V2 n Any -> IO ()
-easyRender name diag = renderPretty ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202010/img/" ++ name) fixedSize diag
+easyRender name diag = renderPretty ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202011/img/" ++ name) fixedSize diag
 
 setSize :: Num n => n -> n -> SizeSpec V2 n
 setSize w h = mkSizeSpec2D (Just w) (Just h)
