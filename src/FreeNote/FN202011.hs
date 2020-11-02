@@ -21,3 +21,24 @@ dia1_1 =
         plbSymbol = plb # translateY 0.75 # rot
     in genDiagram loctrl labels alga <> plbSymbol
 
+
+-- MorphOptsをLensで編集する練習
+dia2_1 =
+    let loctrl = fromOffsets [unitX + 0.5 *^ unitY] :: Trail V2 Double
+        lab = attachLabel (loctrl `at` origin) (boxedText "f" 0.15 :: Diagram B) 0.5
+        mopts = (def :: MorphOpts) & set locTrail ((monicShaft  loctrl) `at` origin)
+                                   & set arrOpts openHead
+                                   & over symbols (lab <|)
+        evalMopts opts = 
+            let trl = view locTrail opts
+                arropts = view arrOpts opts
+                symbs = view symbols opts
+            in arrowFromLocatedTrail' arropts trl <> mconcat symbs
+    in evalMopts mopts <> square 1 # lw none # scale 0.01
+
+-- 良い出来なので公式採用。DiagramLanguageに移行（コピペ）
+evalMorphOpts opts =
+    let trl     = opts ^. locTrail
+        arropts = opts ^. arrOpts
+        symbs   = opts ^. symbols
+    in arrowFromLocatedTrail' arropts trl <> mconcat symbs
