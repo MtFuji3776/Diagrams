@@ -54,7 +54,7 @@ monicShaft trl =
     let p1 = atParam trl 0
         p2 = atParam trl 1
         v  = p2 .-. p1 
-        u  = perp . (0.07 *^) . normalize $ v :: V2 Double
+        u  = perp . (0.05 *^) . normalize $ v :: V2 Double
         tailBar = fromOffsets [u,(-2) *^ u,u] :: Trail V2 Double
     in tailBar <> trl
 
@@ -133,9 +133,13 @@ example1 =
 -- 離散圏図式生成機。対象だけ描画する
 genDiscrete trl objs g =
     let vs = vertexList g :: [Int]
-        es = edgeList g
-        objsMap = Map.fromList $ zip vs (zipWith named ([1..] :: [Int]) objs)
-        d = atPoints trl [objsMap Map.! i | i <- vs ]
+        --es = edgeList g
+        ns = [1..] :: [Int]
+        pointMap = Map.fromList $ zip ns trl
+        objsMap = Map.fromList $ zip ns (zipWith named ns objs)
+        checkObjs = fromMaybe mempty
+        checkPoints = fromMaybe origin
+        d = mconcat [place (checkObjs $ objsMap ^. Lens.at i) (checkPoints $ pointMap ^. Lens.at i)  | i <- vs ]
     in d
 
 -- 名前二つとQDiagramからLocatedTrailを導出
@@ -172,6 +176,7 @@ genMorphOpts es d =
 genGraphLocTrail trl objs g =
     let disd = genDiscrete trl objs g
         es = edgeList g
+        --vertexMap = Map.fromList $ zipWith named ([1..] :: [Int]) objs
         morphmap = genMorphOpts es disd
     in (disd :: Diagram B,morphmap)
 
