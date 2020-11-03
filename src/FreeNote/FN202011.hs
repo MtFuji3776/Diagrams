@@ -37,8 +37,12 @@ dia2_1 =
     in evalMopts mopts <> square 1 # lw none # scale 0.01
 
 -- 良い出来なので公式採用。DiagramLanguageに移行（コピペ）
-evalMorphOpts opts =
-    let trl     = opts ^. locTrail
-        arropts = opts ^. arrOpts
-        symbs   = opts ^. symbols
-    in arrowFromLocatedTrail' arropts trl <> mconcat symbs
+-- evalMorphOpts opts =
+--     let trl     = opts ^. locTrail
+--         arropts = opts ^. arrOpts
+--         symbs   = opts ^. symbols
+--     in arrowFromLocatedTrail' arropts trl <> mconcat symbs
+
+_monic (Morph loctrl opts symbs) = 
+    let p1 = atParam loctrl 0 
+    in over locTrail (flip at p1 . monicShaft . unLoc) (Morph loctrl opts symbs)
