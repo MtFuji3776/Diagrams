@@ -46,3 +46,38 @@ dia2_1 =
 _monic (Morph loctrl opts symbs) = 
     let p1 = atParam loctrl 0 
     in over locTrail (flip at p1 . monicShaft . unLoc) (Morph loctrl opts symbs)
+
+-- LocatedTrailを一旦Trailに戻してから、道の結合演算などを施して、再びLocatedTrailに戻す
+    -- 戻り値の始点は変更しない仕様
+    -- 矢印のShaftを変形させるときに使うと良さそう（monic以外にarc系でも頻繁に使うはず）
+-- buildLocTrail someFuncOnTrail loctrl =
+--     let p0 = atParam loctrl 0
+--     in flip at p0 . someFuncOnTrail . unLoc $ loctrl
+
+dia3_1 =
+    let mopts = def & locTrail .~ fromOffsets [unitX]
+        trl = mopts ^. locTrail
+        deco mopts = mopts & locTrail %~ buildLocTrail monicShaft
+                           & symbols %~ ((attachLabel trl (boxedText "X" 0.15) 0.5 :) . (attachLabel trl reticle 0.3 :))
+    in evalMorphOpts $ deco mopts
+
+dia3_2 =
+    let loctrl = fromOffsets [unitY,unitY,unitY,unit_Y + 4 *^ unitX , 2*^ unit_Y]
+        objs   = map (lw none . flip box 0.05) 
+                $ map (flip boxedText 0.15) 
+                    [
+                        "[((Int,Int),MorphOpts)]",
+                        "Alga",
+                        "[QDiagram]",
+                        "LocatedTrail"
+                    ] 
+                    ++
+                    [ 
+                        (stroke $ textSVG "(QDiagram,Map (Int,Int) MorphOpts)" 0.30) # lw none # fc red
+                    ] 
+                    ++
+                    [
+                        boxedText "QDiagram" 0.15
+                    ]
+        alga = (1+2+3+4)*5 + 5*6
+    in genDiagram loctrl objs alga

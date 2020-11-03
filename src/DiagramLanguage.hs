@@ -39,13 +39,14 @@ genLabelDia trl xs g =
 
 -- 特別な形状の射を示す矢印
 -- monicの見本
-monic = 
-    let tailBar = fromOffsets [0 ^& 0.2]
-        morph   = arrowFromLocatedTrail (fromOffsets [1 ^& 0] ) # translateY 0.1
-    in tailBar <> morph
+-- monic = 
+--     let tailBar = fromOffsets [0 ^& 0.2]
+--         morph   = arrowFromLocatedTrail (fromOffsets [1 ^& 0] ) # translateY 0.1
+--     in tailBar <> morph
 -- connectOutsideシリーズの鏃もmonicの尻尾にできないだろうか？
     --ArrowShaftにTrailをくっつけることができるか？
     --指定した矢印のスタイルを更新してmonicにできるのが理想
+-- MorphOptsを評価してArrowを生成するスタイルに決定したので凍結
 
 -- Trailで定義すればPathの連結モノイドが導入される
     -- Arrowで使う直前にLocatedに持ち上げれば良し
@@ -184,3 +185,11 @@ mkDiagram (disd,morphmap) =
 
 genDiagram trl objs g = mkDiagram $ genGraphLocTrail trl objs g :: Diagram B
 
+
+
+
+buildLocTrail someFuncOnTrail loctrl =
+    let p0 = atParam loctrl 0
+    in flip at p0 . someFuncOnTrail . unLoc $ loctrl
+
+monic mopts = mopts & locTrail %~ (buildLocTrail monicShaft) 
