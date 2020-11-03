@@ -132,9 +132,9 @@ example1 =
 
 -- 離散圏図式生成機。対象だけ描画する
 genDiscrete trl objs g =
-    let vs = vertexList g
+    let vs = vertexList g :: [Int]
         es = edgeList g
-        objsMap = Map.fromList $ zip vs (zipWith named (vs :: [Int]) objs)
+        objsMap = Map.fromList $ zip vs (zipWith named ([1..] :: [Int]) objs)
         d = atPoints trl [objsMap Map.! i | i <- vs ]
     in d
 

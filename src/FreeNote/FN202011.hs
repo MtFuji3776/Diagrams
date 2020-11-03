@@ -61,6 +61,7 @@ dia3_1 =
                            & symbols %~ ((attachLabel trl (boxedText "X" 0.15) 0.5 :) . (attachLabel trl reticle 0.3 :))
     in evalMorphOpts $ deco mopts
 
+-- 文字を含む図のお試し
 dia3_2 =
     let loctrl = fromOffsets [unitY,unitY,unitY,unit_Y + 4 *^ unitX , 2*^ unit_Y]
         objs   = map (lw none . flip box 0.05) 
@@ -80,4 +81,48 @@ dia3_2 =
                         boxedText "QDiagram" 0.15
                     ]
         alga = (1+2+3+4)*5 + 5*6
+    in genDiagram loctrl objs alga
+
+dia3_2' =
+    let loctrl = fromOffsets [unitY,unitY,unitY,unit_Y + 4 *^ unitX , 2*^ unit_Y]
+        objs   = map (lw none . flip box 0.05) 
+                $ map (fc blue . lw none . stroke . flip textSVG 0.30) 
+                    [
+                        "[((Int,Int),MorphOpts)]",
+                        "Alga",
+                        "[QDiagram]",
+                        "LocatedTrail",
+                        "(QDiagram,Map (Int,Int) MorphOpts)",
+                        "QDiagram"
+                    ]
+        alga = (1+2+3+4)*5 + 5*6
+    in genDiagram loctrl objs alga
+
+-- 図式言語のお試し
+    -- genGraphLocTrailの仕様に難あり。[LocatedTrail]と[Diagram B]でatPointsするのではAlgaで制御できなくなる
+dia3_3 =
+    let f alga =
+            let loctrl = fromOffsets [unitY,unit_Y + unitX]
+                objs = map (lw none . flip box 0.02 . fc black . strokeP . flip textSVG 0.2) ["M","A","B"]
+                --alga = 2*(1+3) + 1*3
+                (disd,mp) = genGraphLocTrail loctrl objs alga
+                mp' = over (Lens.at (1,3)) (fmap monic) mp
+            in mkDiagram (disd,mp')
+    in f (1*3) ||| vline 1.7 Forall ||| f ((1+2)*3) ||| vline 1.7 ExistsOnly ||| f ((1+2)*3 + 2*1)
+
+dia3_4 = 
+    let loctrl = fromOffsets [unitY,unitY,unit_Y + 2 *^ unitX, 1.1 *^ unitX + unitY, unit_Y,0.5 *^ unit_X , 2*^ unit_Y ]
+        objs = map (lw none . flip box 0.05) 
+             $ map (lw none. flip box 0.02 . fc blue . strokeP . flip textSVG 0.2) 
+            [
+                "Alga",
+                "[QDiagram]",
+                "Located Trail",
+                "(QDiagram,",
+                "[((Int,Int),MorphOpts)]",
+                "Map (Int,Int) MorphOpts)",
+                "",
+                "QDiagram"
+            ]
+        alga = (1+2+3)*4 + 5*6 + 7*8
     in genDiagram loctrl objs alga
