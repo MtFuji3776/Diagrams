@@ -56,7 +56,8 @@ monicShaft trl =
         v  = p2 .-. p1 
         u  = perp . (0.05 *^) . normalize $ v :: V2 Double
         tailBar = fromOffsets [u,(-2) *^ u,u] :: Trail V2 Double
-    in tailBar <> trl
+        forGap = fromOffsets [0.1*^v,(-0.1) *^ v]
+    in forGap <> tailBar <> trl
 
 measureTrail trl =
     let p1 = atParam trl 0
@@ -70,7 +71,7 @@ equalizerShaft trl =
     let v = (0.1 *^) . normalize $ measureTrail trl
         u = v # rotateBy (3/8)
         u' = v # rotateBy (5/8)
-        eqTail = fromOffsets [u,-u,u',-u'] :: Trail V2 Double
+        eqTail = fromOffsets [v,-v,u,-u,u',-u'] :: Trail V2 Double
     in eqTail <> trl
 
 open = arrowV' (with & headStyle %~ fc white . lw 0.5) unitX 
@@ -78,23 +79,32 @@ open = arrowV' (with & headStyle %~ fc white . lw 0.5) unitX
 -- CoverやEpicなどのArrowHead系には、ArrowOpts単品を渡すことにする
 openHead = with & headStyle %~ fc white . lw 0.3
 
+cover = headStyle %~ fc white . lw 0.5
+
 
 -- 図式言語
 
 -- 量化記号を表す型
-data Quantification = NoQuant Double | Forall Double | Exists Double | ExistsOnly Double deriving(Show)
+data Quantification = NoLine Double | NoQuant Double | Forall Double | Exists Double | Only Double | ExistsOnly Double deriving(Show,Eq)
 
+
+
+evalQF (NoLine d)         = mempty
 evalQF (NoQuant d)        = mempty
 evalQF (Forall d)         = boxedText "∀" d
 evalQF (Exists d)         = boxedText "∃" d
+evalQF (Only d)           = boxedText "!" d
 evalQF (ExistsOnly d)     = boxedText "∃!" d
 -- 罫線
     -- lは長さの値、xは上に付ける量化記号と!
     -- translateYの値は議論の余地あり
     -- 図式の列を与えられたときに罫線の長さを自動で導出させられたらいい感じなのだが。
+
 vline l q = 
     let line l = vrule l # alignB # translateY ((-0.2 * l))
-    in  beside (0 ^& 1) (line l) (evalQF (q 0.2))
+    in if (q 0.2) == NoLine 0.2
+        then mempty
+        else beside (0 ^& 1) (line l) (evalQF (q 0.2))
                     
 
 -- 量化記号はboxedTextで定義
@@ -130,6 +140,9 @@ example1 =
         g2 = connectOutside (4 :: Int) (2 :: Int) $ g1 <> g2' # translateY 1.2 
     in hsep 0.05 [vline 2 (Forall) , g1, vline 2 Exists, g2]
 
+
+-- =================================================図式言語生成用の主要関数==================================================================
+
 -- 離散圏図式生成機。対象だけ描画する
 genDiscrete trl objs g =
     let vs = vertexList g :: [Int]
@@ -160,16 +173,31 @@ data MorphOpts = Morph{
                  _locTrail :: Located (Trail V2 Double)
                , _arrOpts  :: ArrowOpts Double
                , _symbols  :: [Diagram B]
-               } deriving(Typeable)
+               } 
+            --    | Twin{
+            --      _leftMorph :: MorphOpts
+            --    , _rightMorph :: MorphOpts 
+            --    }
+               deriving(Typeable)
 
 instance Default MorphOpts where
     def = Morph ((mempty :: Trail V2 Double) `at` origin) with []
 
 $(makeLenses ''MorphOpts)
 
+-- 平行な射を扱うためにMapのキーを拡張する
+    -- Twinはコンストラクタによってのみ生成される
+    -- ３つ以上の平行な射にも対応すべきか検討してみよう
+data KeyOfMorph = Single Int Int
+                | Twin Int Int Bool
+                deriving (Eq,Ord,Show)
+
 -- LocatedTrailを生成し、Edges値をキーとしてMapに格納する
 genMorphOpts es d = 
-        foldr (\(nm1,nm2) mp -> Lens.at (nm1,nm2) Lens.?~ def{_locTrail = (mkLocTrail (nm1,nm2) d)} $ mp) Map.empty es
+    let insert' (i,j) mp = 
+            let opts = def & locTrail .~ mkLocTrail (i,j) d
+            in Lens.at (Single i j) Lens.?~ opts $ mp
+    in foldr insert' Map.empty es
 
 -- Algaから図式の抽象グラフ構造を読み取り、Trailから座標情報を読み取り、離散グラフとLocatedTrailのMapの組を作って返す
     -- このあと、LocatedTrailのMapを装飾しつつarrowFromLocatedTrailに適用し、離散圏に射を入れていく関数が続く
@@ -191,10 +219,38 @@ mkDiagram (disd,morphmap) =
 genDiagram trl objs g = mkDiagram $ genGraphLocTrail trl objs g :: Diagram B
 
 
+-- attachLabelのアレンジ
+takeLabel_ l asp1 asp2 b opts =
+    let trl = opts ^. locTrail
+        lab = attachLabel_ trl l asp1 asp2 b
+    in over symbols (lab:) opts
 
+-- 簡易版
+takeLabel l b = takeLabel_ l 0.5 0.1 b
 
 buildLocTrail someFuncOnTrail loctrl =
     let p0 = atParam loctrl 0
     in flip at p0 . someFuncOnTrail . unLoc $ loctrl
 
+-- monicの定形ジェネレータ
 monic mopts = mopts & locTrail %~ (buildLocTrail monicShaft) 
+
+-- イコライザの矢印の定形ジェネレータ
+    -- 点を打つ位置が13/14というのは、equalizerShaftの都合上こうなっている
+    -- ArrowOptsのうちgapシリーズは、始点と終点でTrailの接ベクトルを求めて、それと垂直方向に図形の始点を動かす
+    -- Trailの初動が矢印と別を向いている場合、gapの取り方が明後日を向いてしまう
+    -- 対策として、Shaftにはノータッチで飽くまでShaftの変形もQDiagramのatopで済ませるという案がある
+equalizer mopts = 
+    let dot = takeLabel_ (bc # scale 0.2) (13/14) 0.05 
+    in mopts & locTrail %~ (buildLocTrail equalizerShaft)
+             & dot True . dot False
+             & arrOpts.tailGap .~ (local 0.05)
+--
+-- =======================以下、罫線の構築に関する関数==========================================
+-- 
+
+heightOfVline = diameter (r2 $ 0 ^& 1) . padded 0.2
+
+-- 線のながさと量化子リストを受け取って、罫線リストを返す
+verticals h = map (vline h) 
+

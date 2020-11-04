@@ -106,9 +106,18 @@ dia3_3 =
                 objs = map (lw none . flip box 0.02 . fc black . strokeP . flip textSVG 0.2) ["M","A","B"]
                 --alga = 2*(1+3) + 1*3
                 (disd,mp) = genGraphLocTrail loctrl objs alga
-                mp' = over (Lens.at (1,3)) (fmap monic) mp
+                mp' = over (Lens.at (uncurry Single (1,3))) (fmap monic) mp
             in mkDiagram (disd,mp')
-    in f (1*3) ||| vline 1.7 Forall ||| f ((1+2)*3) ||| vline 1.7 ExistsOnly ||| f ((1+2)*3 + 2*1)
+    in f (1*3) ||| vline 1.7 Forall ||| f ((1+2)*3) ||| vline 1.7 Only ||| f ((1+2)*3 + 2*1)
+
+dia3_3' =
+    let f alga =
+            let loctrl = fromOffsets [unitY,unit_Y + unitX]
+                objs = replicate 3 bc
+                (disd,mp) = genGraphLocTrail loctrl objs alga
+                mp' = fmap (\opts -> set (arrOpts . headLength) (local 0.06) . set (arrOpts . gaps) (local 0.02) $ opts)   $ over (Lens.at (Single 1 3)) (fmap monic) mp
+            in mkDiagram (disd,mp')
+    in f (1*3) ||| vline 1.7 Forall ||| f ((1+2)*3) ||| vline 1.7 Only ||| f ((1+2)*3 + 2*1)
 
 dia3_4 = 
     let loctrl = fromOffsets [unitY,unitY,unit_Y + 2 *^ unitX, 1.1 *^ unitX + unitY, unit_Y,0.5 *^ unit_X , 2*^ unit_Y ]
@@ -126,3 +135,82 @@ dia3_4 =
             ]
         alga = (1+2+3)*4 + 5*6 + 7*8
     in genDiagram loctrl objs alga
+
+dia4_1 =
+    let trl = fromOffsets [unitY,unit_Y + unitX]
+        objs = replicate 3 bc
+        alga1 = 1*3
+        alga2 = (1+2)*3
+        alga3 = (1+2)*3 + 2*1
+        (disd,opmap) = genGraphLocTrail trl objs alga2
+        pmap' xmap = xmap & Lens.at (Single 1 3) %~ fmap equalizer
+        opmap' = pmap' opmap
+    in mkDiagram (disd,opmap')
+
+dia4_2 =
+    let trl = fromOffsets [unitY,unit_Y + unitX]
+        objs = replicate 3 bc
+        alga1 = 1*3
+        alga2 = (1+2)*3
+        alga3 = (1+2)*3 + 2*1
+        --(disd,opmap) = genGraphLocTrail trl objs alga2
+        diagrams = map (genGraphLocTrail trl objs) [alga1,alga2,alga3]
+        pmap' xmap = xmap & Lens.at (Single 1 3) %~ fmap equalizer
+        diagrams' = map (over _2 pmap') diagrams
+    in foldr (\x y -> x ||| vline 1.7 Forall ||| y) mempty $ map mkDiagram diagrams'
+
+-- 図式言語の量化記号訂正版
+dia4_2' =
+    let trl = fromOffsets [unitY,unit_Y + unitX,unitX]
+        objs = replicate 4 bc
+        alga1 = 1*3 + 4
+        alga2 = (1+2)*3 + 4
+        alga3 = (1+2)*3 + 2*1 + 4
+        diagrams = map (genGraphLocTrail trl objs) [alga1,alga2,alga3]
+        pmap' xmap = xmap & Lens.at (Single 1 3) %~ fmap equalizer
+                          -- & Lens.at (Twin 3 4 True) . locTrail %~ fmap (translate )
+        mktwinarr d =
+            let tpl = (3,4) :: (Int,Int)
+                trl = mkLocTrail tpl d
+                u   = 0.1 *^ (normalAtParam trl 0)
+                trl1 = trl # translate u
+                trl2 = trl # translate (-u)
+                p = atParam trl 0.5
+                reti = place reticle p
+            in arrowFromLocatedTrail trl1 <> arrowFromLocatedTrail trl2 <> reti <> d
+        diagrams' = map (mkDiagram . over _1 mktwinarr . over _2 pmap') diagrams
+        height = foldr max 0 . map heightOfVline $ diagrams'
+        vlines = verticals height [NoLine,Forall,ExistsOnly]
+    in foldr (|||) mempty $ zipWith (|||) vlines diagrams'
+
+-- 図式言語手習い
+    -- 「任意のcoverはepiである」という主張
+dia4_3 =
+    let trl = fromOffsets [unitY,unit_Y + unitX]
+        objs = replicate 3 bc
+        alga1 = 2*1
+        alga2 = 2*(1+3)
+        alga3 = 2*(1+3) + 1*3
+        diagrams = map (genGraphLocTrail trl objs) [alga1,alga2,alga3]
+        cover opts = opts & arrOpts . headStyle %~ fc white . lw 0.7
+        setting xmap = xmap & Lens.at (Single 2 1) %~ fmap cover
+        diagrams' = map (mkDiagram . over _2 setting) diagrams
+        height = foldr max 0 . map heightOfVline $ diagrams'
+        vlines = verticals height [Forall,Forall,Only]
+    in foldr (|||) mempty $ zipWith (|||) vlines diagrams'
+
+-- 図式言語手習い「coverの定義」
+    -- 未完成。Twinの自動化と、平行で逆向きな二つの射を描くための関数を用意しなければならない
+dia4_4 =
+    let trl = fromOffsets [unitX + unitY, unit_Y]
+        objs = replicate 3 bc
+        alga1 = 2*3
+        alga2 = 2*(1+3) + 1*3
+        alga3 = alga2 + 3*1
+        protoDia = map (genGraphLocTrail trl objs) [alga1,alga2,alga3]
+        cover = over (arrOpts . headStyle) (fc white . lw 0.8)
+        setting = over (Lens.at (Single 2 3)) (fmap cover)
+        protoDia' = map (mkDiagram . over _2 setting) protoDia
+        height = foldr max 0 . map heightOfVline $ protoDia'
+        vlines = verticals height [NoLine,Forall,Exists]
+    in foldr (|||) mempty $ zipWith (|||) vlines protoDia'

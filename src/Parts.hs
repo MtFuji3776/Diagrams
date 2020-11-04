@@ -129,17 +129,31 @@ pointLocTrailOS p1 p2 o1 o2 =
 getCoor n = location . fromMaybe (mkSubdiagram mempty) . lookupName n
 
 
+-- attachLabelでラベルのつく左右(上下)を変えられるよう拡張
+    -- 末尾のb::BoolがTrueならば進行方向左、Falseならば右につく
+    -- 始点と終点を結ぶよりも接線ベクトルを取得する方が絶対良いのでは？
+attachLabel_ loctrl lbl asp1 asp2 b =
+    let p1 = atParam loctrl 0
+        p2 = atParam loctrl 1
+        p3 = atParam loctrl asp1 -- Trail上でラベルのつく位置
+        v = if b then (asp2 *^) . normalize . perp $ p2 .-. p1 -- asp2はTrailからの距離
+                 else ((-asp2) *^) . normalize . perp $ p2 .-. p1
+        p4 = p3 .+^ v
+    in place lbl p4 :: Diagram B
+    
+
 
 -- LocatedTrailにラベル付けして描画する関数
     -- ただしこの関数はまだラベルを配置するだけ
     -- LocatedTrailの描画やarrowFromLocatedTrail化はこの関数と組み合わせて実行すればよし
-attachLabel loctrl lbl n =
-    let p1 = atParam loctrl 0 :: P2 Double
-        p2 = atParam loctrl 1 :: P2 Double
-        p3 = atParam loctrl n :: P2 Double
-        v = (0.1 *^) . normalize . perp $ p2 .-. p1
-        p4 = p3 .+^ v
-    in place lbl p4 :: Diagram B
+attachLabel loctrl lbl n = attachLabel_ loctrl lbl n 0.1 True
+-- 抽象化の名残
+    -- let p1 = atParam loctrl 0 :: P2 Double
+    --     p2 = atParam loctrl 1 :: P2 Double
+    --     p3 = atParam loctrl n :: P2 Double
+    --     v = (0.1 *^) . normalize . perp $ p2 .-. p1
+    --     p4 = p3 .+^ v
+    -- in place lbl p4 :: Diagram B
 
 
 -- 中身と幅を渡すと、中心に中身を据えて周りに余白を確保した図式を返す関数
