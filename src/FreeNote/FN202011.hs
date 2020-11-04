@@ -214,3 +214,23 @@ dia4_4 =
         height = foldr max 0 . map heightOfVline $ protoDia'
         vlines = verticals height [NoLine,Forall,Exists]
     in foldr (|||) mempty $ zipWith (|||) vlines protoDia'
+
+-- 量化子リストと図式リストを受け取って図式言語を構成する関数
+    -- 実用性抜群なのでDiagramLanguage.hs行き
+-- diagramLanguage qs ds =
+--     let height = foldr max 0 . map heightOfVline $ ds
+--         vlines = verticals height qs
+--     in foldr (|||) mempty $ zipWith (|||) vlines ds
+
+-- diagramLanguageを使えば更にコードが短くなる
+dia4_4' =
+    let trl = fromOffsets [unitX + unitY, unit_Y]
+        objs = replicate 3 bc
+        alga1 = 2*3
+        alga2 = 2*(1+3) + 1*3
+        alga3 = alga2 + 3*1
+        protoDia = map (genGraphLocTrail trl objs) [alga1,alga2,alga3]
+        cover = over (arrOpts . headStyle) (fc white . lw 0.9)
+        setting = over (Lens.at (Single 2 3)) (fmap cover)
+        protoDia' = map (mkDiagram . over _2 setting) protoDia
+    in diagramLanguage [NoLine,Forall,Exists] protoDia'

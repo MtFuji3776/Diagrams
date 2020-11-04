@@ -254,3 +254,13 @@ heightOfVline = diameter (r2 $ 0 ^& 1) . padded 0.2
 -- 線のながさと量化子リストを受け取って、罫線リストを返す
 verticals h = map (vline h) 
 
+
+--
+-- =========図式言語生成関数====================================================
+--
+
+-- 量化子リストと図式リストを受け取って図式言語一つの図式を生成する関数
+diagramLanguage qs ds =
+    let height = foldr max 0 . map heightOfVline $ ds
+        vlines = verticals height qs
+    in foldr (|||) mempty $ zipWith (|||) vlines ds
