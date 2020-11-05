@@ -12,7 +12,7 @@ import Diagrams.TwoD.Layout.Tree
 import Parts
 import qualified Data.Map as Map
 import qualified Control.Lens as Lens ((?~),at)
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe,isNothing)
 
 
 -- ラベルにグラフの頂点で名前をつける
@@ -224,10 +224,11 @@ genDiagram trl objs g = mkDiagram $ genGraphLocTrail trl objs g :: Diagram B
 takeLabel_ l asp1 asp2 b opts =
     let trl = opts ^. locTrail
         lab = attachLabel_ trl l asp1 asp2 b
-    in over symbols (lab:) opts
+    in over symbols (lab <|) opts
 
 -- 簡易版
-takeLabel l b = takeLabel_ l 0.5 0.1 b
+    -- asp1も毎回書いてもいいかも。
+takeLabel l asp1 b = takeLabel_ l asp1 0.1 b
 
 buildLocTrail someFuncOnTrail loctrl =
     let p0 = atParam loctrl 0
@@ -246,6 +247,43 @@ equalizer mopts =
     in mopts & locTrail %~ (buildLocTrail equalizerShaft)
              & dot True . dot False
              & arrOpts.tailGap .~ (local 0.05)
+
+
+-- 多くの亜種を持つtwin関数系統の一番抽象的なやつ
+    -- objはとりあえず単品で渡したが、複数のオブジェクトを設置したい場合はどうすれば良いか？
+    -- 図式内の既存のTrailを有効活用するためのプログラムを別途用意した方が良い気がする
+        -- つーかあるだろ、それで図式の矢印のTrailを作ってるじゃねーか。
+    -- あるいは既存のMorphOptsを利用してもよし
+    -- 配置したいオブジェクトに一番近いLocatedTrailを特定して、attachLabelの要領で配置する。イコライザ記号のやり方。
+    -- このやり方でProductとかPullbackとかmonicとかreticleとかみんな設置できるのでは？
+twin_ i j n obj b' xmap = -- b'はBoolで、reverseの有無の確認
+    let e = view (Lens.at (Single i j)) xmap
+        setTwinKeys = set (Lens.at (Twin i j True)) e . set (Lens.at (Twin i j False)) e . sans (Single i j)
+        movetrl b opts = 
+            let trl = view locTrail opts
+                u = n *^ normalAtParam trl 0
+                trans   = if b then translate u . reverseLocTrail
+                               else translate (-u) 
+            in over locTrail trans opts
+        lens_Map b = over (Lens.at (Twin i j b)) (fmap (movetrl b))
+        obj' = --平行射のど真ん中にオブジェクト設置。reticleとか、随伴の記号とか。
+            let e' = view locTrail . fromMaybe def $ e
+                p = atParam e' 0.5
+            in place obj p
+        xmap' = lens_Map True 
+              . (if b' then lens_Map False else lens_Map True)
+              . over (Lens.at (Twin i j True)) (fmap (over symbols (obj' <|)))
+              . setTwinKeys 
+              $ xmap
+    in if isNothing e 
+        then xmap
+        else xmap'
+
+-- 通常のtwin
+twin i j n = twin_ i j n mempty True
+
+
+
 --
 -- =======================以下、罫線の構築に関する関数==========================================
 -- 
@@ -265,3 +303,11 @@ diagramLanguage qs ds =
     let height = foldr max 0 . map heightOfVline $ ds
         vlines = verticals height qs
     in foldr (|||) mempty $ zipWith (|||) vlines ds
+
+
+--
+-- ===============================SVGFontsによる文字記号生成関数関連===========================================
+--
+svgObject = lw none . flip Parts.box 0.01 . fc black . strokeP . flip textSVG 0.15
+
+svgLabel = lw none . fc black . strokeP . flip textSVG 0.14

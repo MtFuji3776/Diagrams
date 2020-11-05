@@ -229,7 +229,7 @@ dia4_4' =
         alga1 = 2*3
         alga2 = 2*(1+3) + 1*3
         alga3 = alga2 
-        protoDia = over (ix 2 . _2) (twin 1 3) $ map (genGraphLocTrail trl objs) [alga1,alga2,alga3]
+        protoDia = over (ix 2 . _2) (twin 1 3 0.05) $ map (genGraphLocTrail trl objs) [alga1,alga2,alga3]
         cover = over (arrOpts . headStyle) (fc white . lw 0.9)
         setting = over (Lens.at (Single 2 3)) (fmap cover) 
                 . over (Lens.at (Twin 1 3 False)) (fmap monic)
@@ -240,18 +240,101 @@ dia4_4' =
 
 -- 平行射を生成してLocatedTrailを動かす関数の試作品
     -- 指定したキーの値が存在しなければ何もしない
-twin i j xmap = 
-    let e = view (Lens.at (Single i j)) xmap
-        setTwinKeys = set (Lens.at (Twin i j True)) e . set (Lens.at (Twin i j False)) e . sans (Single i j)
-        movetrl b opts = 
-            let trl = view locTrail opts
-                u = 0.05 *^ normalAtParam trl 0
-                trans   = if b then translate u . reverseLocTrail
-                               else translate (-u) 
-            in over locTrail trans opts
-        lens_Map b = over (Lens.at (Twin i j b)) (fmap (movetrl b))
-        xmap' = lens_Map True . lens_Map False . setTwinKeys $ xmap
-    in if isNothing e 
-        then xmap
-        else xmap'
+-- twin i j n xmap = 
+--     let e = view (Lens.at (Single i j)) xmap
+--         setTwinKeys = set (Lens.at (Twin i j True)) e . set (Lens.at (Twin i j False)) e . sans (Single i j)
+--         movetrl b opts = 
+--             let trl = view locTrail opts
+--                 u = n *^ normalAtParam trl 0
+--                 trans   = if b then translate u . reverseLocTrail
+--                                else translate (-u) 
+--             in over locTrail trans opts
+--         lens_Map b = over (Lens.at (Twin i j b)) (fmap (movetrl b))
+--         xmap' = lens_Map True . lens_Map False . setTwinKeys $ xmap
+--     in if isNothing e 
+--         then xmap
+--         else xmap'
 
+dia5_1 = 
+    let trl = fromOffsets [unit_X + unitY , unitX]
+        objs = map (lw none . flip Parts.box 0.02 . fc black . strokeP . flip textSVG 0.15) ["P","P","Q"]
+        alga = 2*(1+3) + 3*1
+        protoDia = genGraphLocTrail trl objs alga
+        lab i j x = 
+            let opts = view (Lens.at (Single i j)) $ view _2 protoDia
+                trl  = view locTrail $ fromMaybe def opts
+            in over symbols (((attachLabel trl (textSVG x 0.14 # strokeP # fc black # lw none) 0.5))<|)
+        setting mp = mp & (Lens.at (Single 2 1)) %~ fmap (lab 2 1 "1")
+                        & (Lens.at (Single 2 3)) %~ fmap (lab 2 3 "s")
+                        & (Lens.at (Single 3 1)) %~ fmap (lab 3 1 "r")
+        protoDia' = mkDiagram . over _2 setting $ protoDia
+    in protoDia'
+
+dia5_1' =
+    let trl = fromOffsets [unit_X + unitY , unitX]
+        objs = map (lw none . flip Parts.box 0.02 . fc black . strokeP . flip textSVG 0.15) ["P","P","Q"]
+        alga = 2*(1+3) + 3*1
+        protoDia = genGraphLocTrail trl objs alga
+        lab i j x = 
+            let opts = view (Lens.at (Single i j)) $ view _2 protoDia
+                trl  = view locTrail $ fromMaybe def opts
+            in over symbols (((attachLabel trl (text x # fontSize (local 0.08)) 0.5))<|)
+        setting mp = mp & (Lens.at (Single 2 1)) %~ fmap (lab 2 1 "1")
+                        & (Lens.at (Single 2 3)) %~ fmap (lab 2 3 "s")
+                        & (Lens.at (Single 3 1)) %~ fmap (lab 3 1 "r")
+        protoDia' = mkDiagram . over _2 setting $ protoDia
+    in protoDia'
+
+-- dia5_1から抽出した、対象記号用の文字列関数 
+    -- AMSMathのフォントを使えるようにしたい
+-- svgObject = lw none . flip Parts.box 0.01 . fc black . strokeP . flip textSVG 0.15
+-- dia5_1から抽出した、ラベル記号用の文字列関数
+-- svgLabel = lw none . fc black . strokeP . flip textSVG 0.14
+-- いずれもDiagramLanguage行き
+    -- Partsとどっちが良いだろうか？
+
+-- MorphOptsを受け取り、LocTrailから情報を取り出して、attachLabelを適用
+    -- DiagramLanguage行き
+-- takeLabel x p opts = 
+--     let trl = view locTrail opts
+--         lab = attachLabel trl x p
+--     in over symbols (lab <|) opts
+-- すでにそっくりなのを作っといて忘れていた…
+
+
+dia5_1'' =
+    let trl = fromOffsets [unit_X + unitY , unitX]
+        objs = map svgObject ["P","P","Q"]
+        alga = 2*(1+3) + 3*1
+        protoDia = genGraphLocTrail trl objs alga
+        l_1 = svgLabel "1"
+        l_s = svgLabel "s"
+        l_r = svgLabel "r"
+        setting mp = mp & Lens.at (Single 2 1) %~ fmap (takeLabel l_1 0.5 False) -- ここらへん抽象化できそう
+                        & Lens.at (Single 2 3) %~ fmap (takeLabel l_s 0.5 True)  -- Lens.at キー %~ fmap f のパターン
+                        & Lens.at (Single 3 1) %~ fmap (takeLabel l_r 0.5 True)  -- 記述がさらに短くなる予感
+    in mkDiagram . over _2 setting $ protoDia
+
+-- キーと作用関数を受け取ると、Mapにアクセスしてキーのところの要素に作用を掛ける関数
+    -- 思いの外綺麗にまとまったのでDiagramLanguage行き
+    -- 二項演算っぽく書いても良いかも？attachment感のある演算記号ってどんなだろう。
+actInMap key act = over (Lens.at key) (fmap act)
+
+-- 意味不明のうざいエラーが頻出するので一旦中断。
+-- dia5_1''' = 
+--     let trl = fromOffsets [unit_X + unitY , unitX]
+--         objs = map svgObject ["P","P","Q"]
+--         alga = 2*(1+3) + 3*1
+--         protoDia = genGraphLocTrail trl objs alga
+--         l_1 = takeLabel (svgLabel "1") 0.5 False
+--         l_s = takeLabel (svgLabel "s") 0.5 True
+--         l_r = takeLabel (svgLabel "r") 0.5 True
+--         setting = actInMap (Single 2 1) l_1 . actInMap (Single 2 3) l_s . actInMap (Single 3 1)
+--         mp = setting $ snd protoDia
+--     in mkDiagram (fst protoDia,mp)
+
+dia5_2 = do
+    cmmi5 <- loadFont "cmmi5.svg"
+    let opt = def{textFont = cmmi5}
+        txt2 = textSVG_ opt "ABCDE" # scale 0.15 # fc black # lw none
+    return txt2
