@@ -206,7 +206,8 @@ genGraphLocTrail trl objs g =
         es = edgeList g
         --vertexMap = Map.fromList $ zipWith named ([1..] :: [Int]) objs
         morphmap = genMorphOpts es disd
-    in (disd :: Diagram B,morphmap)
+        morphmap' = fmap (over (arrOpts.gaps) (+ local 0.05)) morphmap 
+    in (disd :: Diagram B,morphmap')
 
 -- MorphOptsを評価して、ArrowのQDiagramを生成する関数
 evalMorphOpts (Morph loc opts symbs) =

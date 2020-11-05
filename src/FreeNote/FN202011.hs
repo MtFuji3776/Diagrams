@@ -4,7 +4,7 @@ import Parts
 import DiagramLanguage
 import Diagrams.Prelude
 import qualified Algebra.Graph as Alga hiding ((===))
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe,isNothing)
 import Diagrams.TwoD.Arrow
 import Diagrams.BoundingBox
 import qualified Control.Lens as Lens (at,(?~))
@@ -224,13 +224,34 @@ dia4_4 =
 
 -- diagramLanguageを使えば更にコードが短くなる
 dia4_4' =
-    let trl = fromOffsets [unitX + unitY, unit_Y]
+    let trl = fromOffsets [1.5 *^ (unitX + unitY), 1.5 *^ unit_Y]
         objs = replicate 3 bc
         alga1 = 2*3
         alga2 = 2*(1+3) + 1*3
-        alga3 = alga2 + 3*1
-        protoDia = map (genGraphLocTrail trl objs) [alga1,alga2,alga3]
+        alga3 = alga2 
+        protoDia = over (ix 2 . _2) (twin 1 3) $ map (genGraphLocTrail trl objs) [alga1,alga2,alga3]
         cover = over (arrOpts . headStyle) (fc white . lw 0.9)
-        setting = over (Lens.at (Single 2 3)) (fmap cover)
+        setting = over (Lens.at (Single 2 3)) (fmap cover) 
+                . over (Lens.at (Twin 1 3 False)) (fmap monic)
+                . over (Lens.at (Single 1 3)) (fmap monic)
         protoDia' = map (mkDiagram . over _2 setting) protoDia
     in diagramLanguage [NoLine,Forall,Exists] protoDia'
+
+
+-- 平行射を生成してLocatedTrailを動かす関数の試作品
+    -- 指定したキーの値が存在しなければ何もしない
+twin i j xmap = 
+    let e = view (Lens.at (Single i j)) xmap
+        setTwinKeys = set (Lens.at (Twin i j True)) e . set (Lens.at (Twin i j False)) e . sans (Single i j)
+        movetrl b opts = 
+            let trl = view locTrail opts
+                u = 0.05 *^ normalAtParam trl 0
+                trans   = if b then translate u . reverseLocTrail
+                               else translate (-u) 
+            in over locTrail trans opts
+        lens_Map b = over (Lens.at (Twin i j b)) (fmap (movetrl b))
+        xmap' = lens_Map True . lens_Map False . setTwinKeys $ xmap
+    in if isNothing e 
+        then xmap
+        else xmap'
+
