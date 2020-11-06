@@ -7,6 +7,7 @@ module Parts (
   , module Data.Typeable
   , module Graphics.SVGFonts
   --, module Diagrams.Backend.PGF
+  , module Data.Char
 ) where
 
 import Diagrams.Prelude
@@ -50,7 +51,7 @@ regText xs = boxedText xs 0.2
 
 -- 黒円。点を表す基本パーツ
     -- 半径は、矢印の長さが1であることを前提としている
-bc = circle 0.05 # fc black
+bc = circle 0.02 # fc black
 -- 黒円無限リスト。atPointsなどに。
 bcs = repeat bc
 -- グラフの頂点で名前付け

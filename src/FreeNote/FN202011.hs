@@ -10,6 +10,7 @@ import Diagrams.BoundingBox
 import qualified Control.Lens as Lens (at,(?~))
 import qualified Data.Map as Map
 import Data.Char
+import CmSymbols
 
 
 -- 引き戻しの図式を回転させてみた
@@ -344,21 +345,22 @@ dia5_2 = do
 -- Unicodeの16進数をInt値に変換
     -- HaskellのStringはUnicodeを\(10進数)の形式で表す
     -- そしてこの形式でないとtextSVG関数たちがフォントファイルを参照してくれない模様
-encode =
-    let trans n [] = n
-        trans n (x:xs) = trans (digitToInt x + 16 * n) xs
-    in trans 0
+-- encode =
+--     let trans n [] = n
+--         trans n (x:xs) = trans (digitToInt x + 16 * n) xs
+--     in trans 0
 
--- いい感じで作ったけど今回は必要ないものだった
--- decode =
---     let change xs 0 = map intToDigit xs
---         change xs n =
---             let m  = mod n 10
---                 n' = div n 10
---             in change (m:xs) n'
---     in change []
+-- -- いい感じで作ったけど今回は必要ないものだった
+-- -- decode =
+-- --     let change xs 0 = map intToDigit xs
+-- --         change xs n =
+-- --             let m  = mod n 10
+-- --                 n' = div n 10
+-- --             in change (m:xs) n'
+-- --     in change []
 
-utfInHask = chr . encode
+-- utfInHask = chr . encode
+-- まとめてCmSymbolsに移転
 
 dia6_1 = do
     cmmi5 <- loadFont "cmmi5.svg"
@@ -372,5 +374,45 @@ dia6_2 = do
     cmsy5 <- loadFont "cmsy5.svg"
     let opt = def{textFont = cmsy5}
         txt = lw none $ fc black $ scale 0.15 $ textSVG_ opt 
-            $ "A" ++ map utfInHask ["f05b","f073","f038","f0a6","f03b","f0a3","f071"] ++ "B"
+            $ "A" ++ [utfInHask "f05b"] ++ "B"
+            ++ map utfInHask ["f05b","f073","f038","f0a6","f03b","f0a3","f071"] ++ "B"
     return txt
+
+-- unicodeを入力すると、cmsy5から対応する文字を取得して返す関数
+    -- 主に数式記号を扱う
+    -- IOモナドに包まれてるが、果たして使いやすく丸め込めるか？
+-- mathSymbol unics = do
+--     cmsy5 <- loadFont "cmsy5.svg"
+--     let opts = def{textFont = cmsy5}
+--         txt  = map utfInHask unics
+--     return $ textSVG_ opts txt
+-- CmSymbols.hsに移転
+
+dia6_3 = do
+    a <- mathAlphabet "A"
+    cup <- cup_
+    b <- mathAlphabet "B"
+    return $ (a|||cup # scale 1.8|||b) # fc black
+
+-- dia1_1の文字記号をComputerModernにするテスト
+dia6_4 = do
+    xs <- mapM mathAlphabet ["A","C","B","P","X"]
+    let rot = rotateBy (-1/8)
+        loctrl = rot $ fromOffsets [unitX,unitY,unit_X,0.5*^(unit_X + unitY)]
+        labels = map (scale 0.15 . lw none . flip Parts.box 0.01 . fc black ) xs
+        alga   = 5*(1+4+3) + 4*(1+3) + (1+3)*2
+        plbSymbol = plb # translateY 0.75 # rot
+    return $ genDiagram loctrl labels alga <> plbSymbol
+
+dia6_5 = do
+    l_1 <- fmap (scale (0.12 * (9/10)) . fc black) $ mathNumber "1"
+    l_s <- fmap (scale 0.12 . fc black) $ mathAlphabet "s"
+    l_r <- fmap (scale 0.12 . fc black) $ mathAlphabet "r"
+    objs <- map (scale 0.14 . lw none . flip Parts.box 0.01 . fc black) <$> mapM mathAlphabet ["P","P","Q"]
+    let trl = fromOffsets [unit_X + unitY , unitX]
+        alga = 2*(1+3) + 3*1
+        protoDia = genGraphLocTrail trl objs alga
+        setting mp = mp & Lens.at (Single 2 1) %~ fmap (takeLabel_ l_1 0.5 0.14 False) -- ここらへん抽象化できそう
+                        & Lens.at (Single 2 3) %~ fmap (takeLabel l_s 0.5 True)  -- Lens.at キー %~ fmap f のパターン
+                        & Lens.at (Single 3 1) %~ fmap (takeLabel l_r 0.5 True)  -- 記述がさらに短くなる予感
+    return $ mkDiagram . over _2 setting $ protoDia
