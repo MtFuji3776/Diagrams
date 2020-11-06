@@ -9,6 +9,7 @@ import Diagrams.TwoD.Arrow
 import Diagrams.BoundingBox
 import qualified Control.Lens as Lens (at,(?~))
 import qualified Data.Map as Map
+import Data.Char
 
 
 -- 引き戻しの図式を回転させてみた
@@ -333,8 +334,43 @@ actInMap key act = over (Lens.at key) (fmap act)
 --         mp = setting $ snd protoDia
 --     in mkDiagram (fst protoDia,mp)
 
+-- Computer ModernのフォントをSVGFontsで使いこなす方法の模索に入る
 dia5_2 = do
     cmmi5 <- loadFont "cmmi5.svg"
     let opt = def{textFont = cmmi5}
         txt2 = textSVG_ opt "ABCDE" # scale 0.15 # fc black # lw none
     return txt2
+
+-- Unicodeの16進数をInt値に変換
+    -- HaskellのStringはUnicodeを\(10進数)の形式で表す
+    -- そしてこの形式でないとtextSVG関数たちがフォントファイルを参照してくれない模様
+encode =
+    let trans n [] = n
+        trans n (x:xs) = trans (digitToInt x + 16 * n) xs
+    in trans 0
+
+-- いい感じで作ったけど今回は必要ないものだった
+-- decode =
+--     let change xs 0 = map intToDigit xs
+--         change xs n =
+--             let m  = mod n 10
+--                 n' = div n 10
+--             in change (m:xs) n'
+--     in change []
+
+utfInHask = chr . encode
+
+dia6_1 = do
+    cmmi5 <- loadFont "cmmi5.svg"
+    let opt = def{textFont = cmmi5}
+        txt2 = textSVG_ opt ("\61504y = fx\61488 f" 
+                          ++ map utfInHask["f0ae","f0af","f07e","f0b8","f0bd","f0c0","f0c3","f0a6"]) 
+                          # scale 0.15 # fc black # lw none
+    return txt2
+
+dia6_2 = do
+    cmsy5 <- loadFont "cmsy5.svg"
+    let opt = def{textFont = cmsy5}
+        txt = lw none $ fc black $ scale 0.15 $ textSVG_ opt 
+            $ "A" ++ map utfInHask ["f05b","f073","f038","f0a6","f03b","f0a3","f071"] ++ "B"
+    return txt
