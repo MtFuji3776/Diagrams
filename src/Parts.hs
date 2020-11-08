@@ -170,4 +170,4 @@ box innards padding =
     let pad_innards = padded padding innards
         height      = diameter (r2 (0,1)) pad_innards
         width       = diameter (r2 (1,0)) pad_innards
-    in centerXY innards <> roundedRect width height 0.1 -- pad_innardsはあくまで寸法測定用で、描画には使わない
+    in centerXY innards <> roundedRect width height 0.05 -- pad_innardsはあくまで寸法測定用で、描画には使わない

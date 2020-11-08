@@ -405,9 +405,9 @@ dia6_4 = do
     return $ genDiagram loctrl labels alga <> plbSymbol
 
 dia6_5 = do
-    l_1 <- fmap (scale (0.12 * (9/10)) . fc black) $ mathNumber "1"
-    l_s <- fmap (scale 0.12 . fc black) $ mathAlphabet "s"
-    l_r <- fmap (scale 0.12 . fc black) $ mathAlphabet "r"
+    l_1 <- fmap (scale (0.12 * (10/9)) . lw none . fc black) $ mathNumber "1"
+    l_s <- fmap (scale 0.12 . lw none .  fc black) $ mathAlphabet "s"
+    l_r <- fmap (scale 0.12 . lw none . fc black) $ mathAlphabet "r"
     objs <- map (scale 0.14 . lw none . flip Parts.box 0.01 . fc black) <$> mapM mathAlphabet ["P","P","Q"]
     let trl = fromOffsets [unit_X + unitY , unitX]
         alga = 2*(1+3) + 3*1
@@ -416,3 +416,35 @@ dia6_5 = do
                         & Lens.at (Single 2 3) %~ fmap (takeLabel l_s 0.5 True)  -- Lens.at キー %~ fmap f のパターン
                         & Lens.at (Single 3 1) %~ fmap (takeLabel l_r 0.5 True)  -- 記述がさらに短くなる予感
     return $ mkDiagram . over _2 setting $ protoDia
+
+dia7_1 = do
+    l1 <- mathObject '1'
+    objs <- mapM mathObject "PPQ"
+    let trl = fromOffsets [0.7 *^ unit_X + unitY , 1.4 *^ unitX]
+        alga = (2+3)*1 + 2*3
+        cov = over arrOpts cover 
+--        mon = over arrOpts monic
+        setting mp = mp & Lens.at (Single 2 1) %~ fmap (takeLabel_ l1 0.5 0.14 False)
+                        & Lens.at (Single 3 1) %~ fmap cov
+                        & Lens.at (Single 2 3) %~ fmap monic
+    return $ mkDiagram . over _2 setting $ genGraphLocTrail trl objs alga 
+
+dia7_2 = 
+    let rec1 = rect 1 2
+        rec2 = rect (sqrt 2) 2
+        tri = fromOffsets [unitY,unitX + unit_Y,unit_X] # centerXY
+        ps1 = map p2 [(i,j) | j <- [-1,1] , i <- [-0.5,0.5,1.5,1.5+sqrt 2]]
+        ps2 = map p2 [(0.5,i) | i <- [-2,2]]
+        --pois = zipWith named ([1..] :: [Int]) $ map (place bc) (ps1 ++ ps2) :: [Diagram B]
+    in (rec1 ||| vcat [tri,rec1,tri # scaleY (-1)] # centerXY ||| rec2) 
+
+dia7_3 = do
+    --labels <- map (scale 0.12 . lw none . flip Parts.box 0.01 . fc black) <$> mapM mathAlphabet ["E","D","E","F","E","B","C","B","A","B"]
+    let trl = fromOffsets [unitX,unit_Y,unitX+unitY,unitX,2*^unitY,unit_X,unit_X+unitY,unit_Y,unit_X]
+        objs = replicate 10 (square 0.0001 # fc black)
+        alga = 2*(1+10+9+7+3+4) + 9*(10+8+7) + 7*(8+4+6) + 4*(3+5+6) + 1*10 + 5*6
+        (g,mp) = genGraphLocTrail trl objs alga
+        mp' = fmap (set (arrOpts . arrowHead) noHead . set (arrOpts.gaps) (local 0)) mp
+--         labs = mconcat $ zipWith ($) (zipWith attachLabel trl (labels :: [Diagram B])) $ (map (*0.1) [0,1,2,3,4,5,6,7,8,9] :: [Double])
+    return $ mkDiagram (g,mp')
+
