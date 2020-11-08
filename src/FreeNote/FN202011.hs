@@ -448,3 +448,14 @@ dia7_3 = do
 --         labs = mconcat $ zipWith ($) (zipWith attachLabel trl (labels :: [Diagram B])) $ (map (*0.1) [0,1,2,3,4,5,6,7,8,9] :: [Double])
     return $ mkDiagram (g,mp')
 
+dia8_1 = do
+    x <- mathObject 'x'
+    y <- mathObject 'y'
+    a <- mathObject 'A'
+    i <- mathObject 'i'
+    colim <-  scale 0.15. lw none . flip Parts.box 0.01 . fc black <$> mathNumber "colim"
+    let trl = fromOffsets [unitY,unitX + 0.5 *^ unitY, unit_Y]
+        objs = [x,y,hcat [colim,a] ,hcat[a,i]]
+        alga1 = 1*2 + 2*3
+        alga2 = 1*(2+4) + 2*3 + 4*3
+    return $ diagramLanguage [Forall,Exists]  (map (mkDiagram . genGraphLocTrail trl objs) $ [alga1,alga2])
