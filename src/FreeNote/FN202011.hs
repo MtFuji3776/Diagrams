@@ -597,6 +597,8 @@ dia13_4 =
         alga4 = 5*(1+2+3+6) + 3*(1+2+4) + 6*4
         qs = [Forall,Exists,Forall,ExistsOnly]
         update mp = mp & fmap (arrOpts.headLength .~ (local 0.08)) -- Lensの中にこうやってfmapを混ぜ込める
+                       & actOpt 3 1 (takeLabel_ (prd # scaleX (-1)) 0.25 0 False)
+                       & actOpt 5 6 (takeLabel_ (prd # scaleX (-1))  0.16 0 True)
         ds =  map (alignB . rotateBy (1/8)) . over (ix 0) (atop (place (circle 0.001 # lw none) (unit_Y + 1.5 *^ unit_X))) $ map (genDiagram trl objs update) [alga1,alga2,alga3,alga4] -- これは抽象化できるのではないか？
     in diagramLanguage qs ds
 

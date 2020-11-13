@@ -242,8 +242,9 @@ evalMorphOpts (Morph loc opts symbs) =
     mconcat $ (arrowFromLocatedTrail' opts loc):symbs
 
 mkDiagram (disd,morphmap) =
-    let arrowDia = foldr (\x y -> evalMorphOpts x <> y) mempty morphmap 
+    let arrowDia = foldr (\x y -> evalMorphOpts x # lw veryThin <> y) mempty morphmap 
     in arrowDia <> disd :: Diagram PGF
+
 
 genDiagram trl objs update = mkDiagram . over _2 update . genGraphLocTrail trl objs 
 
