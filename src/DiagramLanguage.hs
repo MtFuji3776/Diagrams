@@ -59,7 +59,7 @@ monicShaft trl =
     let p1 = atParam trl 0
         p2 = atParam trl 1
         v  = p2 .-. p1 
-        u  = perp . (0.5 *^) . normalize $ v :: V2 Double
+        u  = perp . (0.05 *^) . normalize $ v :: V2 Double
         tailBar = fromOffsets [u,(-2) *^ u,u] :: Trail V2 Double
         forGap = fromOffsets [0.1*^v,(-0.1) *^ v]
     in forGap <> tailBar <> trl
@@ -87,29 +87,48 @@ openHead = with & headStyle %~ fc white . lw 0.3
 cover = headStyle %~ fc white . lw 0.5
 
 
--- 図式言語
+-- ============================== hboxOnlineによるLaTeX文字生成関連 =========================================
+--
+between xs ys zs = xs <> zs <> ys
+
+mathEnv = between "$" "$"
+
+getPGFSymbol d xs = do
+    lab <- hboxOnline . mathEnv $ xs
+    return $ lab # scale d # centerXY
+
+getPGFLabel = getPGFSymbol 0.01
+
+getPGFObj = getPGFSymbol 0.015
+
+--
+-- ============================== 図式言語 ==========================================
+--
 
 -- 量化記号を表す型
-data Quantification = NoLine Double | NoQuant Double | Forall Double | Exists Double | Only Double | ExistsOnly Double deriving(Show,Eq)
+data Quantification = NoLine | NoQuant | Forall | Exists | Only | ExistsOnly deriving(Show,Eq)
 
+forall     = getPGFObj "\\forall"
+exists     = getPGFObj "\\exists"
+existsOnly = getPGFObj "\\exists !"
 
-
-evalQF (NoLine d)         = mempty
-evalQF (NoQuant d)        = mempty
-evalQF (Forall d)         = boxedText "∀" d
-evalQF (Exists d)         = boxedText "∃" d
-evalQF (Only d)           = boxedText "!" d
-evalQF (ExistsOnly d)     = boxedText "∃!" d
+evalQF NoLine         = scale 2 <$> return mempty
+evalQF NoQuant        = scale 2 <$> return mempty
+evalQF Forall         = scale 2 <$> forall
+evalQF Exists         = scale 2 <$> exists
+evalQF Only           = scale 2 <$> getPGFObj "!"
+evalQF ExistsOnly     = scale 2 <$> existsOnly
 -- 罫線
     -- lは長さの値、xは上に付ける量化記号と!
     -- translateYの値は議論の余地あり
     -- 図式の列を与えられたときに罫線の長さを自動で導出させられたらいい感じなのだが。
 
-vline l q = 
+vline l q = do
     let line l = vrule l # alignB # translateY ((-0.2 * l))
-    in if (q 0.2) == NoLine 0.2
-        then mempty
-        else beside (0 ^& 1) (line l) (evalQF (q 2))
+    if q == NoLine
+        then return mempty
+        else beside (0 ^& 1) (strutY 0.1 === line l) <$> evalQF q
+
                     
 
 -- 量化記号はboxedTextで定義
@@ -139,11 +158,13 @@ isomUnitX = dia21_1 <> arrowV unitX
                   # translateY 0.05
 
 -- example
-example1 =
+example1 = do
     let g1 = genBCDia (triangle 1) (2 * (1+3) + 3*1)
         g2' = genBCDia (regPoly 1 1) 4 
         g2 = connectOutside (4 :: Int) (2 :: Int) $ g1 <> g2' # translateY 1.2 
-    in hsep 0.05 [vline 2 (Forall) , g1, vline 2 Exists, g2]
+    v1 <- vline 2 Forall
+    v2 <- vline 2 Exists
+    return $ hsep 0.05 [v1, g1, v2, g2]
 
 
 -- =================================================図式言語生成用の主要関数==================================================================
@@ -213,7 +234,7 @@ genGraphLocTrail trl objs g =
         es = edgeList g
         --vertexMap = Map.fromList $ zipWith named ([1..] :: [Int]) objs
         morphmap = genMorphOpts es disd
-        morphmap' = fmap (over (arrOpts.gaps) (+ local 0.1) . set (arrOpts.headLength) (local 0.5)) morphmap 
+        morphmap' = fmap (over (arrOpts.gaps) (+ local 0.03) . set (arrOpts.headLength) (local 0.05)) morphmap 
     in (disd :: Diagram PGF,morphmap')
 
 -- MorphOptsを評価して、ArrowのQDiagramを生成する関数
@@ -224,7 +245,7 @@ mkDiagram (disd,morphmap) =
     let arrowDia = foldr (\x y -> evalMorphOpts x <> y) mempty morphmap 
     in arrowDia <> disd :: Diagram PGF
 
-genDiagram trl objs g = mkDiagram $ genGraphLocTrail trl objs g :: Diagram PGF
+genDiagram trl objs update = mkDiagram . over _2 update . genGraphLocTrail trl objs 
 
 
 -- attachLabelのアレンジ
@@ -235,7 +256,7 @@ takeLabel_ l asp1 asp2 b opts =
 
 -- 簡易版
     -- asp1も毎回書いてもいいかも。
-takeLabel l asp1 b = takeLabel_ l asp1 1 b
+takeLabel l asp1 b = takeLabel_ l asp1 0.1 b
 
 buildLocTrail someFuncOnTrail loctrl =
     let p0 = atParam loctrl 0
@@ -295,10 +316,11 @@ twin i j n = twin_ i j n mempty True
 -- =======================以下、罫線の構築に関する関数==========================================
 -- 
 
+-- 図式リストを受け取り、縦方向のサイズをそれぞれ測定する関数
 heightOfVline = diameter (r2 (0,1)) -- . padded 0.2
 
 -- 線のながさと量化子リストを受け取って、罫線リストを返す
-verticals h = map (vline h) 
+verticals h = mapM (vline h) 
 
 
 --
@@ -306,11 +328,11 @@ verticals h = map (vline h)
 --
 
 -- 量化子リストと図式リストを受け取って図式言語一つの図式を生成する関数
-diagramLanguage qs ds =
+diagramLanguage qs ds = do
     let ds' = (map getEnvelope ds) :: [Envelope V2 Double]
         height = foldr max 0 . map heightOfVline $ ds'
-        vlines = verticals height qs # map alignB
-    in foldr (|||) mempty $ zipWith (|||) vlines ds
+    vlines <- verticals height qs # fmap (map alignB)
+    return $ foldr (|||) mempty $ zipWith (|||) vlines ds
 
 
 --
@@ -328,3 +350,19 @@ mathObject xs = lw none . flip Parts.box 0.01 . scale 0.15 . fc black <$> switch
 
 
 svgLabel = lw none . fc black . strokeP . flip textSVG 0.14
+
+
+--
+-- -- ============================== hboxOnlineによるLaTeX文字生成関連 =========================================
+-- --
+-- between xs ys zs = xs <> zs <> ys
+
+-- mathEnv = between "$" "$"
+
+-- getPGFSymbol d xs = do
+--     lab <- hboxOnline . mathEnv $ xs
+--     return $ lab # scale d # centerXY
+
+-- getPGFLabel = getPGFSymbol 0.01
+
+-- getPGFObj = getPGFSymbol 0.015

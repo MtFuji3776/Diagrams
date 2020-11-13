@@ -24,7 +24,7 @@ dia1_1 =
         labels = map (flip boxedText 0.15) ["A","C","B","P","X"]
         alga   = 5*(1+4+3) + 4*(1+3) + (1+3)*2
         plbSymbol = plb # translateY 0.75 # rot
-    in genDiagram loctrl labels alga <> plbSymbol
+    in genDiagram loctrl labels id alga <> plbSymbol
 
 
 -- MorphOptsをLensで編集する練習
@@ -86,7 +86,7 @@ dia3_2 =
                         boxedText "QDiagram" 0.15
                     ]
         alga = (1+2+3+4)*5 + 5*6
-    in genDiagram loctrl objs alga
+    in genDiagram loctrl objs id alga
 
 dia3_2' =
     let loctrl = fromOffsets [unitY,unitY,unitY,unit_Y + 4 *^ unitX , 2*^ unit_Y]
@@ -101,11 +101,11 @@ dia3_2' =
                         "QDiagram"
                     ]
         alga = (1+2+3+4)*5 + 5*6
-    in genDiagram loctrl objs alga
+    in genDiagram loctrl objs id alga
 
 -- 図式言語のお試し
     -- genGraphLocTrailの仕様に難あり。[LocatedTrail]と[Diagram B]でatPointsするのではAlgaで制御できなくなる
-dia3_3 =
+dia3_3 = do
     let f alga =
             let loctrl = fromOffsets [unitY,unit_Y + unitX]
                 objs = map (lw none . flip box 0.02 . fc black . strokeP . flip textSVG 0.2) ["M","A","B"]
@@ -113,16 +113,20 @@ dia3_3 =
                 (disd,mp) = genGraphLocTrail loctrl objs alga
                 mp' = over (Lens.at (uncurry Single (1,3))) (fmap monic) mp
             in mkDiagram (disd,mp')
-    in f (1*3) ||| vline 1.7 Forall ||| f ((1+2)*3) ||| vline 1.7 Only ||| f ((1+2)*3 + 2*1)
+    v1 <- vline 1.7 Forall
+    v2 <- vline 1.7 Only
+    return $ f (1*3) ||| v1 ||| f ((1+2)*3) ||| v2 ||| f ((1+2)*3 + 2*1)
 
-dia3_3' =
+dia3_3' = do
     let f alga =
             let loctrl = fromOffsets [unitY,unit_Y + unitX]
                 objs = replicate 3 bc
                 (disd,mp) = genGraphLocTrail loctrl objs alga
                 mp' = fmap (\opts -> set (arrOpts . headLength) (local 0.06) . set (arrOpts . gaps) (local 0.02) $ opts)   $ over (Lens.at (Single 1 3)) (fmap monic) mp
             in mkDiagram (disd,mp')
-    in f (1*3) ||| vline 1.7 Forall ||| f ((1+2)*3) ||| vline 1.7 Only ||| f ((1+2)*3 + 2*1)
+    v1 <- vline 1.7 Forall
+    v2 <- vline 1.7 Only
+    return $ f (1*3) ||| v1 ||| f ((1+2)*3) ||| v2 ||| f ((1+2)*3 + 2*1)
 
 dia3_4 = 
     let loctrl = fromOffsets [unitY,unitY,unit_Y + 2 *^ unitX, 1.1 *^ unitX + unitY, unit_Y,0.5 *^ unit_X , 2*^ unit_Y ]
@@ -139,7 +143,7 @@ dia3_4 =
                 "QDiagram"
             ]
         alga = (1+2+3)*4 + 5*6 + 7*8
-    in genDiagram loctrl objs alga
+    in genDiagram loctrl objs id alga
 
 dia4_1 =
     let trl = fromOffsets [unitY,unit_Y + unitX]
@@ -152,7 +156,7 @@ dia4_1 =
         opmap' = pmap' opmap
     in mkDiagram (disd,opmap')
 
-dia4_2 =
+dia4_2 = do
     let trl = fromOffsets [unitY,unit_Y + unitX]
         objs = replicate 3 bc
         alga1 = 1*3
@@ -162,10 +166,11 @@ dia4_2 =
         diagrams = map (genGraphLocTrail trl objs) [alga1,alga2,alga3]
         pmap' xmap = xmap & Lens.at (Single 1 3) %~ fmap equalizer
         diagrams' = map (over _2 pmap') diagrams
-    in foldr (\x y -> x ||| vline 1.7 Forall ||| y) mempty $ map mkDiagram diagrams'
+    v <- vline 1.7 Forall
+    return $ foldr (\x y -> x ||| v ||| y) mempty $ map mkDiagram diagrams'
 
 -- 図式言語の量化記号訂正版
-dia4_2' =
+dia4_2' = do
     let trl = fromOffsets [unitY,unit_Y + unitX,unitX]
         objs = replicate 4 bc
         alga1 = 1*3 + 4
@@ -185,12 +190,12 @@ dia4_2' =
             in arrowFromLocatedTrail trl1 <> arrowFromLocatedTrail trl2 <> reti <> d
         diagrams' = map (mkDiagram . over _1 mktwinarr . over _2 pmap') diagrams
         height = foldr max 0 . map heightOfVline $ diagrams'
-        vlines = verticals height [NoLine,Forall,ExistsOnly]
-    in foldr (|||) mempty $ zipWith (|||) vlines diagrams'
+    vlines <- verticals height [NoLine,Forall,ExistsOnly]
+    return $ foldr (|||) mempty $ zipWith (|||) vlines diagrams'
 
 -- 図式言語手習い
     -- 「任意のcoverはepiである」という主張
-dia4_3 =
+dia4_3 = do
     let trl = fromOffsets [unitY,unit_Y + unitX]
         objs = replicate 3 bc
         alga1 = 2*1
@@ -201,12 +206,12 @@ dia4_3 =
         setting xmap = xmap & Lens.at (Single 2 1) %~ fmap cover
         diagrams' = map (mkDiagram . over _2 setting) diagrams
         height = foldr max 0 . map heightOfVline $ diagrams'
-        vlines = verticals height [Forall,Forall,Only]
-    in foldr (|||) mempty $ zipWith (|||) vlines diagrams'
+    vlines <- verticals height [Forall,Forall,Only]
+    return $ foldr (|||) mempty $ zipWith (|||) vlines diagrams'
 
 -- 図式言語手習い「coverの定義」
     -- 未完成。Twinの自動化と、平行で逆向きな二つの射を描くための関数を用意しなければならない
-dia4_4 =
+dia4_4 = do
     let trl = fromOffsets [unitX + unitY, unit_Y]
         objs = replicate 3 bc
         alga1 = 2*3
@@ -217,8 +222,8 @@ dia4_4 =
         setting = over (Lens.at (Single 2 3)) (fmap cover)
         protoDia' = map (mkDiagram . over _2 setting) protoDia
         height = foldr max 0 . map heightOfVline $ protoDia'
-        vlines = verticals height [NoLine,Forall,Exists]
-    in foldr (|||) mempty $ zipWith (|||) vlines protoDia'
+    vlines <- verticals height [NoLine,Forall,Exists]
+    return $ foldr (|||) mempty $ zipWith (|||) vlines protoDia'
 
 -- 量化子リストと図式リストを受け取って図式言語を構成する関数
     -- 実用性抜群なのでDiagramLanguage.hs行き
@@ -405,7 +410,7 @@ dia6_4 = do
         labels = map (scale 0.15 . lw none . flip Parts.box 0.01 . fc black ) xs
         alga   = 5*(1+4+3) + 4*(1+3) + (1+3)*2
         plbSymbol = plb # translateY 0.75 # rot
-    return $ genDiagram loctrl labels alga <> plbSymbol
+    return $ genDiagram loctrl labels id alga <> plbSymbol
 
 dia6_5 = do
     l_1 <- fmap (scale (0.12 * (10/9)) . lw none . fc black) $ mathNumber "1"
@@ -513,27 +518,88 @@ dia13_1 = do
         --disd = return $ genDiscrete trl objs alga ||| place test (1 ^& 4)
     disd
 
-between xs ys zs = xs <> zs <> ys
+-- hboxOnline系。いい感じなのでDiagramLanguageに移籍
+-- between xs ys zs = xs <> zs <> ys
 
-mathEnv = between "$" "$"
+-- mathEnv = between "$" "$"
 
-getPGFSymbol d xs = do
-    lab <- hboxOnline . mathEnv $ xs
-    return $ lab # scale d # centerXY
+-- getPGFSymbol d xs = do
+--     lab <- hboxOnline . mathEnv $ xs
+--     return $ lab # scale d # centerXY
 
-getPGFLabel = getPGFSymbol 0.1
+-- getPGFLabel = getPGFSymbol 0.01
 
-getPGFObj = getPGFSymbol 0.15
+-- getPGFObj = getPGFSymbol 0.015
 
 dia13_2 = do
-    objs <- mapM getPGFObj ["E","X\\times Y", "\\int_0^1 E(x) \\mathrm{dx}", "P" , "D\\bigotimes E"] :: OnlineTex [Diagram PGF]
+    objs <- mapM getPGFObj ["E","X\\times Y", "\\int_0^1 E(x) \\mathrm{dx}", "P" , "D\\bigotimes E \\bigotimes \\displaystyle{\\int_0^{10} f(x) \\mathrm{dx}}"] :: OnlineTex [Diagram PGF]
     labs <- mapM getPGFLabel ["f_1","f_2","g","h"] :: OnlineTex [Diagram PGF]
-    let trl = map (10 *^) $ fromOffsets [unitX,unitY,unit_X , 0.5 *^ (unit_X + unitY)]
+    let sc = 10
+        trl = map (sc *^) $ fromOffsets [unitX,unitY,unit_X , 0.5 *^ (unit_X + unitY)]
         alga1 = 4*(1+3) + (1+3)*2
         alga2 = alga1 + 5*(1+3)
         alga3 = alga2 + 5*4
         qs = [Exists,Forall,Exists] -- 量化記号もhboxOnlineで取得するべきか？
-        plbac = plb # scale 10
+        plbac = plb # scale sc
         update mp = mp & (Lens.at (Single 4 1)) %~ fmap (takeLabel_ plbac 0.23 0 True)
         ds = map (alignB . mkDiagram . over _2 update . genGraphLocTrail trl objs) [alga1,alga2,alga3]
     return $ diagramLanguage qs ds
+
+-- DCPO上の拡大列(expanding seqence)関手の図
+dia13_3 = do
+    objs_ <- mapM getPGFObj ["D(1)","D(2)","D(3)","\\cdots"]
+    labs  <- mapM getPGFLabel ["1","e_{21}","e_{32}","e_{43}","p_{12}","p_{23}","p_{34}"]
+    let sc   = 10
+        trl  = fromOffsets [unit_X + unitY , unitX , unitX,unit_Y, unitX,unitY]
+        d1   = objs_ ^. ix 0
+        d2   = view (ix 1) objs_
+        d3   = view (ix 2) objs_
+        idDi = labs ^. ix 0
+        e32  = labs ^. ix 2
+        e43  = labs ^. ix 3
+        p12  = labs ^. ix 4
+        p23  = labs ^. ix 5
+        p34  = labs ^. ix 6
+        dots = view (ix 3) objs_
+        objs = [d1,d1,d2,d3,d2,d3,dots]
+        alga = (2+3)*1 + 2*3 + 3*(4+5) + 4*5 + 4*(6+7) + 7*6
+        g i j h   = over (Lens.at (Single i j)) (fmap h) -- これは中々良い抽象化
+        f i j x b = g i j (takeLabel x 0.5 b)          -- こうやって部分適用できて応用が広い
+        update  = over (Lens.at (Single 2 3)) (fmap (monic . takeLabel (view (ix 1) labs) 0.5 True))
+                . over (Lens.at (Single 3 4)) (fmap (monic . takeLabel e32 0.5 True))
+                . over (Lens.at (Single 2 1)) (fmap $ takeLabel idDi 0.5 False)
+                . over (Lens.at (Single 3 1)) (fmap $ takeLabel p12 0.5 True)
+                . tackLabel 3 5 idDi False--over (Lens.at (Single 3 5)) (fmap $ takeLabel idDi 0.5 False)
+                . f 4 5 p34 True
+                . f 4 6 idDi False
+                . actOpt 4 7 monic--over (Lens.at (Single 4 7)) (fmap monic)
+                . f 4 7 e43 True
+                . f 7 6 p34 True
+    return $ mkDiagram . over _2 update $ genGraphLocTrail trl objs alga
+
+-- MorphOptsのMapに対する作用素
+    -- (i,j)をキーに持つArrowOptsにアクセスして、MorphOpts -> MorphOpts関数を適用
+    -- 必然的に、射に装飾を施す関数はMorphOpts -> MorphOptsの形にすることが規格となる
+    -- 無印はSingleと対応。_Twin付きはTwinキーと対応。
+actOpt i j f = over (Lens.at (Single i j)) (fmap f)
+actOpt_Twin i j b f = over (Lens.at (Twin i j b)) (fmap f)
+-- おそらく最も頻出であろう、ラベルを貼るための関数
+    -- 標準的なものはLocatedTrailの中間点にラベルを貼る
+tackLabel i j l b = actOpt i j (takeLabel l 0.5 b)
+
+-- Exponential Categoryの定義
+dia13_4 = 
+    let objs = replicate 6 bc
+        trl = fromOffsets [unit_Y + unitX, unit_X, 1.5 *^ unit_X, 2.5 *^ unitX + unitY , 1.5 *^ unitY]
+        alga1 = 1 + 2
+        alga2 = 3*(1+2) + 3*4
+        alga3 = alga2 + 5*(1+2+6)
+        alga4 = 5*(1+2+3+6) + 3*(1+2+4) + 6*4
+        qs = [Forall,Exists,Forall,ExistsOnly]
+        update mp = mp & fmap (arrOpts.headLength .~ (local 0.08)) -- Lensの中にこうやってfmapを混ぜ込める
+        ds =  map (alignB . rotateBy (1/8)) . over (ix 0) (atop (place (circle 0.001 # lw none) (unit_Y + 1.5 *^ unit_X))) $ map (genDiagram trl objs update) [alga1,alga2,alga3,alga4] -- これは抽象化できるのではないか？
+    in diagramLanguage qs ds
+
+-- mkDiagram . over _2 update . genGraphLocTrail trl objs
+-- この形式で図式を十分に装飾しつつ生成できるはず
+-- 名前はgenDiagramがふさわしいので、既存の関数をアップグレードする感じで実装
