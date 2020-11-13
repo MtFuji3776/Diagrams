@@ -2,20 +2,23 @@
 module DiagramLanguage where
 
 import Diagrams.Prelude
-import Diagrams.Backend.SVG
+import Diagrams.Backend.SVG 
+import Diagrams.Backend.PGF hiding (B)
 import Diagrams.TwoD.Arrow
 import Diagrams.TwoD.Vector
 import Graphics.SVGFonts
 import Algebra.Graph hiding((===))
 import Data.Tree
 import Diagrams.TwoD.Layout.Tree
-import Parts
+import Parts hiding (B)
 import qualified Data.Map as Map
 import qualified Control.Lens as Lens ((?~),at)
 import Data.Maybe (fromMaybe,isNothing)
 import Data.Char
 import CmSymbols
 
+-- 課題：PGFバックエンドとSVGバックエンドで統一的に関数を定義できないか考えてみること
+--      それができれば縮尺の違いはバックエンドの違いで場合分けして対処できる
 
 -- ラベルにグラフの頂点で名前をつける
 genLabels xs g = 
@@ -56,7 +59,7 @@ monicShaft trl =
     let p1 = atParam trl 0
         p2 = atParam trl 1
         v  = p2 .-. p1 
-        u  = perp . (0.05 *^) . normalize $ v :: V2 Double
+        u  = perp . (0.5 *^) . normalize $ v :: V2 Double
         tailBar = fromOffsets [u,(-2) *^ u,u] :: Trail V2 Double
         forGap = fromOffsets [0.1*^v,(-0.1) *^ v]
     in forGap <> tailBar <> trl
@@ -106,7 +109,7 @@ vline l q =
     let line l = vrule l # alignB # translateY ((-0.2 * l))
     in if (q 0.2) == NoLine 0.2
         then mempty
-        else beside (0 ^& 1) (line l) (evalQF (q 0.2))
+        else beside (0 ^& 1) (line l) (evalQF (q 2))
                     
 
 -- 量化記号はboxedTextで定義
@@ -174,7 +177,7 @@ mkLocTrail (nm1,nm2) d =
 data MorphOpts = Morph{ 
                  _locTrail :: Located (Trail V2 Double)
                , _arrOpts  :: ArrowOpts Double
-               , _symbols  :: [Diagram B]
+               , _symbols  :: [Diagram PGF]
                } 
             --    | Twin{
             --      _leftMorph :: MorphOpts
@@ -198,18 +201,20 @@ data KeyOfMorph = Single Int Int
 genMorphOpts es d = 
     let insert' (i,j) mp = 
             let opts = def & locTrail .~ mkLocTrail (i,j) d
+                           & arrOpts.headLength .~ (local 10)
             in Lens.at (Single i j) Lens.?~ opts $ mp
     in foldr insert' Map.empty es
 
 -- Algaから図式の抽象グラフ構造を読み取り、Trailから座標情報を読み取り、離散グラフとLocatedTrailのMapの組を作って返す
     -- このあと、LocatedTrailのMapを装飾しつつarrowFromLocatedTrailに適用し、離散圏に射を入れていく関数が続く
+    -- SVG専用になってしまってるのが癪。バックエンドを抽象化できないものか？
 genGraphLocTrail trl objs g =
     let disd = genDiscrete trl objs g
         es = edgeList g
         --vertexMap = Map.fromList $ zipWith named ([1..] :: [Int]) objs
         morphmap = genMorphOpts es disd
-        morphmap' = fmap (over (arrOpts.gaps) (+ local 0.05) . set (arrOpts.headLength) (local 0.05)) morphmap 
-    in (disd :: Diagram B,morphmap')
+        morphmap' = fmap (over (arrOpts.gaps) (+ local 0.1) . set (arrOpts.headLength) (local 0.5)) morphmap 
+    in (disd :: Diagram PGF,morphmap')
 
 -- MorphOptsを評価して、ArrowのQDiagramを生成する関数
 evalMorphOpts (Morph loc opts symbs) =
@@ -217,9 +222,9 @@ evalMorphOpts (Morph loc opts symbs) =
 
 mkDiagram (disd,morphmap) =
     let arrowDia = foldr (\x y -> evalMorphOpts x <> y) mempty morphmap 
-    in arrowDia <> disd :: Diagram B
+    in arrowDia <> disd :: Diagram PGF
 
-genDiagram trl objs g = mkDiagram $ genGraphLocTrail trl objs g :: Diagram B
+genDiagram trl objs g = mkDiagram $ genGraphLocTrail trl objs g :: Diagram PGF
 
 
 -- attachLabelのアレンジ
@@ -230,7 +235,7 @@ takeLabel_ l asp1 asp2 b opts =
 
 -- 簡易版
     -- asp1も毎回書いてもいいかも。
-takeLabel l asp1 b = takeLabel_ l asp1 0.1 b
+takeLabel l asp1 b = takeLabel_ l asp1 1 b
 
 buildLocTrail someFuncOnTrail loctrl =
     let p0 = atParam loctrl 0
@@ -290,7 +295,7 @@ twin i j n = twin_ i j n mempty True
 -- =======================以下、罫線の構築に関する関数==========================================
 -- 
 
-heightOfVline = diameter (r2 $ 0 ^& 1) . padded 0.2
+heightOfVline = diameter (r2 (0,1)) -- . padded 0.2
 
 -- 線のながさと量化子リストを受け取って、罫線リストを返す
 verticals h = map (vline h) 
@@ -302,8 +307,9 @@ verticals h = map (vline h)
 
 -- 量化子リストと図式リストを受け取って図式言語一つの図式を生成する関数
 diagramLanguage qs ds =
-    let height = foldr max 0 . map heightOfVline $ ds
-        vlines = verticals height qs
+    let ds' = (map getEnvelope ds) :: [Envelope V2 Double]
+        height = foldr max 0 . map heightOfVline $ ds'
+        vlines = verticals height qs # map alignB
     in foldr (|||) mempty $ zipWith (|||) vlines ds
 
 

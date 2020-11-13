@@ -15,7 +15,7 @@ import Algebra.Graph hiding((===))
 import Data.Tree
 import Diagrams.TwoD.Layout.Tree
 import Diagrams.Backend.SVG
---import Diagrams.Backend.PGF
+import Diagrams.Backend.PGF hiding(B)
 --import Diagrams.Trail
 import Diagrams.TwoD.Arrow
 import Data.Typeable
@@ -140,7 +140,7 @@ attachLabel_ loctrl lbl asp1 asp2 b =
         v = if b then (asp2 *^) . normalize . perp $ p2 .-. p1 -- asp2はTrailからの距離
                  else ((-asp2) *^) . normalize . perp $ p2 .-. p1
         p4 = p3 .+^ v
-    in place lbl p4 :: Diagram B
+    in place lbl p4 :: Diagram PGF
     
 
 

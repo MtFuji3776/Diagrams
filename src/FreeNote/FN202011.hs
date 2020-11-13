@@ -1,6 +1,6 @@
 module FreeNote.FN202011 where
 
-import Parts
+import Parts hiding(B)
 import DiagramLanguage
 import Diagrams.Prelude
 import qualified Algebra.Graph as Alga hiding ((===))
@@ -11,6 +11,9 @@ import qualified Control.Lens as Lens (at,(?~))
 import qualified Data.Map as Map
 import Data.Char
 import CmSymbols
+import Diagrams.Backend.PGF hiding(B)
+
+type B = SVG
 
 
 -- 引き戻しの図式を回転させてみた
@@ -27,7 +30,7 @@ dia1_1 =
 -- MorphOptsをLensで編集する練習
 dia2_1 =
     let loctrl = fromOffsets [unitX + 0.5 *^ unitY] :: Trail V2 Double
-        lab = attachLabel (loctrl `at` origin) (boxedText "f" 0.15 :: Diagram B) 0.5
+        lab = attachLabel (loctrl `at` origin) (boxedText "f" 0.15 :: Diagram PGF) 0.5
         mopts = (def :: MorphOpts) & set locTrail ((monicShaft  loctrl) `at` origin)
                                    & set arrOpts openHead
                                    & over symbols (lab <|)
@@ -453,9 +456,84 @@ dia8_1 = do
     y <- mathObject 'y'
     a <- mathObject 'A'
     i <- mathObject 'i'
+    lbr <- fmap (scale 0.12 . lw none . flip Parts.box 0.01 . fc black) (mathNumber "(")
+    rbr <- fmap (scale 0.12 . lw none. flip Parts.box 0.01 . fc black)  (mathNumber ")")
     colim <-  scale 0.15. lw none . flip Parts.box 0.01 . fc black <$> mathNumber "colim"
     let trl = fromOffsets [unitY,unitX + 0.5 *^ unitY, unit_Y]
-        objs = [x,y,hcat [colim,a] ,hcat[a,i]]
+        objs = [x,y,hcat [colim,a] ,hcat[a,lbr,i,rbr]]
         alga1 = 1*2 + 2*3
         alga2 = 1*(2+4) + 2*3 + 4*3
     return $ diagramLanguage [Forall,Exists]  (map (mkDiagram . genGraphLocTrail trl objs) $ [alga1,alga2])
+
+-- 有向集合の記号
+dia10_1 = 
+    let trl = fromOffsets [unitX + 2 *^ unitY,unitX + 2 *^ unit_Y] :: Trail V2 Double
+    in stroke trl :: Diagram B
+
+-- 有向集合（上限つき）
+dia10_2 =
+    let trl = fromOffsets [unitX + 2 *^ unitY,unitX + 2 *^ unit_Y] :: Trail V2 Double
+        top = place bc (1 ^& 2)
+    in stroke trl <> top
+
+-- 下向きの有向集合
+dia10_1' = dia10_1 # scaleY (-1)
+-- 下向きの有向集合(下限付き)
+dia10_2' = dia10_2 # scaleY (-1)
+
+
+dia11_1 = do
+    objs_ <- mapM mathAlphabet ["E","X","E","P","D"] :: IO [Diagram PGF]
+    labs_ <- mapM mathAlphabet $ map return "hlrfg" :: IO [Diagram PGF]
+    let arrange = map (scale 0.15 . lw none . flip Parts.box 0.01 . fc black) 
+        objs = arrange objs_
+        labs = arrange labs_
+        trl = fromOffsets[unitX,unitY,unit_X,0.5*^(unit_X + unitY)]
+        alga1 = 5*(1+3) + (1+3)*2
+        alga2 = alga1 +4*(1+3)
+        qs = [Forall,Exists]
+        (disd,trlmp) = genGraphLocTrail trl objs alga2
+    return disd
+
+renderpgf = renderOnlinePGF "test1.pdf" (mkSizeSpec2D (Just 600) (Just 450))
+
+-- やっと気づいたが、PGFバックエンドはSVGバックエンドと物物のサイズの尺度が違う
+    -- scale 0.15でも全然デカイ。どんな縮尺になっているのか詳しく調べた方が良い
+    -- それさえ突き止めれば、今まで作った関数はPGF向けにも使える。
+dia13_1 = do
+    objs <- mapM getPGFObj ["E","X\\times Y","\\int_0^1 E(x)\\mathrm{dx}","P","D\\bigotimes E"] :: OnlineTex [Diagram PGF]
+    labs <- mapM getPGFLabel ["f_1^q","f","g","h"] :: OnlineTex [Diagram PGF]
+    test <- hboxOnline "A" :: OnlineTex (Diagram PGF)
+    let trl = map (10 *^ ) $ fromOffsets [unitX,unitY,unit_X,0.5 *^ (unit_X + unitY)]
+        alga = 5 * (1+3 + 4) + (1+3) * 2 + 4*(1+3)
+        plback = plb # scale 10 # translateY 7.5
+        qs = [Forall,Exists]
+        update mp = mp & (Lens.at (Single 1 2)) %~ (fmap (monic . over arrOpts cover . takeLabel (view (ix 0) labs # centerXY # lw none) 0.5 False))
+        disd = return $ (mkDiagram $ over _2 update $ genGraphLocTrail trl objs alga) <> plback
+        --disd = return $ genDiscrete trl objs alga ||| place test (1 ^& 4)
+    disd
+
+between xs ys zs = xs <> zs <> ys
+
+mathEnv = between "$" "$"
+
+getPGFSymbol d xs = do
+    lab <- hboxOnline . mathEnv $ xs
+    return $ lab # scale d # centerXY
+
+getPGFLabel = getPGFSymbol 0.1
+
+getPGFObj = getPGFSymbol 0.15
+
+dia13_2 = do
+    objs <- mapM getPGFObj ["E","X\\times Y", "\\int_0^1 E(x) \\mathrm{dx}", "P" , "D\\bigotimes E"] :: OnlineTex [Diagram PGF]
+    labs <- mapM getPGFLabel ["f_1","f_2","g","h"] :: OnlineTex [Diagram PGF]
+    let trl = map (10 *^) $ fromOffsets [unitX,unitY,unit_X , 0.5 *^ (unit_X + unitY)]
+        alga1 = 4*(1+3) + (1+3)*2
+        alga2 = alga1 + 5*(1+3)
+        alga3 = alga2 + 5*4
+        qs = [Exists,Forall,Exists] -- 量化記号もhboxOnlineで取得するべきか？
+        plbac = plb # scale 10
+        update mp = mp & (Lens.at (Single 4 1)) %~ fmap (takeLabel_ plbac 0.23 0 True)
+        ds = map (alignB . mkDiagram . over _2 update . genGraphLocTrail trl objs) [alga1,alga2,alga3]
+    return $ diagramLanguage qs ds
