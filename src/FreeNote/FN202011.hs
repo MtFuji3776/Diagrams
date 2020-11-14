@@ -691,4 +691,21 @@ dia14_4 =
     let p1 = fst $ dart 1 0
         trl = mconcat . map unLoc $ pathTrails p1 -- dartのArrowHeadをバラしてTrailに
         p2 = Path [trl `at` origin,trl `at` 1.5 *^ unitX] -- Located TrailのリストからPathを構成
-    in strokeP p2
+        epicHead x y = (p2 # scale x,p2 # scale y)
+        arr = arrowV' (with & arrowHead .~ epicHead) (10 *^ unitX)
+    in return $ arr <> circle 100
+
+-- epic射を表す矢印記号用のArrowHead値
+    -- 二つの引数はdartの中で正しく使われているので、dartが正しく実装されていればこの関数も常に正しく動く
+    -- DiagramLanguageに移動してepic :: MorphOpts -> MorphOpts値に仕立て上げるべし。
+-- epicHead x y = 
+--     let p = fst $ dart x y
+--         trl = mconcat . map unLoc $ pathTrails p
+--         l   = diameter unitX p
+--         p2 = Path [trl `at` origin,trl `at` (0.8*l) *^unitX]
+--     in (p2,snd $ dart x y)
+
+dia14_5 =
+    let trl = origin ~~ unitX
+        arr = evalMorphOpts $ def & locTrail .~ trl & epic
+    in return $ arr <> square 1

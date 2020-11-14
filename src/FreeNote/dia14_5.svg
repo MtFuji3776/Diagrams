@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600pt" height="450pt" viewBox="0 0 600 450" version="1.1">
+<g id="surface1">
+<path style="fill:none;stroke-width:1.95961;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%,0%,0%);stroke-opacity:1;stroke-miterlimit:10;" d="M 400.005187 25.002 L 400.005187 425.005906 L 0.00128125 425.005906 L 0.00128125 25.002 Z M 400.005187 25.002 " transform="matrix(1,0,0,-1,0.112,450.002)"/>
+<path style="fill:none;stroke-width:1.95961;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%,0%,0%);stroke-opacity:1;stroke-miterlimit:10;" d="M 200.001281 225.002 L 566.813781 225.002 " transform="matrix(1,0,0,-1,0.112,450.002)"/>
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(0%,0%,0%);fill-opacity:1;" d="M 567.441406 225 L 547.382812 218.480469 L 550.808594 225 L 547.382812 231.515625 Z M 583.488281 225 L 563.429688 218.480469 L 566.855469 225 L 563.429688 231.515625 Z M 583.488281 225 "/>
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(0%,0%,0%);fill-opacity:1;" d="M 567.441406 225 L 566.925781 225 L 566.925781 224.019531 L 567.441406 225 L 566.925781 225 L 566.925781 225.980469 Z M 567.441406 225 "/>
+</g>
+</svg>
