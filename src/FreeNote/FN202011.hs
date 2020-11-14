@@ -645,7 +645,7 @@ dia14_2 = do
                . tackLabel_ 5 3 (l 3) True 0.5 0.16
                . tackLabel 6 4 (l 2) False
                . tackLabel_ 3 1 (prd # scaleX (-1) # rotateBy (1/8)) True 0.19 0
-               . tackLabel_ 5 1 (prd # rotateBy (1/8 + 1/4) # alignB) True 0.19 0
+               . tackLabel_ 5 1 (prd # rotateBy (1/8 + 1/4) # alignB) True 0.20 0
         qs = [Forall,Exists,Forall,ExistsOnly]
         ghost = (place (circle 0.001 # lw none) (unit_Y + 1.5 *^ unit_X)) # rotateBy (1/8)
         putGhost = over (ix 0) (alignB . atop ghost)
