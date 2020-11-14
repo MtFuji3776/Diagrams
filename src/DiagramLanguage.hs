@@ -112,12 +112,12 @@ forall     = getPGFObj "\\forall"
 exists     = getPGFObj "\\exists"
 existsOnly = getPGFObj "\\exists !"
 
-evalQF NoLine         = scale 2 <$> return mempty
-evalQF NoQuant        = scale 2 <$> return mempty
-evalQF Forall         = scale 2 <$> forall
-evalQF Exists         = scale 2 <$> exists
-evalQF Only           = scale 2 <$> getPGFObj "!"
-evalQF ExistsOnly     = scale 2 <$> existsOnly
+evalQF NoLine         = scale 1.2 <$> return mempty
+evalQF NoQuant        = scale 1.2 <$> return mempty
+evalQF Forall         = scale 1.2 <$> forall
+evalQF Exists         = scale 1.2 <$> exists
+evalQF Only           = scale 1.2 <$> getPGFObj "!"
+evalQF ExistsOnly     = scale 1.2 <$> existsOnly
 -- 罫線
     -- lは長さの値、xは上に付ける量化記号と!
     -- translateYの値は議論の余地あり
@@ -199,6 +199,7 @@ data MorphOpts = Morph{
                  _locTrail :: Located (Trail V2 Double)
                , _arrOpts  :: ArrowOpts Double
                , _symbols  :: [Diagram PGF]
+               , _actions  :: [Diagram PGF -> Diagram PGF]
                } 
             --    | Twin{
             --      _leftMorph :: MorphOpts
@@ -207,7 +208,7 @@ data MorphOpts = Morph{
                deriving(Typeable)
 
 instance Default MorphOpts where
-    def = Morph ((mempty :: Trail V2 Double) `at` origin) with []
+    def = Morph ((mempty :: Trail V2 Double) `at` origin) with [] []
 
 $(makeLenses ''MorphOpts)
 
@@ -238,8 +239,9 @@ genGraphLocTrail trl objs g =
     in (disd :: Diagram PGF,morphmap')
 
 -- MorphOptsを評価して、ArrowのQDiagramを生成する関数
-evalMorphOpts (Morph loc opts symbs) =
-    mconcat $ (arrowFromLocatedTrail' opts loc):symbs
+evalMorphOpts (Morph loc opts symbs acts) =
+    let protoarr = mconcat $ (arrowFromLocatedTrail' opts loc):symbs
+    in foldr (.) id acts $ protoarr
 
 mkDiagram (disd,morphmap) =
     let arrowDia = foldr (\x y -> evalMorphOpts x # lw veryThin <> y) mempty morphmap 
@@ -264,7 +266,21 @@ buildLocTrail someFuncOnTrail loctrl =
     in flip at p0 . someFuncOnTrail . unLoc $ loctrl
 
 -- monicの定形ジェネレータ
-monic mopts = mopts & locTrail %~ (buildLocTrail monicShaft) 
+monic mopts = mopts & locTrail %~ (buildLocTrail monicShaft)
+
+-- epicを表すためのArrowHead値
+epicHead x y = 
+    let p = fst $ dart x y
+        trl = mconcat . map unLoc $ pathTrails p
+        l   = diameter unitX p
+        p2 = Path [trl `at` origin,trl `at` (0.8*l) *^unitX]
+    in (p2,snd $ dart x y)
+ 
+-- MorphOpts -> MorphOpts値に仕立てる
+    -- よくわからんがheadGapが異常にデカく出るんだが。
+    -- Envelopeのデカさかと思ったがheadGapは関係ないはず
+    -- とりあえず応急処置としてheadGapをlocal (-0.03)ほど補正しているが、根本的な解決を望んでいる
+epic = over arrOpts (set arrowHead epicHead)
 
 -- イコライザの矢印の定形ジェネレータ
     -- 点を打つ位置が13/14というのは、equalizerShaftの都合上こうなっている
