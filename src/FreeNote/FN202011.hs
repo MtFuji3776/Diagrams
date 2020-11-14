@@ -586,6 +586,7 @@ actOpt_Twin i j b f = over (Lens.at (Twin i j b)) (fmap f)
 -- おそらく最も頻出であろう、ラベルを貼るための関数
     -- 標準的なものはLocatedTrailの中間点にラベルを貼る
 tackLabel i j l b = actOpt i j (takeLabel l 0.5 b)
+tackLabel_ i j l b d1 d2 = actOpt i j (takeLabel_ l d1 d2 b)
 
 -- Exponential Categoryの定義
 dia13_4 = 
@@ -599,9 +600,25 @@ dia13_4 =
         update mp = mp & fmap (arrOpts.headLength .~ (local 0.08)) -- Lensの中にこうやってfmapを混ぜ込める
                        & actOpt 3 1 (takeLabel_ (prd # scaleX (-1)) 0.25 0 False)
                        & actOpt 5 6 (takeLabel_ (prd # scaleX (-1))  0.16 0 True)
-        ds =  map (alignB . rotateBy (1/8)) . over (ix 0) (atop (place (circle 0.001 # lw none) (unit_Y + 1.5 *^ unit_X))) $ map (genDiagram trl objs update) [alga1,alga2,alga3,alga4] -- これは抽象化できるのではないか？
+        ds = map (alignB . rotateBy (1/8)) . over (ix 0) (atop (place (circle 0.001 # lw none) (unit_Y + 1.5 *^ unit_X)))
+           $ map (genDiagram trl objs update) [alga1,alga2,alga3,alga4] -- これは抽象化できるのではないか？
     in diagramLanguage qs ds
 
 -- mkDiagram . over _2 update . genGraphLocTrail trl objs
 -- この形式で図式を十分に装飾しつつ生成できるはず
 -- 名前はgenDiagramがふさわしいので、既存の関数をアップグレードする感じで実装
+
+dia14_1 = do
+    objs_ <- mapM getPGFObj ["X \\times A","X \\times B^X","B"]
+    labs_ <- mapM getPGFLabel ["1_X \\times \\lambda \\varphi", "ev_B","\\varphi"]
+    let trl = fromOffsets [unitY,unit_Y + unitX]
+        o i = view (ix i) objs_
+        l i = view (ix i) labs_
+        objs = [o 1,o 0,o 2]
+        alga = 2*(1+3) + 1*3
+        update = tackLabel 2 3 (l 2) True
+               . tackLabel 1 3 (l 1) False
+               . tackLabel_ 2 1 (l 0) False 0.5 0.2
+               . fmap (over (arrOpts.headLength) (0.8*))
+    return $ genDiagram trl objs update alga
+
