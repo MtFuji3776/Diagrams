@@ -651,3 +651,34 @@ dia14_2 = do
         putGhost = over (ix 0) (alignB . atop ghost)
         ds = putGhost $ map (alignB . genDiagram trl objs_ update) [alga1,alga2,alga3,alga4]
     diagramLanguage qs ds
+
+dia14_3 = do
+    objs <- mapM getPGFObj [
+                            "A"
+                           ,"X \\times A^X"
+                           ,"B"
+                           ,"X \\times B^X"
+                           ,"B^X"
+                           ,"A^X"
+                           ]
+    labs <- mapM getPGFLabel ["f"
+                             ,"\\overline{f}"
+                             ,"ev"
+                             ,"(ev)f"
+                             ,"\\lambda (ev) f"
+                             ,"1 \\times \\lambda ((ev) f)"
+                             ]
+    let trl = fromOffsets [unitY,unitX,unit_X+unitY,unit_X,unit_Y]
+        alga1 = 1*3
+        alga2 = alga1 + 2*(1+3+6) + 4*(5+3)
+        alga3 = alga2 + 2*4 + (6+4)*5
+        l i   = view (ix $i-1) labs
+        update = tackLabel 1 3 (l 1) False
+               . tackLabel 2 1 (l 3) False
+               . tackLabel 2 3 (l 4) True
+               . tackLabel 4 3 (l 3) True
+               . tackLabel_ 2 4 (l 6) True 0.5 0.3
+               . tackLabel_ 6 5 (l 5) True 0.5 0.2
+        ds = map (alignB . genDiagram trl objs update) [alga1,alga2,alga3]
+        qs = [Forall,Exists,ExistsOnly]
+    diagramLanguage qs ds
