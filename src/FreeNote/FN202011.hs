@@ -48,9 +48,9 @@ dia2_1 =
 --         symbs   = opts ^. symbols
 --     in arrowFromLocatedTrail' arropts trl <> mconcat symbs
 
-_monic (Morph loctrl opts symbs) = 
+_monic (Morph loctrl opts symbs acts) = 
     let p1 = atParam loctrl 0 
-    in over locTrail (flip at p1 . monicShaft . unLoc) (Morph loctrl opts symbs)
+    in over locTrail (flip at p1 . monicShaft . unLoc) (Morph loctrl opts symbs acts)
 
 -- LocatedTrailを一旦Trailに戻してから、道の結合演算などを施して、再びLocatedTrailに戻す
     -- 戻り値の始点は変更しない仕様
@@ -709,3 +709,15 @@ dia14_5 =
     let trl = origin ~~ unitX
         arr = evalMorphOpts $ def & locTrail .~ trl & epic
     in return $ arr <> square 1
+
+dia14_6 =
+    let trl = fromOffsets [unitX,unitY]
+        objs = replicate 3 bc
+        alga1 = 1*2
+        alga2 = alga1 + 1*3
+        alga3 = alga2 + 2*3
+        update = actOpt 1 2 epic 
+               . actOpt 1 2 ((set (arrOpts.headGap) (local (-0.03))) . (over actions ((lc red):)))
+        ds = map (genDiagram trl objs update) [alga1,alga2,alga3]
+        qs = [NoLine,Forall,Only]
+    in diagramLanguage qs ds
