@@ -622,3 +622,32 @@ dia14_1 = do
                . fmap (over (arrOpts.headLength) (0.8*))
     return $ genDiagram trl objs update alga
 
+dia14_2 = do
+    objs_ <- mapM getPGFObj ["A"
+                           ,"B"
+                           ,"A \\times B^A" 
+                           ,"B^A" 
+                           ,"A \\times X"
+                           ,"X"]
+    labs_ <- mapM getPGFLabel ["f"
+                             ,"\\lambda f"
+                             ,"1 \\times \\lambda f"
+                             ,"ev"]
+    let trl = rotateBy (1/8) $ fromOffsets [unitX + unit_Y,unit_X,1.5 *^ unit_X, 2.5 *^ unitX + unitY, 1.5 *^ unitY]
+        o i = view (ix (i-1)) objs_
+        l i = view (ix (i-1)) labs_
+        alga1 = 1 + 2
+        alga2 = alga1 + 3*(1+2+4)
+        alga3 = alga2 + 5*(1 + 2 + 6)
+        alga4 = alga3 + 5*3 + 6*4
+        update = tackLabel 3 2 (l 4) False
+               . tackLabel 5 2 (l 1) True
+               . tackLabel_ 5 3 (l 3) True 0.5 0.16
+               . tackLabel 6 4 (l 2) False
+               . tackLabel_ 3 1 (prd # scaleX (-1) # rotateBy (1/8)) True 0.19 0
+               . tackLabel_ 5 1 (prd # rotateBy (1/8 + 1/4) # alignB) True 0.19 0
+        qs = [Forall,Exists,Forall,ExistsOnly]
+        ghost = (place (circle 0.001 # lw none) (unit_Y + 1.5 *^ unit_X)) # rotateBy (1/8)
+        putGhost = over (ix 0) (alignB . atop ghost)
+        ds = putGhost $ map (alignB . genDiagram trl objs_ update) [alga1,alga2,alga3,alga4]
+    diagramLanguage qs ds
