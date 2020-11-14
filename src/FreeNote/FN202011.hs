@@ -652,6 +652,7 @@ dia14_2 = do
         ds = putGhost $ map (alignB . genDiagram trl objs_ update) [alga1,alga2,alga3,alga4]
     diagramLanguage qs ds
 
+-- exponential関手(-)^Xを随伴から構成する図式言語
 dia14_3 = do
     objs <- mapM getPGFObj [
                             "A"
@@ -682,3 +683,12 @@ dia14_3 = do
         ds = map (alignB . genDiagram trl objs update) [alga1,alga2,alga3]
         qs = [Forall,Exists,ExistsOnly]
     diagramLanguage qs ds
+
+-- epic射の矢印記号
+    -- dartを二つ連ねた鏃
+    -- これをPathのままArrowOptsのArrowHeadにsetすればepicの矢印が手に入るはずだ
+dia14_4 = 
+    let p1 = fst $ dart 1 0
+        trl = mconcat . map unLoc $ pathTrails p1 -- dartのArrowHeadをバラしてTrailに
+        p2 = Path [trl `at` origin,trl `at` 1.5 *^ unitX] -- Located TrailのリストからPathを構成
+    in strokeP p2

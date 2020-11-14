@@ -333,7 +333,7 @@ diagramLanguage qs ds = do
     let ds' = (map getEnvelope ds) :: [Envelope V2 Double]
         height = foldr max 0 . map heightOfVline $ ds'
     vlines <- verticals height qs # fmap (map alignB)
-    return $ foldr (|||) mempty $ zipWith (|||) vlines ds
+    return $ foldr (|||) mempty $ zipWith (|||) vlines (map alignB ds)
 
 
 --
