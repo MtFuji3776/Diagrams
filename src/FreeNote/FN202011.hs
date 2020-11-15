@@ -500,7 +500,7 @@ dia11_1 = do
         (disd,trlmp) = genGraphLocTrail trl objs alga2
     return disd
 
-renderpgf = renderOnlinePGF "test1.pdf" (mkSizeSpec2D (Just 600) (Just 450))
+renderpgf name = renderOnlinePGF name (mkSizeSpec2D (Just 600) (Just 450))
 
 -- やっと気づいたが、PGFバックエンドはSVGバックエンドと物物のサイズの尺度が違う
     -- scale 0.15でも全然デカイ。どんな縮尺になっているのか詳しく調べた方が良い
@@ -721,3 +721,16 @@ dia14_6 =
         ds = map (genDiagram trl objs update) [alga1,alga2,alga3]
         qs = [NoLine,Forall,Only]
     in diagramLanguage qs ds
+
+dia15_1 = do
+    objs_ <- mapM getPGFObj ["A","B","C","D","1","2","3","4","5","6"]
+    let o i = view (ix i) objs_
+        trl1 = fromOffsets [unitX , unit_Y, unitX + 0.5 *^ unitY] ++ map (2 *^ unit_Y +) (fromOffsets [unitX + 0.5 *^ unitY,unitX, 0.5 *^ unitX + 1.5 *^ unit_Y,unit_Y + unit_X,unit_X])
+        alga1 =  1*(2+3) + (2+3)*4 -- 二つのグラフの間に矢印を引きたいのだが、名前が重複してしまってる
+        alga2 = 5*(6+7+9+10) + 6*(8+10) + 7*(8+9) -- 同じ名前で
+        update = id
+        c = connectOutside
+        -- obj1 = take 4 objs_
+        -- obj2 = drop 4 objs_
+    return $ genDiagram trl1 objs_ id (alga1 + alga2) -- === strutY 1 === genDiagram trl2 obj2 id alga2)
+           # connectOutside (1 :: Int) (5 :: Int) 

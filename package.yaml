@@ -34,6 +34,7 @@ dependencies:
 - algebraic-graphs
 - data-default-class
 - split
+- texrunner
 
 
 library:

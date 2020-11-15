@@ -5,10 +5,11 @@ import Diagrams.Backend.PGF.Surface
 import Diagrams.Prelude
 import Parts
 import DiagramLanguage
+import System.Texrunner
 
 
-preamble' :: String
-preamble' = "\\documentclass[dvipdfmx,uplatex]{jsarticle}\n"
+preamble1 :: String
+preamble1 = "\\documentclass[dvipdfmx,uplatex]{jsarticle}\n"
     ++ "\\usepackage[utf8]{inputenc}\n"
     ++ "\\usepackage{otf}\n"
     ++ "\\usepackage{booktabs}\n"
@@ -24,11 +25,12 @@ preamble' = "\\documentclass[dvipdfmx,uplatex]{jsarticle}\n"
     -- ++ "\\usepackage[epsilon]{backnaur}\n"
     -- ++ "\\usepackage{bussproofs}\n"
     -- ++ "\\usepackage{media9}\n"
-    -- ++ "\\usepackage[dvipdfmx]{hyperref}\n"
+    ++ "\\usepackage[dvipdfmx]{hyperref}\n"
     ++ "\\usepackage{pxjahyper}\n"
-    ++ "\\usetikzlibrary{matrix}\n"
-    ++ "\\usetikzlibrary{cd}\n"
+    -- ++ "\\usetikzlibrary{matrix}\n"
+    -- ++ "\\usetikzlibrary{cd}\n"
     ++ "\\usepackage{pgfcore}\n"
+    -- ++ "\\usepackage{CJKutf8}"
     -- ++ "\\newtheorem{dfn}{Def}\n"
     -- ++ "\\newtheorem{thm}{Thm}\n"
     -- ++ "\\newtheorem{cor}{Cor}\n"
@@ -53,18 +55,25 @@ preamble' = "\\documentclass[dvipdfmx,uplatex]{jsarticle}\n"
     -- ++ "\\author{}\n"
     -- ++ "\\date{\\today}\n"
 
+preamble2 :: String
+preamble2 = "\\documentclass{article}\n"
+         ++ "\\usepackage{pgfcore}\n"
+         ++ "\\usepackage{mathpazo}\n"
+        --  ++ "\\usepackage{amsmath}\n"
+        --  ++ "\\usepackage{amssymb}"
+
 uplatexSurface = Surface
     {   _texFormat = LaTeX
-    ,   _command   = "uplatex"
-    ,   _arguments = ["uplatex","dvipdfmx"]
+    ,   _command   = "pdflatex"
+    ,   _arguments = []--"$dvipdf='dvipdfmx %O %S'"]
     ,   _pageSize  = Just $ \(V2 w h) ->
                     "\\pdfpagewidth=" ++ show w ++ "bp\n"
                 ++  "\\pdfpageheight=" ++ show h ++ "bp\n"
                 ++ "\\textheight=" ++ show h ++ "bp\n"
-    ,   _preamble  = preamble'
+    ,   _preamble  = preamble2
     ,   _beginDoc  = "\\begin{document}"
     ,   _endDoc    = "\\end{document}"
     }
 
-pgfTest = renderOnlinePGF' "test1.pdf" (def & surface .~ uplatexSurface) --(mkSizeSpec2D (Just 400) (Just 300))
+pgfTest = renderOnlinePGF' "test1.tex" (def & surface .~ uplatexSurface) --(mkSizeSpec2D (Just 400) (Just 300))
 
