@@ -9,9 +9,10 @@ import System.Texrunner
 
 
 preamble1 :: String
-preamble1 = "\\documentclass[dvipdfmx,uplatex]{jsarticle}\n"
-    ++ "\\usepackage[utf8]{inputenc}\n"
-    ++ "\\usepackage{otf}\n"
+preamble1 = "\\documentclass{ltjsarticle}\n"
+    -- ++ "\\usepackage[utf8]{inputenc}\n"
+    ++ "\\usepackage{luatexja-otf}\n"
+    ++ "\\usepackage[]{luatexja,luatexja-fontspec}"
     ++ "\\usepackage{booktabs}\n"
     ++ "\\usepackage{array}\n"
     ++ "\\usepackage{graphicx}\n"
@@ -25,8 +26,8 @@ preamble1 = "\\documentclass[dvipdfmx,uplatex]{jsarticle}\n"
     -- ++ "\\usepackage[epsilon]{backnaur}\n"
     -- ++ "\\usepackage{bussproofs}\n"
     -- ++ "\\usepackage{media9}\n"
-    ++ "\\usepackage[dvipdfmx]{hyperref}\n"
-    ++ "\\usepackage{pxjahyper}\n"
+    -- ++ "\\usepackage[dvipdfmx]{hyperref}\n"
+    -- ++ "\\usepackage{pxjahyper}\n"
     -- ++ "\\usetikzlibrary{matrix}\n"
     -- ++ "\\usetikzlibrary{cd}\n"
     ++ "\\usepackage{pgfcore}\n"
@@ -62,18 +63,34 @@ preamble2 = "\\documentclass{article}\n"
         --  ++ "\\usepackage{amsmath}\n"
         --  ++ "\\usepackage{amssymb}"
 
-uplatexSurface = Surface
-    {   _texFormat = LaTeX
-    ,   _command   = "pdflatex"
-    ,   _arguments = []--"$dvipdf='dvipdfmx %O %S'"]
-    ,   _pageSize  = Just $ \(V2 w h) ->
-                    "\\pdfpagewidth=" ++ show w ++ "bp\n"
-                ++  "\\pdfpageheight=" ++ show h ++ "bp\n"
-                ++ "\\textheight=" ++ show h ++ "bp\n"
-    ,   _preamble  = preamble2
-    ,   _beginDoc  = "\\begin{document}"
-    ,   _endDoc    = "\\end{document}"
-    }
+preamble3 :: String
+preamble3 = "\\documentclass[ja = standard,pdflatex]{bxjsarticle}\n"
+         ++ "\\usepackage{pgfcore}\n"
+         ++ "\\usepackage{mathpazo}\n"
+         ++ "\\usepackage{CJK}"
+         ++ "\\usepackage[colorlinks]{hyperref}"
 
-pgfTest = renderOnlinePGF' "test1.tex" (def & surface .~ uplatexSurface) --(mkSizeSpec2D (Just 400) (Just 300))
+lualatexSurface :: Surface
+lualatexSurface = def & command .~ "lualatex"
+                      & preamble .~ preamble1
+                      & pageSize ?~ (\_ -> "") -- lualatexの場合、PageSizeを指定するとパーサーに漏れ出してくるのでなしで良い
 
+-- lualatexSurface = Surface
+--     {   _texFormat = LaTeX
+--     ,   _command   = "lualatex"
+--     ,   _arguments = []--"$dvipdf='dvipdfmx %O %S'"]
+--     ,   _pageSize  = Just $ \(V2 w h) ->
+--                     "\\pdfpagewidth=" ++ show w ++ "bp\n"
+--                 ++  "\\pdfpageheight=" ++ show h ++ "bp\n"
+--                 ++ "\\textheight=" ++ show h ++ "bp\n"
+--     ,   _preamble  = preamble1
+--     ,   _beginDoc  = "\\begin{document}"
+--     ,   _endDoc    = "\\end{document}"
+--     }
+
+pdflatexSurface = def & command .~ "pdflatex"
+                      & preamble .~ preamble3
+
+pgfTest s = renderOnlinePGF' "test1.pdf" (def & surface .~ s & standalone .~ False) --(mkSizeSpec2D (Just 400) (Just 300))
+
+renderPGFLua filepath  = renderOnlinePGF' filepath (def & surface .~ lualatexSurface) 
