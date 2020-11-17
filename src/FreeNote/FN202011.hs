@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module FreeNote.FN202011 where
 
 import Parts hiding(B)
@@ -13,6 +14,7 @@ import Data.Char
 import CmSymbols
 import Diagrams.Backend.PGF hiding(B)
 import PGFSurface
+import Data.String
 
 type B = SVG
 
@@ -748,3 +750,30 @@ dia17_1 = do
 getJpnObj = getPGFObj . between "\\text{" "}"
 -- 射のラベルにも日本語を使えるように。
 getJpnLabel = getPGFLabel . between "\\text{" "}"
+
+dia17_2 = do
+    jpnobj <- mapM getJpnObj ["\\texttt{Rtree a -> [[a]]}で実現できそう","各リストの中身を\\texttt{place}"
+                             ,"リスト毎に\\texttt{mconcat}","\\texttt{diameter unitX}で幅を測り、\\texttt{vline}"]
+    let trl = fromOffsets [0.5 *^ unit_Y, unitX + 0.5 *^ unit_Y,0.5 *^ unit_Y]
+        alga = Alga.path [1,2,3,4]
+    return $ genDiagram trl jpnobj id alga
+
+instance IsString a => IsString (Alga.Graph a) where
+    fromString      = Alga.Vertex . fromString
+
+(+++) :: IsString a => Alga.Graph a -> Alga.Graph a -> Alga.Graph a
+xs +++ ys = Alga.Overlay xs ys
+
+(***) :: IsString a => Alga.Graph a -> Alga.Graph a -> Alga.Graph a
+xs *** ys = Alga.Connect xs ys
+
+dia17_3 = do
+    objs <- mapM getPGFObj ["H","C","D","G","A","B","E","F"]
+    let 
+        alga = 1*(2+3+4) + 2*(5+6) + 4 * (7+8)
+        tree_ = genTree 1 alga
+        f i = view (ix (i-1)) objs
+        tree = fmap (scaleY (-1) . f) tree_
+        verticeGraph = symmLayout tree
+        dia  = scaleY (-1) $ foldr (<>) mempty $ fmap (\(x,p) -> place x p) verticeGraph
+    return dia
