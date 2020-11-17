@@ -3,7 +3,7 @@ module PGFSurface where
 import Diagrams.Backend.PGF
 import Diagrams.Backend.PGF.Surface
 import Diagrams.Prelude
-import Parts
+import Parts hiding(sizeSpec)
 import DiagramLanguage
 import System.Texrunner
 
@@ -93,4 +93,4 @@ pdflatexSurface = def & command .~ "pdflatex"
 
 pgfTest s = renderOnlinePGF' "test1.pdf" (def & surface .~ s & standalone .~ False) --(mkSizeSpec2D (Just 400) (Just 300))
 
-renderPGFLua filepath  = renderOnlinePGF' filepath (def & surface .~ lualatexSurface) 
+renderPGFLua filepath  = renderOnlinePGF' filepath (def & surface .~ lualatexSurface & sizeSpec .~ (mkSizeSpec2D (Just 400) (Just 300))) 

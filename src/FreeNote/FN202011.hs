@@ -12,6 +12,7 @@ import qualified Data.Map as Map
 import Data.Char
 import CmSymbols
 import Diagrams.Backend.PGF hiding(B)
+import PGFSurface
 
 type B = SVG
 
@@ -734,3 +735,16 @@ dia15_1 = do
         -- obj2 = drop 4 objs_
     return $ genDiagram trl1 objs_ id (alga1 + alga2) -- === strutY 1 === genDiagram trl2 obj2 id alga2)
            # connectOutside (1 :: Int) (5 :: Int) 
+
+dia17_1 = do
+    objs_ <- mapM (getPGFObj . \x -> between "\\text{" "}" x) ["テスト！","テスト？","テスト。"]
+    let trl1 = fromOffsets [unitX + unitY,unitX + unitY]
+        alga = Alga.path [1,2,3]
+        update = id
+        d = genDiagram trl1 objs_ update alga
+    diagramLanguage [NoLine] [d]
+
+-- 図式の対象に日本語を使えるようにする
+getJpnObj = getPGFObj . between "\\text{" "}"
+-- 射のラベルにも日本語を使えるように。
+getJpnLabel = getPGFLabel . between "\\text{" "}"
