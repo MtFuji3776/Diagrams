@@ -753,15 +753,15 @@ getJpnLabel = getPGFLabel . between "\\text{" "}"
 
 dia17_2 = do
     jpnobj <- mapM getJpnObj ["\\texttt{Rtree a -> [[a]]}で実現できそう"
-                             ,"各リストの中身を\\texttt{place}"
-                             ,"その際、x座標だけ使い、y座標は0にする"
+                             ,"・各リストの中身を\\texttt{place}"
+                             ,"・その際、x座標だけ使い、y座標は0にする"
                              ,"リスト毎に\\texttt{mconcat}"
-                             ,"\\texttt{diameter unitX}で幅を測り、\\texttt{vline}"
-                             ,"\\texttt{root===vline===subtree}の形の再帰関数"
-                             ,"y座標を0にしたのは、\\texttt{===}を活用するため。"]
-    let trl = fromOffsets [0.5 *^ unit_Y, unitX + 0.5 *^ unit_Y,0.5 *^ unit_Y]
+                             ,"・\\texttt{diameter unitX}で幅を測り、\\texttt{vline}"
+                             ,"・\\texttt{root===vline===subtree}の形の再帰関数"
+                             ,"・y座標を0にしたのは、\\texttt{===}を活用するため。"]
+    let trl = fromOffsets [0.5 *^ unit_Y, unitX + 0.5 *^ unit_Y,unit_Y]
         o i = view (ix (i-1)) jpnobj
-        objs = [o 1, o 2 === o 3,o 4,o 5 === o 6 === o 7]
+        objs = [o 1, (o 2 # alignL === o 3 # alignL) # centerXY,o 4,(o 5 # alignL === o 6 # alignL === o 7 # alignL) # centerXY]
         alga = Alga.path [1,2,3,4]
     return $ genDiagram trl objs id alga
 
@@ -784,3 +784,31 @@ dia17_3 = do
         verticeGraph = symmLayout tree
         dia  = scaleY (-1) $ foldr (<>) mempty $ fmap (\(x,p) -> place x p) verticeGraph
     return dia
+
+-- なんか色々おかしいのでいったん封印
+-- dia17_4 = do
+--     objs <- mapM getPGFObj ["H","C","D","G","A","B","E","F"]
+--     let alga = 1*(2+3+4) + 2*(5+6) + 4 * (7+8)
+--         tree_ = genTree 1 alga
+--         e   :: Int -> Diagram PGF
+--         e i = objs !! (i-1)
+--         tree = fmap e tree_
+--         symmopt = def & slVSep .~ 0.2
+--         verticeGraph = fmap (over _1 (scaleY (-1))) $ symmLayout' symmopt tree
+--         setNode (x,p) = place x ((view _x p ^& 0) :: P2 Double)
+--         f (Node (a,p) []) = setNode (a,p)
+--         f (Node (a,p) ts) = 
+--             let d' = mconcat $ map f ts
+--                 dx = diameter unitX d' :: Double
+--             in d' # centerXY === vrule dx # centerXY === setNode (a,p) -- あまりよくない左再帰
+--         drawNode (x,p) = place x p
+--         drawline (x1,p1) (x2, p2) = place (hrule (abs $ view _x $ p1 .-. p2)) (0.5 *^ (p1 .+. p2))
+--         dia = renderTree id drawline verticeGraph 
+--     return dia
+
+-- RoseTreeの各節点とその子ノードの組を[(a,[a]])値として取得
+    -- symmLayoutから導出図を作る際に役に立つはず
+    -- 各架線を引くためのデータがセットになっている
+nodeFamilies t = 
+    let family t = (rootLabel t,map rootLabel $ subForest t)
+    in family t : concatMap nodeFamilies (subForest t)
