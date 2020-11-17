@@ -752,11 +752,18 @@ getJpnObj = getPGFObj . between "\\text{" "}"
 getJpnLabel = getPGFLabel . between "\\text{" "}"
 
 dia17_2 = do
-    jpnobj <- mapM getJpnObj ["\\texttt{Rtree a -> [[a]]}で実現できそう","各リストの中身を\\texttt{place}"
-                             ,"リスト毎に\\texttt{mconcat}","\\texttt{diameter unitX}で幅を測り、\\texttt{vline}"]
+    jpnobj <- mapM getJpnObj ["\\texttt{Rtree a -> [[a]]}で実現できそう"
+                             ,"各リストの中身を\\texttt{place}"
+                             ,"その際、x座標だけ使い、y座標は0にする"
+                             ,"リスト毎に\\texttt{mconcat}"
+                             ,"\\texttt{diameter unitX}で幅を測り、\\texttt{vline}"
+                             ,"\\texttt{root===vline===subtree}の形の再帰関数"
+                             ,"y座標を0にしたのは、\\texttt{===}を活用するため。"]
     let trl = fromOffsets [0.5 *^ unit_Y, unitX + 0.5 *^ unit_Y,0.5 *^ unit_Y]
+        o i = view (ix (i-1)) jpnobj
+        objs = [o 1, o 2 === o 3,o 4,o 5 === o 6 === o 7]
         alga = Alga.path [1,2,3,4]
-    return $ genDiagram trl jpnobj id alga
+    return $ genDiagram trl objs id alga
 
 instance IsString a => IsString (Alga.Graph a) where
     fromString      = Alga.Vertex . fromString
