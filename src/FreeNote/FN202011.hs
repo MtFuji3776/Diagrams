@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module FreeNote.FN202011 where
 
-import Parts hiding(B)
+import Parts hiding(B,renderTest)
 import DiagramLanguage
 import Diagrams.Prelude
 import qualified Algebra.Graph as Alga hiding ((===))
@@ -591,6 +591,10 @@ actOpt_Twin i j b f = over (Lens.at (Twin i j b)) (fmap f)
 tackLabel i j l b = actOpt i j (takeLabel l 0.5 b)
 tackLabel_ i j l b d1 d2 = actOpt i j (takeLabel_ l d1 d2 b)
 
+tackLabelTwin i j b1 l b2 = actOpt_Twin i j b1 (takeLabel l 0.5 b2)
+takeLabelTwin_ i j b1 l b2 d1 d2 = actOpt_Twin i j b1 (takeLabel_ l d1 d2 b2)
+
+
 -- Exponential Categoryの定義
 dia13_4 = 
     let objs = replicate 6 bc
@@ -812,3 +816,73 @@ dia17_3 = do
 nodeFamilies t = 
     let family t = (rootLabel t,map rootLabel $ subForest t)
     in family t : concatMap nodeFamilies (subForest t)
+
+dia18_1 = do
+    objs <- map (padded 0.1) <$> mapM getPGFObj ["H","C","D","G","A","B","E","F"]
+    let alga = 1*(2+3+4) + 2*(5+6) + 4 * (7+8)
+        tree_ = genTree 1 alga
+        e   :: Int -> Diagram PGF
+        e i = objs !! (i-1)
+        tree = fmap e tree_ -- Tree IntをTree (Diagram B)に変換
+        symmopt = def & slVSep .~ 0.3
+        verticeGraph = symmLayout' symmopt tree
+        -- convert d i = 
+        --     let subd  = fromMaybe (mkSubdiagram mempty) $ lookupName i d
+        --         p     = location subd
+        --     in place subd (over _2 (-1) p)
+        vg = fmap (over (_2._y) (*(-1))) verticeGraph
+        pairs = nodeFamilies vg
+        derive (x,ys) = 
+            let (x',ys') = (x,ys) & _1 %~ (\(w,p) -> place w p)
+                                  & _2 %~ (mconcat . map (\(w,p) -> place w p))
+                d = diameter unitX ys'
+            in ys' ===  hrule d === x'
+        dia = mconcat $ map derive pairs
+    return dia
+
+-- dia18_2 = do
+--     objs <- map (padded 0.1) <$> mapM getPGFObj ["H","C","D","G","A","B","E","F"]
+--     let alga = 1*(2+3+4) + 2*(5+6) + 4 * (7+8)
+--         tree_ = genTree 1 alga
+--         e   :: Int -> Diagram PGF
+--         e i = objs !! (i-1)
+--         tree = fmap e tree_ -- Tree IntをTree (Diagram B)に変換
+--         symmopts = def & slVSep .~ 0.3
+--         verticeGraph = 
+
+dia18_3 = do
+    objs <- mapM getPGFObj ["A_1","A_2","A_3"]
+    labs <- mapM getPGFLabel ["f_1","f_2"]
+    objs1 <- mapM getPGFObj ["B_1","B_2","B_3","B_4"]
+    labs1 <- mapM getPGFLabel ["g_1","g_2","g_3","g_4","g_5","g_1g_3"]
+    let alga = Alga.path [1,2,3]
+        trl = fromOffsets [unitX,unitX] 
+        o i = view (ix (i-1)) objs --不要だった
+        l i = view (ix (i-1)) labs
+        update = tackLabel 1 2 (l 1) True . tackLabel 2 3 (l 2) True
+        d = genDiagram trl objs update alga
+        -- ここから二つ目の図式のデータ
+        trl1 = fromOffsets [unitX,unit_Y,unitX]
+        alga1 = (1+2+4)*3 + 1*2 + 2*4
+        l1 i = view (ix (i-1)) labs1
+        update1 = tackLabel 4 3 (l1 5) True
+                . tackLabelTwin 1 2 False (l1 2) True . tackLabelTwin 1 2 False reticle False
+                . tackLabel 1 3 (l1 6) False . tackLabelTwin 1 2 True (l1 1) False
+                . tackLabel 2 4 (l1 4) True . tackLabel 4 5 (l1 5) True
+                . tackLabel 2 3 (l1 3) True . introTwin 1 2 
+        d1 = genDiagram trl1 objs1 update1 alga1
+    return $ d === strutY 0.5 === d1
+
+introTwin i j mp = 
+    let mopt = view (Lens.at $ Single i j) mp
+        moveTrail n mop = 
+            let lt = mop ^. locTrail
+                u = n *^ normalAtParam lt 0
+            in mop & locTrail %~ translate u
+        result = 
+            case mopt of Nothing -> mp;
+                          Just mopt' ->
+                                mp  & (Lens.at $ Twin i j True) ?~ (moveTrail 0.1 mopt')
+                                    & (Lens.at $ Twin i j False) ?~ (moveTrail (-0.1) mopt')
+                                    & sans (Single i j)
+    in result

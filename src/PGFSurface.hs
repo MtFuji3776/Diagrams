@@ -93,4 +93,13 @@ pdflatexSurface = def & command .~ "pdflatex"
 
 pgfTest s = renderOnlinePGF' "test1.pdf" (def & surface .~ s & standalone .~ False) --(mkSizeSpec2D (Just 400) (Just 300))
 
+luaSurafaceSize w h = def & surface .~ lualatexSurface
+                          & sizeSpec .~ (mkSizeSpec2D (Just w) (Just h))
+
 renderPGFLua filepath  = renderOnlinePGF' filepath (def & surface .~ lualatexSurface & sizeSpec .~ (mkSizeSpec2D (Just 400) (Just 300))) 
+
+renderPDF = renderOnlinePGF' "test.pdf" $ luaSurafaceSize 400 300
+
+renderTex = renderOnlinePGF' "/Users/fujimotomakoto/Documents/latexs/Notes/Free/Whiteboard/img/test.tex" $ luaSurafaceSize 300 225
+
+easyRender name diag = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202011/img/" ++ name) diag
