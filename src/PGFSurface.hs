@@ -55,6 +55,10 @@ preamble1 = "\\documentclass{ltjsarticle}\n"
     -- ++ "\\title{}\n"
     -- ++ "\\author{}\n"
     -- ++ "\\date{\\today}\n"
+    ++ "\\pagestyle{empty}\n"
+    ++ "\\pdfpagewidth 300 bp\n"
+    ++ "\\pdfpageheight 225 bp\n"
+    ++ "\\textheight  225 bp\n"
 
 preamble2 :: String
 preamble2 = "\\documentclass{article}\n"
@@ -73,7 +77,9 @@ preamble3 = "\\documentclass[ja = standard,pdflatex]{bxjsarticle}\n"
 lualatexSurface :: Surface
 lualatexSurface = def & command .~ "lualatex"
                       & preamble .~ preamble1
-                      & pageSize ?~ (\_ -> "") -- lualatexの場合、PageSizeを指定するとパーサーに漏れ出してくるのでなしで良い
+                      & pageSize ?~ (\(V2 w h) -> "\\pdfpagewidth=" ++ show w ++ "bp\n"
+                                              ++ "\\pdfpageheight=" ++ show h ++ "bp\n"
+                                              ++ "\\textheight=" ++ show h ++ "bp\n\n")
 
 -- lualatexSurface = Surface
 --     {   _texFormat = LaTeX
@@ -102,4 +108,6 @@ renderPDF = renderOnlinePGF' "test.pdf" $ luaSurafaceSize 400 300
 
 renderTex = renderOnlinePGF' "/Users/fujimotomakoto/Documents/latexs/Notes/Free/Whiteboard/img/test.tex" $ luaSurafaceSize 300 225
 
-easyRender name diag = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202011/img/" ++ name) diag
+easyRender name = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202011/img/" ++ name) (luaSurafaceSize 300 225)
+
+rendersato name = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/Notes/Writing/sato/Functor1/pandoc/img/" ++ name) (luaSurafaceSize 300 225)

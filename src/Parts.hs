@@ -26,7 +26,7 @@ import Data.Char
 
 
 --easyRender :: (Show n, RealFloat n) => FilePath -> QDiagram SVG V2 n Any -> IO ()
-easyRender name diag = renderPretty ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202011/img/" ++ name) fixedSize diag
+-- easyRender name diag = renderPretty ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202011/img/" ++ name) fixedSize diag
 
 setSize :: Num n => n -> n -> SizeSpec V2 n
 setSize w h = mkSizeSpec2D (Just w) (Just h)

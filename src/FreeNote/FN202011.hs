@@ -242,7 +242,7 @@ dia4_4' =
         alga1 = 2*3
         alga2 = 2*(1+3) + 1*3
         alga3 = alga2 
-        protoDia = over (ix 2 . _2) (twin 1 3 0.05) $ map (genGraphLocTrail trl objs) [alga1,alga2,alga3]
+        protoDia = over (ix 2 . _2) (introTwin 1 3) $ map (genGraphLocTrail trl objs) [alga1,alga2,alga3]
         cover = over (arrOpts . headStyle) (fc white . lw 0.9)
         setting = over (Lens.at (Single 2 3)) (fmap cover) 
                 . over (Lens.at (Twin 1 3 False)) (fmap monic)
@@ -873,16 +873,71 @@ dia18_3 = do
         d1 = genDiagram trl1 objs1 update1 alga1
     return $ d === strutY 0.5 === d1
 
-introTwin i j mp = 
-    let mopt = view (Lens.at $ Single i j) mp
-        moveTrail n mop = 
-            let lt = mop ^. locTrail
-                u = n *^ normalAtParam lt 0
-            in mop & locTrail %~ translate u
-        result = 
-            case mopt of Nothing -> mp;
-                          Just mopt' ->
-                                mp  & (Lens.at $ Twin i j True) ?~ (moveTrail 0.1 mopt')
-                                    & (Lens.at $ Twin i j False) ?~ (moveTrail (-0.1) mopt')
-                                    & sans (Single i j)
-    in result
+-- Twinキーを挿入し、LocatedTrailを適切に平行移動させて、元あったSingleキーを削除する関数
+    -- Map KeyOfMorph MorphOpts上の関数として定義したので、updateの中にそのまま合成できる
+    -- DiagramLanguage行き。
+-- introTwin i j mp = 
+--     let mopt = view (Lens.at $ Single i j) mp
+--         moveTrail n mop = 
+--             let lt = mop ^. locTrail
+--                 u = n *^ normalAtParam lt 0
+--             in mop & locTrail %~ translate u
+--         result = 
+--             case mopt of Nothing -> mp;
+--                           Just mopt' ->
+--                                 mp  & (Lens.at $ Twin i j True) ?~ (moveTrail 0.1 mopt')
+--                                     & (Lens.at $ Twin i j False) ?~ (moveTrail (-0.1) mopt')
+--                                     & sans (Single i j)
+--     in result
+
+-- 差核の定義。（イコライザの定義と完全一致）
+dia18_4 = do
+    objs <- mapM getPGFObj ["X","K","A","B"]
+    labs <- mapM getPGFLabel ["k","x","y"]
+    let trl = fromOffsets [unit_Y , unitX,unitX]
+        alga1 = (1+2)*3 + 3*4
+        alga2 = alga1 + 1*2
+        l i = view (ix $ i-1) labs
+        update = tackLabel 2 3 (l 1) False
+               . tackLabelTwin 3 4 True (l 2) True
+               . tackLabelTwin 3 4 False (l 3) False
+               . tackLabelTwin 3 4 True reticle False
+               . introTwin 3 4 
+        ds = map (genDiagram trl objs update) [alga1,alga2]
+        qs = [Forall,ExistsOnly]
+    diagramLanguage qs ds
+
+dia18_5 = do
+    objs <- mapM getPGFObj ["A_1","A_2","A_3","\\mathbf{A}:"]
+    labs <- mapM getPGFLabel ["f_1","f_2"]
+    objs1 <- mapM getPGFObj ["B_1","B_2","B_3","B_4","\\mathbf{B}:"]
+    labs1 <- mapM getPGFLabel ["g_1","g_2","g_3","g_4","g_5","g_1g_3"]
+    objs2 <- mapM getPGFObj ["FA_1","FA_2","B_3","FA_3"]
+    labs2 <- mapM getPGFLabel ["Ff_1", "g_2","g_3","Ff_2","g_5","g_1g_3"]
+    let alga = Alga.path [1,2,3]
+        trl = fromOffsets [unitX,unitX] 
+        o i = view (ix (i-1)) objs
+        l i = view (ix (i-1)) labs
+        update = tackLabel 1 2 (l 1) True . tackLabel 2 3 (l 2) True
+        d = genDiagram trl objs update alga <> place (view (ix 3) objs) (0.3 *^unit_X)
+        -- ここから圏B
+        trl1 = fromOffsets [unitX,unit_Y,unitX]
+        alga1 = (1+2+4)*3 + 1*2 + 2*4
+        l1 i = view (ix (i-1)) labs1
+        update1 = tackLabel 4 3 (l1 5) True
+                . tackLabelTwin 1 2 True (l1 2) True . tackLabelTwin 1 2 True reticle False
+                . tackLabel 1 3 (l1 6) False . tackLabelTwin 1 2 False (l1 1) False
+                . tackLabel 2 4 (l1 4) True . tackLabel 4 5 (l1 5) True
+                . tackLabel 2 3 (l1 3) True . introTwin 1 2 
+        d1 = genDiagram trl1 objs1 update1 alga1 <> place (view (ix 4) objs1) (0.3 *^unit_X)
+        -- ここから関手の像を交えた圏B
+        trl2 = fromOffsets [unitX,unit_Y,unitX]
+        alga2 = (1+2+4)*3 + 1*2 + 2*4
+        l2 i = view (ix (i-1)) labs2
+        update2 = actOpt 2 4 (set actions [lc magenta]) . tackLabel 4 3 (l2 5) True
+                . tackLabelTwin 1 2 True (l2 2) True . tackLabelTwin 1 2 True reticle False
+                . tackLabel 1 3 (l2 6) False . tackLabelTwin 1 2 False (l2 1) False
+                . (tackLabel_ 2 4 (l2 4) True 0.5 0.14) . tackLabel 4 5 (l2 5) True
+                . tackLabel 2 3 (l2 3) True . introTwin 1 2 
+        d2 = genDiagram trl2 objs2 update2 alga2
+    return $ d === strutY 0.5 === d1 === strutY 0.5 === d2

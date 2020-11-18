@@ -301,31 +301,46 @@ equalizer mopts =
     -- あるいは既存のMorphOptsを利用してもよし
     -- 配置したいオブジェクトに一番近いLocatedTrailを特定して、attachLabelの要領で配置する。イコライザ記号のやり方。
     -- このやり方でProductとかPullbackとかmonicとかreticleとかみんな設置できるのでは？
-twin_ i j n obj b' xmap = -- b'はBoolで、reverseの有無の確認
-    let e = view (Lens.at (Single i j)) xmap
-        setTwinKeys = set (Lens.at (Twin i j True)) e . set (Lens.at (Twin i j False)) e . sans (Single i j)
-        movetrl b opts = 
-            let trl = view locTrail opts
-                u = n *^ normalAtParam trl 0
-                trans   = if b then translate u . reverseLocTrail
-                               else translate (-u) 
-            in over locTrail trans opts
-        lens_Map b = over (Lens.at (Twin i j b)) (fmap (movetrl b))
-        obj' = --平行射のど真ん中にオブジェクト設置。reticleとか、随伴の記号とか。
-            let e' = view locTrail . fromMaybe def $ e
-                p = atParam e' 0.5
-            in place obj p
-        xmap' = lens_Map True 
-              . (if b' then lens_Map False else lens_Map True)
-              . over (Lens.at (Twin i j True)) (fmap (over symbols (obj' <|)))
-              . setTwinKeys 
-              $ xmap
-    in if isNothing e 
-        then xmap
-        else xmap'
+-- twin_ i j n obj b' xmap = -- b'はBoolで、reverseの有無の確認
+--     let e = view (Lens.at (Single i j)) xmap
+--         setTwinKeys = set (Lens.at (Twin i j True)) e . set (Lens.at (Twin i j False)) e . sans (Single i j)
+--         movetrl b opts = 
+--             let trl = view locTrail opts
+--                 u = n *^ normalAtParam trl 0
+--                 trans   = if b then translate u . reverseLocTrail
+--                                else translate (-u) 
+--             in over locTrail trans opts
+--         lens_Map b = over (Lens.at (Twin i j b)) (fmap (movetrl b))
+--         obj' = --平行射のど真ん中にオブジェクト設置。reticleとか、随伴の記号とか。
+--             let e' = view locTrail . fromMaybe def $ e
+--                 p = atParam e' 0.5
+--             in place obj p
+--         xmap' = lens_Map True 
+--               . (if b' then lens_Map False else lens_Map True)
+--               . over (Lens.at (Twin i j True)) (fmap (over symbols (obj' <|)))
+--               . setTwinKeys 
+--               $ xmap
+--     in if isNothing e 
+--         then xmap
+--         else xmap'
 
 -- 通常のtwin
-twin i j n = twin_ i j n mempty True
+-- twin i j n = twin_ i j n mempty True
+-- もうちょっと洗練させた関数に仕上げたのでそちらを採用する
+
+introTwin i j mp = 
+    let mopt = view (Lens.at $ Single i j) mp
+        moveTrail n mop = 
+            let lt = mop ^. locTrail
+                u = n *^ normalAtParam lt 0
+            in mop & locTrail %~ translate u
+        result = 
+            case mopt of Nothing -> mp;
+                          Just mopt' ->
+                                mp  & (Lens.at $ Twin i j True) ?~ (moveTrail (-0.1) mopt')
+                                    & (Lens.at $ Twin i j False) ?~ (moveTrail 0.1 mopt')
+                                    & sans (Single i j)
+    in result
 
 
 
