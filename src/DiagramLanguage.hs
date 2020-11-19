@@ -229,19 +229,24 @@ anglePoint n a d =
     in p'
 
 -- endmorphismのTrailのモデル
-loopMorph p =
-    let trl = reverseTrail . Trail . onLineSegments init $ (pentagon 0.2)
-        ps = trailVertices $ at trl origin
-        loop = cubicSpline False ps
-    in loop `at` p
+    -- arcで実装した方が良い
+-- loopMorph p =
+--     let trl = arc (direction unitX) (3/4 @@ turn) # scale 0.1 . rotateBy (5/8)
+    -- let trl = reverseTrail . Trail . onLineSegments init $ (pentagon 0.2)
+    --     ps = trailVertices $ at trl origin
+    --     loop = cubicSpline False ps
+    -- in loop `at` p
 
 -- LocatedTrailを生成し、Edges値をキーとしてMapに格納する
 genMorphOpts es d = 
     let insert' (i,j) mp = 
             if i == j 
                 then
+                    -- let p = anglePoint i (1/3) d
+                    --     opts = def & locTrail .~ loopMorph p
+                    -- in Lens.at (Single i j) Lens.?~ opts $ mp
                     let p = anglePoint i (1/3) d
-                        opts = def & locTrail .~ loopMorph p
+                        opts = def & locTrail .~ (arc (direction unitX) ((-4/5) @@ turn) # scale (-0.1) . rotateBy (1/8)) `at` p
                     in Lens.at (Single i j) Lens.?~ opts $ mp
                 else
                     let opts = def & locTrail .~ mkLocTrail (i,j) d

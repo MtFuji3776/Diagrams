@@ -585,7 +585,9 @@ actOpt i j f = over (Lens.at (Single i j)) (fmap f)
 actOpt_Twin i j b f = over (Lens.at (Twin i j b)) (fmap f)
 -- おそらく最も頻出であろう、ラベルを貼るための関数
     -- 標準的なものはLocatedTrailの中間点にラベルを貼る
-tackLabel i j l b = actOpt i j (takeLabel l 0.5 b)
+tackLabel i j l b = if i /= j 
+                    then actOpt i j (takeLabel l 0.5 b)
+                    else actOpt i j (takeLabel_ l 0.38 0.23 b)
 tackLabel_ i j l b d1 d2 = actOpt i j (takeLabel_ l d1 d2 b)
 
 tackLabelTwin i j b1 l b2 = actOpt_Twin i j b1 (takeLabel l 0.5 b2)
@@ -976,17 +978,17 @@ dia19_2 = do
                              ,"1_{FA_1}=F(1_{A_1})"
                              ,"Ff"                      -- 5
                              ,"1_{FA_2} = F(1_{A_2})"]
-    let alga = 1*2
+    let alga = 1*(1+2)*2
         trl = fromOffsets [unitX]
         o i = view (ix (i-1)) objs
         l i = view (ix (i-1)) labs
-        update1 = --tackLabel 1 1 (l 1) True
-                  tackLabel 1 2 (l 2) True
-                -- . tackLabel 2 2 (l 3) True
-        update2 = --tackLabel 1 1 (l 4) True
-                  tackLabel 1 2 (l 5) True
-                -- . tackLabel 2 2 (l 6) True
-        vl = strutY 0.1 === (translateX (-0.1) $ hrule 1.3 # alignL # lw thick) ||| o 5 # centerXY === strutY 0.1
+        update1 = tackLabel 1 1 (l 1) True
+                . tackLabel 1 2 (l 2) True
+                . tackLabel 2 2 (l 3) True
+        update2 = tackLabel 1 1 (l 4) True
+                . tackLabel 1 2 (l 5) True
+                . tackLabel 2 2 (l 6) True
+        vl = strutY 0.1 === (translateX (-0.1) $ hrule 1.3 # alignL # lw thick) ||| o 5 # translateY (-0.05) === strutY 0.1
         d1 = genDiagram trl (map o [1,2]) update1 alga
         d2 = genDiagram trl (map o [3,4]) update2 alga
     return $ d1 === vl === d2
@@ -1084,10 +1086,12 @@ dia19_8 = do
     lab <- getPGFLabel "1_A"
     let alga = 1*1
         trl = [origin]
-        f x = tackLabel_ 1 1 lab True x 0.2
-        update = tackLabel_ 1 1 lab True 0.5 0.2
+        update = tackLabel 1 1 lab True
                . tackLabel_ 1 1 lab True 0.1 0.2
-               . f 0.2
-               . f 0.3
-               . f 0.4 . f 0.6 . f 0.7 . f 0.8 . f 0.9
     return $ genDiagram trl [obj] update alga <> square 1
+
+dia19_9 = 
+    let arr = arrowV' (def & arrowShaft .~ arc xDir ((-3/4) @@ turn)) (0.15 *^ unitX)
+        arr1 = scale (-0.1) $ rotateBy (1/8) $ arrowFromLocatedTrail $ arc (direction unitX) ((-3/4) @@ turn)
+        arr2 = evalMorphOpts $ def & locTrail .~ arc (direction unitX) ((3/4) @@ turn) & locTrail %~ scale (-0.1) . rotateBy (-5/8)  & takeLabel_ (text "f" # fontSize (local 0.15)) 0.5 0.15 True
+    in return $ arr1 ||| square 1 ||| arr ||| arr2
