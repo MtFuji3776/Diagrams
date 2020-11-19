@@ -1009,9 +1009,38 @@ dia19_5 =
         loop = reverseLocTrail $ cubicSpline False ps
     in return $ arrowFromLocatedTrail loop <> square 1 # translate (0.25 *^ (unit_X + unitY)) <> strokeTrail trl
 
+-- endmorphismのTrailのモデル
 loopMorph =
     let trl = reverseTrail . Trail . onLineSegments init $ (hexagon 0.3)
         ps = trailVertices $ at trl origin
         loop = cubicSpline False ps
     in loop <> square 1
-    
+
+dia19_6 = do
+    objs <- mapM getPGFObj ["A_1" --1
+                           ,"A_2"
+                           ,"A_3" --3
+                           ,"FA_1"
+                           ,"FA_2"--5
+                           ,"FA_3"]
+    labs <- mapM getPGFLabel ["f_1"   --1
+                             ,"f_2"
+                             ,"f_1f_2"--3
+                             ,"Ff_1"
+                             ,"Ff_2"  --5
+                             ,"F(f_1f_2)"
+                             ,"F"]    --7
+    let trl = fromOffsets [unitX,unit_Y]
+        alga = 1*(2+3) + 2*3
+        o i = view (ix (i-1)) objs
+        l i = view (ix (i-1)) labs
+        update1 = tackLabel 1 2 (l 1) True
+                . tackLabel 2 3 (l 2) True
+                . tackLabel 1 3 (l 3) False
+        update2 = tackLabel 1 2 (l 4) True
+                . tackLabel 2 3 (l 5) True
+                . tackLabel_ 1 3 (l 6) False 0.5 0.15
+        d1 = genDiagram trl (map o [1,2,3]) update1 alga
+        d2 = genDiagram trl (map o [4,5,6]) update2 alga
+        vl = translateX (-0.2) $ alignL $ strutY 0.1 === hrule 1.7 ||| l 7 === strutY 0.1
+    return $ d1 === vl === d2
