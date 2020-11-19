@@ -24,7 +24,7 @@ type B = SVG
 dia1_1 =
     let rot = rotateBy (-1/8)
         loctrl = rot $ fromOffsets [unitX,unitY,unit_X,0.5*^(unit_X + unitY)]
-        labels = map (flip boxedText 0.15) ["A","C","B","P","X"]
+        labels = map (flip boxedText 0.15) ["A","C","B","","X"]
         alga   = 5*(1+4+3) + 4*(1+3) + (1+3)*2
         plbSymbol = plb # translateY 0.75 # rot
     in genDiagram loctrl labels id alga <> plbSymbol
@@ -270,7 +270,7 @@ dia4_4' =
 
 dia5_1 = 
     let trl = fromOffsets [unit_X + unitY , unitX]
-        objs = map (lw none . flip Parts.box 0.02 . fc black . strokeP . flip textSVG 0.15) ["P","P","Q"]
+        objs = map (lw none . flip Parts.box 0.02 . fc black . strokeP . flip textSVG 0.15) ["","","Q"]
         alga = 2*(1+3) + 3*1
         protoDia = genGraphLocTrail trl objs alga
         lab i j x = 
@@ -285,7 +285,7 @@ dia5_1 =
 
 dia5_1' =
     let trl = fromOffsets [unit_X + unitY , unitX]
-        objs = map (lw none . flip Parts.box 0.02 . fc black . strokeP . flip textSVG 0.15) ["P","P","Q"]
+        objs = map (lw none . flip Parts.box 0.02 . fc black . strokeP . flip textSVG 0.15) ["","","Q"]
         alga = 2*(1+3) + 3*1
         protoDia = genGraphLocTrail trl objs alga
         lab i j x = 
@@ -317,7 +317,7 @@ dia5_1' =
 
 dia5_1'' =
     let trl = fromOffsets [unit_X + unitY , unitX]
-        objs = map svgObject ["P","P","Q"]
+        objs = map svgObject ["","","Q"]
         alga = 2*(1+3) + 3*1
         protoDia = genGraphLocTrail trl objs alga
         l_1 = svgLabel "1"
@@ -334,9 +334,8 @@ dia5_1'' =
 actInMap key act = over (Lens.at key) (fmap act)
 
 -- 意味不明のうざいエラーが頻出するので一旦中断。
--- dia5_1''' = 
---     let trl = fromOffsets [unit_X + unitY , unitX]
---         objs = map svgObject ["P","P","Q"]
+-- dia5_1''' = --     let trl = fromOffsets [unit_X + unitY , unitX]
+--         objs = map svgObject ["","","Q"]
 --         alga = 2*(1+3) + 3*1
 --         protoDia = genGraphLocTrail trl objs alga
 --         l_1 = takeLabel (svgLabel "1") 0.5 False
@@ -407,7 +406,7 @@ dia6_3 = do
 
 -- dia1_1の文字記号をComputerModernにするテスト
 dia6_4 = do
-    xs <- mapM mathAlphabet ["A","C","B","P","X"]
+    xs <- mapM mathAlphabet ["A","C","B","","X"]
     let rot = rotateBy (-1/8)
         loctrl = rot $ fromOffsets [unitX,unitY,unit_X,0.5*^(unit_X + unitY)]
         labels = map (scale 0.15 . lw none . flip Parts.box 0.01 . fc black ) xs
@@ -419,7 +418,7 @@ dia6_5 = do
     l_1 <- fmap (scale (0.12 * (10/9)) . lw none . fc black) $ mathNumber "1"
     l_s <- fmap (scale 0.12 . lw none .  fc black) $ mathAlphabet "s"
     l_r <- fmap (scale 0.12 . lw none . fc black) $ mathAlphabet "r"
-    objs <- map (scale 0.14 . lw none . flip Parts.box 0.01 . fc black) <$> mapM mathAlphabet ["P","P","Q"]
+    objs <- map (scale 0.14 . lw none . flip Parts.box 0.01 . fc black) <$> mapM mathAlphabet ["","","Q"]
     let trl = fromOffsets [unit_X + unitY , unitX]
         alga = 2*(1+3) + 3*1
         protoDia = genGraphLocTrail trl objs alga
@@ -489,9 +488,8 @@ dia10_1' = dia10_1 # scaleY (-1)
 -- 下向きの有向集合(下限付き)
 dia10_2' = dia10_2 # scaleY (-1)
 
-
 dia11_1 = do
-    objs_ <- mapM mathAlphabet ["E","X","E","P","D"] :: IO [Diagram PGF]
+    objs_ <- mapM mathAlphabet ["E","X","E","","D"] :: IO [Diagram PGF]
     labs_ <- mapM mathAlphabet $ map return "hlrfg" :: IO [Diagram PGF]
     let arrange = map (scale 0.15 . lw none . flip Parts.box 0.01 . fc black) 
         objs = arrange objs_
@@ -509,7 +507,7 @@ renderpgf name = renderOnlinePGF name (mkSizeSpec2D (Just 600) (Just 450))
     -- scale 0.15でも全然デカイ。どんな縮尺になっているのか詳しく調べた方が良い
     -- それさえ突き止めれば、今まで作った関数はPGF向けにも使える。
 dia13_1 = do
-    objs <- mapM getPGFObj ["E","X\\times Y","\\int_0^1 E(x)\\mathrm{dx}","P","D\\bigotimes E"] :: OnlineTex [Diagram PGF]
+    objs <- mapM getPGFObj ["E","X\\times Y","\\int_0^1 E(x)\\mathrm{dx}","","D\\bigotimes E"] :: OnlineTex [Diagram PGF]
     labs <- mapM getPGFLabel ["f_1^q","f","g","h"] :: OnlineTex [Diagram PGF]
     test <- hboxOnline "A" :: OnlineTex (Diagram PGF)
     let trl = map (10 *^ ) $ fromOffsets [unitX,unitY,unit_X,0.5 *^ (unit_X + unitY)]
@@ -533,9 +531,8 @@ dia13_1 = do
 -- getPGFLabel = getPGFSymbol 0.01
 
 -- getPGFObj = getPGFSymbol 0.015
-
 dia13_2 = do
-    objs <- mapM getPGFObj ["E","X\\times Y", "\\int_0^1 E(x) \\mathrm{dx}", "P" , "D\\bigotimes E \\bigotimes \\displaystyle{\\int_0^{10} f(x) \\mathrm{dx}}"] :: OnlineTex [Diagram PGF]
+    objs <- mapM getPGFObj ["E","X\\times Y", "\\int_0^1 E(x) \\mathrm{dx}", "" , "D\\bigotimes E \\bigotimes \\displaystyle{\\int_0^{10} f(x) \\mathrm{dx}}"] :: OnlineTex [Diagram PGF]
     labs <- mapM getPGFLabel ["f_1","f_2","g","h"] :: OnlineTex [Diagram PGF]
     let sc = 10
         trl = map (sc *^) $ fromOffsets [unitX,unitY,unit_X , 0.5 *^ (unit_X + unitY)]
@@ -912,8 +909,8 @@ dia18_5 = do
     labs <- mapM getPGFLabel ["f_1","f_2"]
     objs1 <- mapM getPGFObj ["B_1","B_2","B_3","B_4","\\mathbf{B}:"]
     labs1 <- mapM getPGFLabel ["g_1","g_2","g_3","g_4","g_5","g_1g_3"]
-    objs2 <- mapM getPGFObj ["FA_1","FA_2","B_3","FA_3"]
-    labs2 <- mapM getPGFLabel ["Ff_1", "g_2","g_3","Ff_2","g_5","g_1g_3"]
+    objs2 <- mapM getPGFObj ["\\textcolor{red}{FA_1}","\\textcolor{red}{FA_2}","B_3","\\textcolor{red}{FA_3}"]
+    labs2 <- mapM getPGFLabel ["\\textcolor{red}{Ff_1}", "g_2","g_3","\\textcolor{red}{Ff_2}","g_5","g_1g_3"]
     let alga = Alga.path [1,2,3]
         trl = fromOffsets [unitX,unitX] 
         o i = view (ix (i-1)) objs
@@ -934,10 +931,87 @@ dia18_5 = do
         trl2 = fromOffsets [unitX,unit_Y,unitX]
         alga2 = (1+2+4)*3 + 1*2 + 2*4
         l2 i = view (ix (i-1)) labs2
-        update2 = actOpt 2 4 (set actions [lc magenta]) . tackLabel 4 3 (l2 5) True
+        update2 = actOpt_Twin 1 2 False (set actions [lc red])
+                . actOpt 2 4 (set actions [lc red]) . tackLabel 4 3 (l2 5) True
                 . tackLabelTwin 1 2 True (l2 2) True . tackLabelTwin 1 2 True reticle False
                 . tackLabel 1 3 (l2 6) False . tackLabelTwin 1 2 False (l2 1) False
-                . (tackLabel_ 2 4 (l2 4) True 0.5 0.14) . tackLabel 4 5 (l2 5) True
-                . tackLabel 2 3 (l2 3) True . introTwin 1 2 
+                . (tackLabel 2 4 (l2 4) True ) . tackLabel 4 5 (l2 5) True
+                . tackLabel 2 3 (l2 3) True . introTwin 1 2
         d2 = genDiagram trl2 objs2 update2 alga2
-    return $ d === strutY 0.5 === d1 === strutY 0.5 === d2
+    return $ d === strutY 0.5 === d1 --  === strutY 0.5 === d2
+
+dia19_1 = do
+    objs <- mapM getPGFObj ["A_1","A_2","A_3","\\mathbf{A}:"]
+    labs <- mapM getPGFLabel ["f_1","f_2"]
+    objs2 <- mapM getPGFObj ["\\textcolor{red}{FA_1}","\\textcolor{red}{FA_2}","B_3","\\textcolor{red}{FA_3}","\\mathbf{B}:"]
+    labs2 <- mapM getPGFLabel ["\\textcolor{red}{Ff_1}", "g_2","g_3","\\textcolor{red}{Ff_2}","g_5","g_1g_3","\\downarrow F"]    
+    let alga = Alga.path [1,2,3]
+        trl = fromOffsets [unitX,unitX] 
+        o i = view (ix (i-1)) objs
+        l i = view (ix (i-1)) labs
+        update = tackLabel 1 2 (l 1) True . tackLabel 2 3 (l 2) True
+        d = genDiagram trl objs update alga <> place (view (ix 3) objs) (0.3 *^unit_X)
+        -- ここから関手の像を含んだ圏B
+        trl2 = fromOffsets [unitX,unit_Y,unitX]
+        alga2 = (1+2+4)*3 + 1*2 + 2*4
+        l2 i = view (ix (i-1)) labs2
+        update2 = actOpt_Twin 1 2 False (set actions [lc red])
+                . actOpt 2 4 (set actions [lc red]) . tackLabel 4 3 (l2 5) True
+                . tackLabelTwin 1 2 True (l2 2) True . tackLabelTwin 1 2 True reticle False
+                . tackLabel 1 3 (l2 6) False . tackLabelTwin 1 2 False (l2 1) False
+                . (tackLabel 2 4 (l2 4) True ) . tackLabel 4 5 (l2 5) True
+                . tackLabel 2 3 (l2 3) True . introTwin 1 2
+        d2 = genDiagram trl2 objs2 update2 alga2 <> place (view (ix 4) objs2) (0.3 *^ unit_X)
+    return $ d === strutY 0.2 === place (view (ix 6) labs2) (0.3 *^ unit_X) === strutY 0.1 === d2
+
+dia19_2 = do
+    objs <- mapM getPGFObj ["A_1"  -- 1
+                           ,"A_2"
+                           ,"FA_1" -- 3
+                           ,"FA_2"
+                           ,"F"]   -- 5
+    labs <- mapM getPGFLabel ["1_{A_1}"                 -- 1
+                             ,"f"
+                             ,"1_{A_2}"                 -- 3
+                             ,"1_{FA_1}=F(1_{A_1})"
+                             ,"Ff"                      -- 5
+                             ,"1_{FA_2} = F(1_{A_2})"]
+    let alga = 1*2
+        trl = fromOffsets [unitX]
+        o i = view (ix (i-1)) objs
+        l i = view (ix (i-1)) labs
+        update1 = --tackLabel 1 1 (l 1) True
+                  tackLabel 1 2 (l 2) True
+                -- . tackLabel 2 2 (l 3) True
+        update2 = --tackLabel 1 1 (l 4) True
+                  tackLabel 1 2 (l 5) True
+                -- . tackLabel 2 2 (l 6) True
+        vl = strutY 0.1 === (translateX (-0.1) $ hrule 1.3 # alignL # lw thick) ||| o 5 # centerXY === strutY 0.1
+        d1 = genDiagram trl (map o [1,2]) update1 alga
+        d2 = genDiagram trl (map o [3,4]) update2 alga
+    return $ d1 === vl === d2
+
+dia19_3 = let
+    ps = [0.2 *^ unit_X,0.5 *^ unit_X + 0.5 *^ unitY , unitY, 0.5 *^ unitX + 0.5 *^ unitY, 0.2 *^ unitX]
+    ps1 = circle 1
+    loop = bspline ps
+    arr = arrowFromLocatedTrail loop
+    in return $ arr  <> square 2 # translateY 0.5 <> mconcat (map (place bc) ps) :: OnlineTex (Diagram PGF)
+
+dia19_4 = 
+    let trl = onLineSegments init (pentagon 1)
+    in return $ strokeTrail $ Trail trl :: OnlineTex (Diagram PGF)
+
+-- ループを表すTrailを作ってみた
+dia19_5 =
+    let trl = Trail . onLineSegments init $ (hexagon 0.3)
+        ps = trailVertices $ at trl origin
+        loop = reverseLocTrail $ cubicSpline False ps
+    in return $ arrowFromLocatedTrail loop <> square 1 # translate (0.25 *^ (unit_X + unitY)) <> strokeTrail trl
+
+loopMorph =
+    let trl = reverseTrail . Trail . onLineSegments init $ (hexagon 0.3)
+        ps = trailVertices $ at trl origin
+        loop = cubicSpline False ps
+    in loop <> square 1
+    

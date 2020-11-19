@@ -21,6 +21,7 @@ preamble1 = "\\documentclass{ltjsarticle}\n"
     ++ "\\usepackage{amsthm}\n"
     ++ "\\usepackage{amssymb}\n"
     ++ "\\usepackage{amsfonts}\n"
+    ++ "\\usepackage[noheadfoot,top=0mm,bottom=0mm,hmargin=-5mm]{geometry}\n"
     -- ++ "\\usepackage{enumitem}\n"
     -- ++ "\\usepackage{tikz}\n"
     -- ++ "\\usepackage[epsilon]{backnaur}\n"
@@ -31,6 +32,7 @@ preamble1 = "\\documentclass{ltjsarticle}\n"
     -- ++ "\\usetikzlibrary{matrix}\n"
     -- ++ "\\usetikzlibrary{cd}\n"
     ++ "\\usepackage{pgfcore}\n"
+    ++ "\\usepackage{color}\n"
     -- ++ "\\usepackage{CJKutf8}"
     -- ++ "\\newtheorem{dfn}{Def}\n"
     -- ++ "\\newtheorem{thm}{Thm}\n"
@@ -55,10 +57,7 @@ preamble1 = "\\documentclass{ltjsarticle}\n"
     -- ++ "\\title{}\n"
     -- ++ "\\author{}\n"
     -- ++ "\\date{\\today}\n"
-    ++ "\\pagestyle{empty}\n"
-    ++ "\\pdfpagewidth 300 bp\n"
-    ++ "\\pdfpageheight 225 bp\n"
-    ++ "\\textheight  225 bp\n"
+
 
 preamble2 :: String
 preamble2 = "\\documentclass{article}\n"
@@ -77,9 +76,10 @@ preamble3 = "\\documentclass[ja = standard,pdflatex]{bxjsarticle}\n"
 lualatexSurface :: Surface
 lualatexSurface = def & command .~ "lualatex"
                       & preamble .~ preamble1
-                      & pageSize ?~ (\(V2 w h) -> "\\pdfpagewidth=" ++ show w ++ "bp\n"
-                                              ++ "\\pdfpageheight=" ++ show h ++ "bp\n"
-                                              ++ "\\textheight=" ++ show h ++ "bp\n\n")
+                      & pageSize ?~ (\(V2 w h) -> "\\pagewidth=" ++ show w ++ "bp\n"
+                                              ++ "\\pageheight=" ++ show h ++ "bp\n"
+                                              ++ "\\textheight=" ++ show h ++ "bp\n")
+                      
 
 -- lualatexSurface = Surface
 --     {   _texFormat = LaTeX
@@ -104,7 +104,7 @@ luaSurafaceSize w h = def & surface .~ lualatexSurface
 
 renderPGFLua filepath  = renderOnlinePGF' filepath (def & surface .~ lualatexSurface & sizeSpec .~ (mkSizeSpec2D (Just 400) (Just 300))) 
 
-renderPDF = renderOnlinePGF' "test.pdf" $ luaSurafaceSize 400 300
+renderPDF = renderOnlinePGF' "test.pdf" $ luaSurafaceSize 600 450
 
 renderTex = renderOnlinePGF' "/Users/fujimotomakoto/Documents/latexs/Notes/Free/Whiteboard/img/test.tex" $ luaSurafaceSize 300 225
 
