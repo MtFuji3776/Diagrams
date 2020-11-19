@@ -134,11 +134,12 @@ getCoor n = location . fromMaybe (mkSubdiagram mempty) . lookupName n
     -- 末尾のb::BoolがTrueならば進行方向左、Falseならば右につく
     -- 始点と終点を結ぶよりも接線ベクトルを取得する方が絶対良いのでは？
 attachLabel_ loctrl lbl asp1 asp2 b =
-    let p1 = atParam loctrl 0
-        p2 = atParam loctrl 1
+    let --p1 = atParam loctrl 0
+        --p2 = atParam loctrl 1
         p3 = atParam loctrl asp1 -- Trail上でラベルのつく位置
-        v = if b then (asp2 *^) . normalize . perp $ p2 .-. p1 -- asp2はTrailからの距離
-                 else ((-asp2) *^) . normalize . perp $ p2 .-. p1
+        u = tangentAtParam loctrl asp1 -- ラベルのつく位置の接ベクトル
+        v = if b then (asp2 *^) . normalize . perp $ u -- asp2はTrailからの距離
+                 else ((-asp2) *^) . normalize . perp $ u
         p4 = p3 .+^ v
     in place lbl p4 :: Diagram PGF
     

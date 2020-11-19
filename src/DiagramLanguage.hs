@@ -219,12 +219,34 @@ data KeyOfMorph = Single Int Int
                 | Twin Int Int Bool
                 deriving (Eq,Ord,Show)
 
+-- オブジェクト内部から輪郭に向けてレイを飛ばし、境界上の点を得る関数
+    -- nはname,aはangle
+    -- aで指定した角度(rotateByによるtau角度)の方向にレイが飛ぶ
+anglePoint n a d =
+    let sub = fromMaybe (mkSubdiagram mempty) $ lookupName n d
+        p   = location sub 
+        p'  = fromMaybe p (rayTraceP p (unitX # rotateBy a) sub)
+    in p'
+
+-- endmorphismのTrailのモデル
+loopMorph p =
+    let trl = reverseTrail . Trail . onLineSegments init $ (pentagon 0.2)
+        ps = trailVertices $ at trl origin
+        loop = cubicSpline False ps
+    in loop `at` p
+
 -- LocatedTrailを生成し、Edges値をキーとしてMapに格納する
 genMorphOpts es d = 
     let insert' (i,j) mp = 
-            let opts = def & locTrail .~ mkLocTrail (i,j) d
-                           & arrOpts.headLength .~ (local 10)
-            in Lens.at (Single i j) Lens.?~ opts $ mp
+            if i == j 
+                then
+                    let p = anglePoint i (1/3) d
+                        opts = def & locTrail .~ loopMorph p
+                    in Lens.at (Single i j) Lens.?~ opts $ mp
+                else
+                    let opts = def & locTrail .~ mkLocTrail (i,j) d
+                                   & arrOpts.headLength .~ (local 10)
+                    in Lens.at (Single i j) Lens.?~ opts $ mp
     in foldr insert' Map.empty es
 
 -- Algaから図式の抽象グラフ構造を読み取り、Trailから座標情報を読み取り、離散グラフとLocatedTrailのMapの組を作って返す

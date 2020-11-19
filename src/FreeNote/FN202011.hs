@@ -919,7 +919,7 @@ dia18_5 = do
         d = genDiagram trl objs update alga <> place (view (ix 3) objs) (0.3 *^unit_X)
         -- ここから圏B
         trl1 = fromOffsets [unitX,unit_Y,unitX]
-        alga1 = (1+2+4)*3 + 1*2 + 2*4
+        alga1 = (2+4)*3 + 1*2 + 2*4
         l1 i = view (ix (i-1)) labs1
         update1 = tackLabel 4 3 (l1 5) True
                 . tackLabelTwin 1 2 True (l1 2) True . tackLabelTwin 1 2 True reticle False
@@ -929,7 +929,7 @@ dia18_5 = do
         d1 = genDiagram trl1 objs1 update1 alga1 <> place (view (ix 4) objs1) (0.3 *^unit_X)
         -- ここから関手の像を交えた圏B
         trl2 = fromOffsets [unitX,unit_Y,unitX]
-        alga2 = (1+2+4)*3 + 1*2 + 2*4
+        alga2 = (2+4)*3 + 1*2 + 2*4
         l2 i = view (ix (i-1)) labs2
         update2 = actOpt_Twin 1 2 False (set actions [lc red])
                 . actOpt 2 4 (set actions [lc red]) . tackLabel 4 3 (l2 5) True
@@ -953,12 +953,12 @@ dia19_1 = do
         d = genDiagram trl objs update alga <> place (view (ix 3) objs) (0.3 *^unit_X)
         -- ここから関手の像を含んだ圏B
         trl2 = fromOffsets [unitX,unit_Y,unitX]
-        alga2 = (1+2+4)*3 + 1*2 + 2*4
+        alga2 = (2+4)*3 + 1*2 + 2*4
         l2 i = view (ix (i-1)) labs2
         update2 = actOpt_Twin 1 2 False (set actions [lc red])
                 . actOpt 2 4 (set actions [lc red]) . tackLabel 4 3 (l2 5) True
                 . tackLabelTwin 1 2 True (l2 2) True . tackLabelTwin 1 2 True reticle False
-                . tackLabel 1 3 (l2 6) False . tackLabelTwin 1 2 False (l2 1) False
+                . tackLabelTwin 1 2 False (l2 1) False
                 . (tackLabel 2 4 (l2 4) True ) . tackLabel 4 5 (l2 5) True
                 . tackLabel 2 3 (l2 3) True . introTwin 1 2
         d2 = genDiagram trl2 objs2 update2 alga2 <> place (view (ix 4) objs2) (0.3 *^ unit_X)
@@ -1042,5 +1042,52 @@ dia19_6 = do
                 . tackLabel_ 1 3 (l 6) False 0.5 0.15
         d1 = genDiagram trl (map o [1,2,3]) update1 alga
         d2 = genDiagram trl (map o [4,5,6]) update2 alga
-        vl = translateX (-0.2) $ alignL $ strutY 0.1 === hrule 1.7 ||| l 7 === strutY 0.1
+        vl = translateX (-0.2) $ alignL $ strutY 0.1 === hrule 1.7 ||| (l 7 # centerXY # translateY (-0.05)) === strutY 0.1
     return $ d1 === vl === d2
+
+dia19_7 = do
+    objs <- mapM getPGFObj ["A_1","A_2","A_3","\\mathbf{A}:"]
+    labs <- mapM getPGFLabel ["f_1","f_2"]
+    objs2 <- mapM getPGFObj ["\\textcolor{red}{GA_3}","\\textcolor{red}{GA_2}","\\textcolor{red}{GA_1}","B_4","\\mathbf{B}:"]
+    labs2 <- mapM getPGFLabel ["g_1", "\\textcolor{red}{Gf_2}","\\textcolor{red}{Gf_1}","g_4","g_5","g_1g_3","\\downarrow G"]    
+    let alga = Alga.path [1,2,3]
+        trl = fromOffsets [unitX,unitX] 
+        o i = view (ix (i-1)) objs
+        l i = view (ix (i-1)) labs
+        update = tackLabel 1 2 (l 1) True . tackLabel 2 3 (l 2) True
+        d = genDiagram trl objs update alga <> place (view (ix 3) objs) (0.3 *^unit_X)
+        -- ここから関手の像を含んだ圏B
+        trl2 = fromOffsets [unitX,unit_Y,unitX]
+        alga2 = (2+4)*3 + 1*2 + 2*4
+        l2 i = view (ix (i-1)) labs2
+        update2 = actOpt_Twin 1 2 True (set actions [lc red])
+                . actOpt 2 3 (set actions [lc red]) . tackLabel 4 3 (l2 5) True
+                . tackLabelTwin 1 2 True (l2 2) True . tackLabelTwin 1 2 True (reticle # lc black) False
+                . tackLabelTwin 1 2 False (l2 1) False
+                . (tackLabel 2 4 (l2 4) True ) . tackLabel 4 5 (l2 5) True
+                . tackLabel 2 3 (l2 3) True . introTwin 1 2
+        d2 = genDiagram trl2 objs2 update2 alga2 <> place (view (ix 4) objs2) (0.3 *^ unit_X)
+    return $ d === strutY 0.2 === place (view (ix 6) labs2) (0.3 *^ unit_X) === strutY 0.1 === d2
+
+-- オブジェクトの内部中心から指定した方向にレイを飛ばして、オブジェクトの輪郭との交点を取得する関数
+    -- これを使って自己準同型のLocatedTrailを構成する
+    -- DiagramLanguage行き
+    -- Partsでも良いかも？非常に汎用的。
+-- anglePoint n a d =
+--     let sub = fromMaybe (mkSubdiagram mempty) $ lookupName n d
+--         p   = location sub 
+--         p'  = fromMaybe p (rayTraceP p (unitX # rotateBy a) sub)
+--     in p'
+
+dia19_8 = do
+    obj <- getPGFObj "A"
+    lab <- getPGFLabel "1_A"
+    let alga = 1*1
+        trl = [origin]
+        f x = tackLabel_ 1 1 lab True x 0.2
+        update = tackLabel_ 1 1 lab True 0.5 0.2
+               . tackLabel_ 1 1 lab True 0.1 0.2
+               . f 0.2
+               . f 0.3
+               . f 0.4 . f 0.6 . f 0.7 . f 0.8 . f 0.9
+    return $ genDiagram trl [obj] update alga <> square 1
