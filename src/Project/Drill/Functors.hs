@@ -62,3 +62,11 @@ fig_def1 = do
         d1 = genDiagram trl (map o [1,2]) update1 alga
         d2 = genDiagram trl (map o [3,4]) update2 alga
     return $ pad 1.5 $ d1 === vl === d2
+
+-- ==================================問の証明概要図=====================================================
+
+q3 = do 
+    f2 <- getPGFObj "\\forall f \\in \\mathbf{A} (A \\stackrel{f}{\\to} B \\iff B \\stackrel{f}{\\to} A \\text{ in } \\mathbf{A}^{op})"
+    f3 <- getPGFObj "\\mathrm{Id}:\\mathbf{A} \\to \\mathbf{A}^{op}"
+    f4 <- getPGFObj "\\mathrm{Id}:\\mathbf{A}^{op} \\to \\mathbf{A}"
+    return $ vsep 0.2 [f2,f3,f4] # pad 1.2

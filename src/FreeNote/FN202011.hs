@@ -15,6 +15,7 @@ import CmSymbols
 import Diagrams.Backend.PGF hiding(B)
 import PGFSurface
 import Data.String
+import Algebra.Graph.AdjacencyMap hiding(box)
 
 type B = SVG
 
@@ -1107,11 +1108,66 @@ dia20_2 =
         ysh y = lw veryThin $ arrowFromLocatedTrail' (def &  headLength %~ (* (local 0.005))) $ (0 ^& (-y)) ~~ (0 ^& y) :: Diagram PGF
     in return $ atPoints ps (replicate 59 bc :: [Diagram PGF]) <> cubicSpline False ps <> xsh 4 <> ysh 4
 
-coordinates (x1,x2) (y1,y2) = do
-    labs <- mapM getPGFLabel ["x","y","O"]
+coordinates (x1,x2) (y1,y2) comm1 comm2 = do
+    labs <- mapM getPGFLabel [comm1,comm2]
     let l i = view (ix (i-1)) labs
         sty = def & headLength .~ local 0.05
                   & shaftStyle %~ lw veryThin
-        xsh x1 x2 = arrowFromLocatedTrail' sty  ((x1 ^& 0) ~~ (x2 ^& 0)) ||| l 1 
-        ysh y1 y2 = l 2 === arrowFromLocatedTrail' sty  ((0 ^& y1) ~~ (0 ^& y2))
-    return $ xsh x1 x2 # centerXY <> ysh y1 y2 # centerXY <> place (l 3) (-1 ^& (-1)) # centerXY
+        xsh x1 x2 = arrowFromLocatedTrail' sty  ((x1 ^& 0) ~~ (x2 ^& 0)) <> place (l 1) ((1.1 * x2) ^& 0)
+        ysh y1 y2 = arrowFromLocatedTrail' sty  ((0 ^& y1) ~~ (0 ^& y2)) <> place (l 2) (0 ^& (1.1 * y2))
+    return $ xsh x1 x2 # centerXY <> ysh y1 y2 # centerXY
+
+oppositecat = getPGFObj "\\mathbf{A}^{op}:A \\stackrel{f}{\\to} B \\iff B \\stackrel{f}{\\to} A:\\mathbf{A}"
+
+dia20_3 = do
+    forms <- mapM getPGFObj ["A \\times A \\stackrel{+}{\\to} A"
+                            ,"A \\stackrel{-(\\cdot)}{\\to} A"
+                            ,"1 \\stackrel{\\mathrm{zero}}{\\to} A"]
+    objs <- mapM getPGFObj ["A\\times A",--1
+                            "A",
+                            "1" , --3
+                            "+"]
+    lab <- getPGFLabel "(+,-(\\cdot),\\mathrm{zero})"
+    tx <- getPGFLabel "\\text{The operators of Abelian Group}"
+    tx' <- getPGFLabel "\\text{Abelian Group}"
+    let alga = 1*2
+        trl = fromOffsets [unitX]
+        update = tackLabel 1 2 lab True
+        o i = view (ix (i-1)) objs
+        d = genDiagram trl [vsep 0.1 [o 1,o 4, o 2,o 4,o 3] # centerXY, o 2] update alga
+    return $ pad 1.2 $ (vsep 0.1 forms # flip box 0.1 === tx) === strutY 0.15 === d # centerXY === tx'
+
+-- dia20_4 = do
+--     forms <- mapM getPGFObj ["A","B","C","D","E","F"]
+--     let alga = 1*(2+3) + 2*4 + 3*(5+6)
+--         tr = genTree 1 alga
+--         o i = view (ix (i-1)) forms
+--         symmtr = symmLayout $ fmap o tr
+--         f trr = let xs = levels trr in view (ix 1) xs
+
+dia20_5 = do
+    sens <- mapM (getPGFObj . between "\\text{" "}") 
+                           ["伝票明細ID" -- 1
+                           ,"伝票内明細書"
+                           ,"伝票ID(FK)" -- 3
+                           ,"売上ID(FK)"
+                           ] :: OnlineTex [(Diagram PGF)]
+    let msr x = (diameter unitX x,diameter unitY x)
+        champ = foldr (\(x,y) (x',y') -> (max x x',max y y')) (0,0) $ map msr sens
+        biggestBox (x,y) = 
+            let b = rect x y
+            in box b 0.1
+        setText b t = b # alignL <> t # alignL
+    return $ vcat $ map (setText (biggestBox champ)) sens
+
+dia20_6 = do
+    sens <- mapM (getPGFObj . between "\\text{" "}") 
+                           ["伝票明細ID" -- 1
+                           ,"伝票内明細書"
+                           ,"伝票ID(FK)" -- 3
+                           ,"売上ID(FK)"
+                           ] :: OnlineTex [(Diagram PGF)]
+    let boxed = map (lw none . alignL . flip box 0.01) sens -- 見えない箱で余白取り
+        boxTower = vcat boxed -- 文字列の箱を積み上げる
+        entity = pad 1.2 $ box boxTower 0.05 -- 文字列の列を箱で覆う
+    return entity

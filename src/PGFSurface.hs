@@ -104,7 +104,7 @@ luaSurafaceSize w h = def & surface .~ lualatexSurface
 
 renderPGFLua filepath  = renderOnlinePGF' filepath (def & surface .~ lualatexSurface & sizeSpec .~ (mkSizeSpec2D (Just 400) (Just 300))) 
 
-renderPDF = renderOnlinePGF' "test.pdf" $ luaSurafaceSize 600 450
+renderPDF = renderOnlinePGF' "/Users/fujimotomakoto/haskell_testing/diagrams/src/FreeNote/test.pdf" $ luaSurafaceSize 600 450
 
 renderTex = renderOnlinePGF' "/Users/fujimotomakoto/Documents/latexs/Notes/Free/Whiteboard/img/test.tex" $ luaSurafaceSize 300 225
 
