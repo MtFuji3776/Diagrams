@@ -288,6 +288,27 @@ takeLabel_ l asp1 asp2 b opts =
     -- asp1も毎回書いてもいいかも。
 takeLabel l asp1 b = takeLabel_ l asp1 0.1 b
 
+
+-- MorphOptsのMapに対する作用素
+    -- (i,j)をキーに持つArrowOptsにアクセスして、MorphOpts -> MorphOpts関数を適用
+    -- 必然的に、射に装飾を施す関数はMorphOpts -> MorphOptsの形にすることが規格となる
+    -- 無印はSingleと対応。_Twin付きはTwinキーと対応。
+actOpt i j f = over (Lens.at (Single i j)) (fmap f)
+-- Twin用
+actOpt_Twin i j b f = over (Lens.at (Twin i j b)) (fmap f)
+
+-- actOptとtakeLabelの併せ
+    -- takeLabelはMorphOpts上の関数
+    -- MorphOpts上の関数として定義→actOptでMap上に持ち上げ
+tackLabel i j l b = if i /= j 
+                    then actOpt i j (takeLabel l 0.5 b)
+                    else actOpt i j (takeLabel_ l 0.38 0.23 b)
+tackLabel_ i j l b d1 d2 = actOpt i j (takeLabel_ l d1 d2 b)
+
+tackLabelTwin i j b1 l b2 = actOpt_Twin i j b1 (takeLabel l 0.5 b2)
+takeLabelTwin_ i j b1 l b2 d1 d2 = actOpt_Twin i j b1 (takeLabel_ l d1 d2 b2)
+
+
 buildLocTrail someFuncOnTrail loctrl =
     let p0 = atParam loctrl 0
     in flip at p0 . someFuncOnTrail . unLoc $ loctrl

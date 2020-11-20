@@ -581,17 +581,18 @@ dia13_3 = do
     -- (i,j)をキーに持つArrowOptsにアクセスして、MorphOpts -> MorphOpts関数を適用
     -- 必然的に、射に装飾を施す関数はMorphOpts -> MorphOptsの形にすることが規格となる
     -- 無印はSingleと対応。_Twin付きはTwinキーと対応。
-actOpt i j f = over (Lens.at (Single i j)) (fmap f)
-actOpt_Twin i j b f = over (Lens.at (Twin i j b)) (fmap f)
+-- actOpt i j f = over (Lens.at (Single i j)) (fmap f)
+-- actOpt_Twin i j b f = over (Lens.at (Twin i j b)) (fmap f)
 -- おそらく最も頻出であろう、ラベルを貼るための関数
     -- 標準的なものはLocatedTrailの中間点にラベルを貼る
-tackLabel i j l b = if i /= j 
-                    then actOpt i j (takeLabel l 0.5 b)
-                    else actOpt i j (takeLabel_ l 0.38 0.23 b)
-tackLabel_ i j l b d1 d2 = actOpt i j (takeLabel_ l d1 d2 b)
+-- tackLabel i j l b = if i /= j 
+--                     then actOpt i j (takeLabel l 0.5 b)
+--                     else actOpt i j (takeLabel_ l 0.38 0.23 b)
+-- tackLabel_ i j l b d1 d2 = actOpt i j (takeLabel_ l d1 d2 b)
 
-tackLabelTwin i j b1 l b2 = actOpt_Twin i j b1 (takeLabel l 0.5 b2)
-takeLabelTwin_ i j b1 l b2 d1 d2 = actOpt_Twin i j b1 (takeLabel_ l d1 d2 b2)
+-- tackLabelTwin i j b1 l b2 = actOpt_Twin i j b1 (takeLabel l 0.5 b2)
+-- takeLabelTwin_ i j b1 l b2 d1 d2 = actOpt_Twin i j b1 (takeLabel_ l d1 d2 b2)
+-- DiagramLanguage行き
 
 
 -- Exponential Categoryの定義
@@ -1095,3 +1096,22 @@ dia19_9 =
         arr1 = scale (-0.1) $ rotateBy (1/8) $ arrowFromLocatedTrail $ arc (direction unitX) ((-3/4) @@ turn)
         arr2 = evalMorphOpts $ def & locTrail .~ arc (direction unitX) ((3/4) @@ turn) & locTrail %~ scale (-0.1) . rotateBy (-5/8)  & takeLabel_ (text "f" # fontSize (local 0.15)) 0.5 0.15 True
     in return $ arr1 ||| square 1 ||| arr ||| arr2
+
+dia20_1 =
+    let ps = fromOffsets [unitX + unitY , unitX + unit_Y + unit_Y , unitX + 0.5 *^ unitY]
+    in atPoints ps (replicate 4 bc:: [Diagram PGF]) <> cubicSpline False ps
+
+dia20_2 =
+    let ps = map p2 [(x,x*x - 1) | x <- [-2,-1.9 .. 2] ]
+        xsh x = lw veryThin $ (arrowFromLocatedTrail' (def & headLength %~ (* (local 0.005))) $ (-x ^& 0) ~~ (x ^& 0)) :: Diagram PGF
+        ysh y = lw veryThin $ arrowFromLocatedTrail' (def &  headLength %~ (* (local 0.005))) $ (0 ^& (-y)) ~~ (0 ^& y) :: Diagram PGF
+    in return $ atPoints ps (replicate 59 bc :: [Diagram PGF]) <> cubicSpline False ps <> xsh 4 <> ysh 4
+
+coordinates (x1,x2) (y1,y2) = do
+    labs <- mapM getPGFLabel ["x","y","O"]
+    let l i = view (ix (i-1)) labs
+        sty = def & headLength .~ local 0.05
+                  & shaftStyle %~ lw veryThin
+        xsh x1 x2 = arrowFromLocatedTrail' sty  ((x1 ^& 0) ~~ (x2 ^& 0)) ||| l 1 
+        ysh y1 y2 = l 2 === arrowFromLocatedTrail' sty  ((0 ^& y1) ~~ (0 ^& y2))
+    return $ xsh x1 x2 # centerXY <> ysh y1 y2 # centerXY <> place (l 3) (-1 ^& (-1)) # centerXY
