@@ -166,8 +166,17 @@ padded padding innards =    strutY padding
                                 ===
                             strutY padding
 
--- 図式を入れて周りに余白を取り、長方形で囲んだ図式にする関数
+
+-- 長方形ラッパー。
+    -- 中身のサイズにアジャストして自動でサイズ決定。
 box innards padding = 
+    let pad_innards = padded padding innards
+        height      = diameter (r2 (0,1)) pad_innards
+        width       = diameter (r2 (1,0)) pad_innards
+    in centerXY innards <> rect width height 
+
+-- 図式を入れて周りに余白を取り、長方形で囲んだ図式にする関数
+roundBox innards padding = 
     let pad_innards = padded padding innards
         height      = diameter (r2 (0,1)) pad_innards
         width       = diameter (r2 (1,0)) pad_innards

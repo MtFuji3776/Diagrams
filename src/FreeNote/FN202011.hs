@@ -1171,3 +1171,59 @@ dia20_6 = do
         boxTower = vcat boxed -- 文字列の箱を積み上げる
         entity = pad 1.2 $ box boxTower 0.05 -- 文字列の列を箱で覆う
     return entity
+
+mkEntity tableName keys elems = do
+    primk <- getPGFObj "PK"
+    let boxedName = lw none . alignL . flip box 0.04
+        boxed = lw none . alignL . flip box 0.01
+        -- 箱作成
+        nameBox = boxedName tableName
+        keys' = over (ix 0) (primk ||| strutX 0.1 |||) keys
+        boxTower = (vcat . map boxed $ keys') === (vcat . map boxed $ elems)
+        w = diameter unitX $ box boxTower 0.08
+        entity = pad 1.2 $ box (nameBox === hrule w # alignL === boxTower) 0
+    return entity
+
+-- ER図のEntity図のパーツ。
+    -- ER&UMLモジュール作るか？汎用性高そう。
+    -- DiagramLanguageのフレームワークの下位
+dia21_1 = do
+    sens <- mapM (getPGFObj . between "\\text{" "}") 
+                           ["伝票明細ID" -- 1
+                           ,"伝票内明細書"
+                           ,"伝票ID(FK)" -- 3
+                           ,"売上ID(FK)"
+                           ] :: OnlineTex [(Diagram PGF)]
+    let s i = view (ix (i-1)) sens
+        entity = mkEntity (s 1) [s 2] (map s [3,4])
+    entity
+
+dia21_2 = do
+    fs <- mapM (getPGFObj) ["A \\land B","A","B"]
+    let l i = view (ix (i-1)) fs
+        alga = 1*(2+3)
+        tr = fmap l $ genTree 1 alga
+        symtr = fmap (over (_2._y) (*(-1)) ) $ symmLayout' (def & slVSep .~ 0.2) tr
+        oneStepDerive p1 p2 = 
+            let x1 = view _x p1
+                x2 = view _x p2
+                pm = p1 .+^ (0.5 *^ (p2 .-. p1))
+                xm = view _x pm
+                ym = view _y pm
+            in if (xm >= x1) 
+                then place (hrule (1.1 * (x2 - x1)) # lw thick) (x1 ^& ym) # alignR
+                else place (hrule (1.1 * (x2 - x1)) # lw thick) (x1 ^& ym) # alignL
+        symobj = fmap (uncurry place) symtr
+        trr = renderTree id oneStepDerive symtr
+    return $ trr
+
+dia21_3 = do
+    objs <- mapM getPGFObj ["TA","T^2 A","TA"]
+    labs <- mapM getPGFLabel ["\\eta_A","\\mu_A","1_{TA}"]
+    let alga = 1*(2+3) + 2*3
+        trl = fromOffsets [unitX,unit_Y]
+        l i = view (ix (i-1)) labs
+        update = tackLabel 1 2 (l 1) True
+               . tackLabel 1 3 (l 3) False
+               . tackLabel 2 3 (l 2) True
+    return $ genDiagram trl objs update alga
