@@ -110,4 +110,4 @@ renderTex = renderOnlinePGF' "/Users/fujimotomakoto/Documents/latexs/Notes/Free/
 
 easyRender name = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202011/img/" ++ name) (luaSurafaceSize 300 225)
 
-rendersato name = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/Notes/Writing/sato/Functor1/pandoc/img/" ++ name) (luaSurafaceSize 300 225)
+rendersato name = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/Work/SatoDrill/img/" ++ name) (luaSurafaceSize 300 225)

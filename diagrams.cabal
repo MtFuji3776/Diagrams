@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a62bf60fbc15e18cabbef89e67a359a742e95cd08f2bed0ed8c863b8c2606b04
+-- hash: 95c7b87466a9e2d49137d3c8ec28d651732f4f16587dcd4f787ef7af44896173
 
 name:           diagrams
 version:        0.1.0.0
@@ -40,8 +40,9 @@ library
       Parts
       PGFSurface
       Project.Drill.Functors
-      TextDiagrams.Fingertrees
-      TextDiagrams.Freyd_CatAll.Freyd1_8
+      References.DomainTheory.Char4
+      References.Fingertrees
+      References.Freyd_CatAll.Freyd1_8
       Tutorial
   other-modules:
       Paths_diagrams

@@ -15,7 +15,7 @@ import qualified Data.Map as Map
 import qualified Control.Lens as Lens ((?~),at)
 import Data.Maybe (fromMaybe,isNothing)
 import Data.Char
-import CmSymbols
+-- import CmSymbols
 
 -- 課題：PGFバックエンドとSVGバックエンドで統一的に関数を定義できないか考えてみること
 --      それができれば縮尺の違いはバックエンドの違いで場合分けして対処できる
@@ -418,18 +418,20 @@ diagramLanguage qs ds = do
 --
 -- ===============================SVGFontsによる文字記号生成関数関連===========================================
 --
-svgObject = lw none . flip Parts.box 0.01 . fc black . strokeP . flip textSVG 0.15
+-- PGFバックエンドをメインにしたので一旦棚上げ
 
--- 英数字に関してフォントを使い分けてくれる関数
-switcher x
-    | isAlpha x  = mathAlphabet [x]
-    | isNumber x = mathNumber [x]
-    | otherwise  = return mempty
+-- svgObject = lw none . flip Parts.box 0.01 . fc black . strokeP . flip textSVG 0.15
 
-mathObject xs = lw none . flip Parts.box 0.01 . scale 0.15 . fc black <$> switcher xs
+-- -- 英数字に関してフォントを使い分けてくれる関数
+-- switcher x
+--     | isAlpha x  = mathAlphabet [x]
+--     | isNumber x = mathNumber [x]
+--     | otherwise  = return mempty
+
+-- mathObject xs = lw none . flip Parts.box 0.01 . scale 0.15 . fc black <$> switcher xs
 
 
-svgLabel = lw none . fc black . strokeP . flip textSVG 0.14
+-- svgLabel = lw none . fc black . strokeP . flip textSVG 0.14
 
 
 --

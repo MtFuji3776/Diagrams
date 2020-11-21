@@ -3,7 +3,8 @@ module Parts (
   --, module Diagrams.Prelude EmptyがPreludeとLayout.Treeで衝突、しかしExportではhidingできないので、インポートしやすいPreludeの方を封印
   , module Data.Tree
   , module Diagrams.TwoD.Layout.Tree
-  , module Diagrams.Backend.SVG
+  --, module Diagrams.Backend.SVG
+  ,module Diagrams.Backend.PGF
   , module Data.Typeable
   , module Graphics.SVGFonts
   --, module Diagrams.Backend.PGF
