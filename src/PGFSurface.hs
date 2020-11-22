@@ -102,6 +102,8 @@ pgfTest s = renderOnlinePGF' "test1.pdf" (def & surface .~ s & standalone .~ Fal
 luaSurafaceSize w h = def & surface .~ lualatexSurface
                           & sizeSpec .~ (mkSizeSpec2D (Just w) (Just h))
 
+ds = "/Users/fujimotomakoto/Documents/latexs/DailyStrategy/"
+
 renderPGFLua filepath  = renderOnlinePGF' filepath (def & surface .~ lualatexSurface & sizeSpec .~ (mkSizeSpec2D (Just 400) (Just 300))) 
 
 renderPDF = renderOnlinePGF' "/Users/fujimotomakoto/haskell_testing/diagrams/src/FreeNote/test.pdf" $ luaSurafaceSize 600 450
@@ -109,5 +111,7 @@ renderPDF = renderOnlinePGF' "/Users/fujimotomakoto/haskell_testing/diagrams/src
 renderTex = renderOnlinePGF' "/Users/fujimotomakoto/Documents/latexs/Notes/Free/Whiteboard/img/test.tex" $ luaSurafaceSize 300 225
 
 easyRender name = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202011/img/" ++ name) (luaSurafaceSize 300 225)
+
+renderdom name = renderOnlinePGF' (ds ++ "Work/DomainTheory/img/" ++ name) (luaSurafaceSize 400 300)
 
 rendersato name = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/Work/SatoDrill/img/" ++ name) (luaSurafaceSize 300 225)

@@ -101,6 +101,8 @@ getPGFLabel = getPGFSymbol 0.01
 
 getPGFObj = getPGFSymbol 0.015
 
+getPGFText xs = centerXY . scale 0.01 <$> hboxOnline xs
+
 --
 -- ============================== 図式言語 ==========================================
 --

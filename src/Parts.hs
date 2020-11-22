@@ -9,6 +9,7 @@ module Parts (
   , module Graphics.SVGFonts
   --, module Diagrams.Backend.PGF
   , module Data.Char
+  , module Diagrams.TwoD.Arrow
 ) where
 
 import Diagrams.Prelude
