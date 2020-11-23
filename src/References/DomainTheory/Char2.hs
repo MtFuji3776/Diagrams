@@ -8,6 +8,8 @@ import Algebra.Graph hiding(at,(===))
 
 -- =============基本記号たち=================
 
+symbols = [directed,subset,sup,closedSet]
+
 -- 有向集合は折れ線
 directed =
     let half = [unitX + 2 *^ unitY]

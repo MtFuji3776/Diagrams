@@ -12,12 +12,12 @@ import qualified Control.Lens as Lens (at,(?~))
 import qualified Data.Map as Map
 import Data.Char
 import CmSymbols
-import Diagrams.Backend.PGF hiding(B)
+import Diagrams.Backend.PGF
 import PGFSurface
 import Data.String
 import Algebra.Graph.AdjacencyMap hiding(box)
 
-type B = SVG
+--type B = SVG
 
 
 -- 引き戻しの図式を回転させてみた
@@ -316,18 +316,20 @@ dia5_1' =
 -- すでにそっくりなのを作っといて忘れていた…
 
 
-dia5_1'' =
-    let trl = fromOffsets [unit_X + unitY , unitX]
-        objs = map svgObject ["","","Q"]
-        alga = 2*(1+3) + 3*1
-        protoDia = genGraphLocTrail trl objs alga
-        l_1 = svgLabel "1"
-        l_s = svgLabel "s"
-        l_r = svgLabel "r"
-        setting mp = mp & Lens.at (Single 2 1) %~ fmap (takeLabel l_1 0.5 False) -- ここらへん抽象化できそう
-                        & Lens.at (Single 2 3) %~ fmap (takeLabel l_s 0.5 True)  -- Lens.at キー %~ fmap f のパターン
-                        & Lens.at (Single 3 1) %~ fmap (takeLabel l_r 0.5 True)  -- 記述がさらに短くなる予感
-    in mkDiagram . over _2 setting $ protoDia
+-- dia5_1'' =
+--     let trl = fromOffsets [unit_X + unitY , unitX]
+--         objs = map svgObject ["","","Q"]
+--         alga = 2*(1+3) + 3*1
+--         protoDia = genGraphLocTrail trl objs alga
+--         l_1 = svgLabel "1"
+--         l_s = svgLabel "s"
+--         l_r = svgLabel "r"
+--         setting mp = mp & Lens.at (Single 2 1) %~ fmap (takeLabel l_1 0.5 False) -- ここらへん抽象化できそう
+--                         & Lens.at (Single 2 3) %~ fmap (takeLabel l_s 0.5 True)  -- Lens.at キー %~ fmap f のパターン
+--                         & Lens.at (Single 3 1) %~ fmap (takeLabel l_r 0.5 True)  -- 記述がさらに短くなる予感
+--     in mkDiagram . over _2 setting $ protoDia
+-- mathObjects関連を凍結したのでこちらも凍結
+
 
 -- キーと作用関数を受け取ると、Mapにアクセスしてキーのところの要素に作用を掛ける関数
     -- 思いの外綺麗にまとまったのでDiagramLanguage行き
@@ -428,17 +430,17 @@ dia6_5 = do
                         & Lens.at (Single 3 1) %~ fmap (takeLabel l_r 0.5 True)  -- 記述がさらに短くなる予感
     return $ mkDiagram . over _2 setting $ protoDia
 
-dia7_1 = do
-    l1 <- mathObject '1'
-    objs <- mapM mathObject "PPQ"
-    let trl = fromOffsets [0.7 *^ unit_X + unitY , 1.4 *^ unitX]
-        alga = (2+3)*1 + 2*3
-        cov = over arrOpts cover 
---        mon = over arrOpts monic
-        setting mp = mp & Lens.at (Single 2 1) %~ fmap (takeLabel_ l1 0.5 0.14 False)
-                        & Lens.at (Single 3 1) %~ fmap cov
-                        & Lens.at (Single 2 3) %~ fmap monic
-    return $ mkDiagram . over _2 setting $ genGraphLocTrail trl objs alga 
+-- dia7_1 = do
+--     l1 <- mathObject '1'
+--     objs <- mapM mathObject "PPQ"
+--     let trl = fromOffsets [0.7 *^ unit_X + unitY , 1.4 *^ unitX]
+--         alga = (2+3)*1 + 2*3
+--         cov = over arrOpts cover 
+-- --        mon = over arrOpts monic
+--         setting mp = mp & Lens.at (Single 2 1) %~ fmap (takeLabel_ l1 0.5 0.14 False)
+--                         & Lens.at (Single 3 1) %~ fmap cov
+--                         & Lens.at (Single 2 3) %~ fmap monic
+--     return $ mkDiagram . over _2 setting $ genGraphLocTrail trl objs alga 
 
 dia7_2 = 
     let rec1 = rect 1 2
@@ -459,19 +461,19 @@ dia7_3 = do
 --         labs = mconcat $ zipWith ($) (zipWith attachLabel trl (labels :: [Diagram B])) $ (map (*0.1) [0,1,2,3,4,5,6,7,8,9] :: [Double])
     return $ mkDiagram (g,mp')
 
-dia8_1 = do
-    x <- mathObject 'x'
-    y <- mathObject 'y'
-    a <- mathObject 'A'
-    i <- mathObject 'i'
-    lbr <- fmap (scale 0.12 . lw none . flip Parts.box 0.01 . fc black) (mathNumber "(")
-    rbr <- fmap (scale 0.12 . lw none. flip Parts.box 0.01 . fc black)  (mathNumber ")")
-    colim <-  scale 0.15. lw none . flip Parts.box 0.01 . fc black <$> mathNumber "colim"
-    let trl = fromOffsets [unitY,unitX + 0.5 *^ unitY, unit_Y]
-        objs = [x,y,hcat [colim,a] ,hcat[a,lbr,i,rbr]]
-        alga1 = 1*2 + 2*3
-        alga2 = 1*(2+4) + 2*3 + 4*3
-    return $ diagramLanguage [Forall,Exists]  (map (mkDiagram . genGraphLocTrail trl objs) $ [alga1,alga2])
+-- dia8_1 = do
+--     x <- mathObject 'x'
+--     y <- mathObject 'y'
+--     a <- mathObject 'A'
+--     i <- mathObject 'i'
+--     lbr <- fmap (scale 0.12 . lw none . flip Parts.box 0.01 . fc black) (mathNumber "(")
+--     rbr <- fmap (scale 0.12 . lw none. flip Parts.box 0.01 . fc black)  (mathNumber ")")
+--     colim <-  scale 0.15. lw none . flip Parts.box 0.01 . fc black <$> mathNumber "colim"
+--     let trl = fromOffsets [unitY,unitX + 0.5 *^ unitY, unit_Y]
+--         objs = [x,y,hcat [colim,a] ,hcat[a,lbr,i,rbr]]
+--         alga1 = 1*2 + 2*3
+--         alga2 = 1*(2+4) + 2*3 + 4*3
+--     return $ diagramLanguage [Forall,Exists]  (map (mkDiagram . genGraphLocTrail trl objs) $ [alga1,alga2])
 
 -- 有向集合の記号
 dia10_1 = 
@@ -1227,3 +1229,27 @@ dia21_3 = do
                . tackLabel 1 3 (l 3) False
                . tackLabel 2 3 (l 2) True
     return $ genDiagram trl objs update alga
+
+dia23_1 = do
+    txts <- mapM getPGFText ["・0:30以降は電子機器に触れない"
+                            ,"・25:00までに歯を磨き始める"
+                            ,"・26:00には就寝"
+                            ,"・起床は9:00を目標"]
+    let l i = view (ix (i-1)) txts
+        d = pad 1.1 $ vsep 0.1 $ map alignL txts
+    return d
+
+dia23_2 = do
+    let lin = (((-10) *^ unit_Y)~~origin) `at` origin :: Located (Trail V2 Double)
+        vs = zipWith named ([1..] :: [Int]) $ map (place bc . atParam lin) [0.1,0.2 .. 1]
+        d  = arrowFromLocatedTrail lin <> mconcat vs :: Diagram B
+        p1 = anglePoint (1 :: Int) 0 d
+        p2 = anglePoint (2::Int) 0 d
+        p3 = anglePoint (3::Int) 0 d
+    t <- getPGFText "24:30\ \ 電子機器の使用終了"
+    t1 <- getPGFText "25:00 この時点までに歯を磨き始める"
+    t2 <- getPGFText "26:00には就寝"
+    return $ d  <> (place bc p1 ||| t)
+                <> (place (bc) p2 ||| t1)
+                <> (place (bc) p3 ||| t2)
+
