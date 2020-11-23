@@ -1231,12 +1231,12 @@ dia21_3 = do
     return $ genDiagram trl objs update alga
 
 dia23_1 = do
-    txts <- mapM getPGFText ["・0:30以降は電子機器に触れない"
+    txts <- mapM getPGFText ["・0:30以降は情報端末に触れない"
                             ,"・25:00までに歯を磨き始める"
                             ,"・26:00には就寝"
                             ,"・起床は9:00を目標"]
     let l i = view (ix (i-1)) txts
-        d = pad 1.1 $ vsep 0.1 $ map alignL txts
+        d = padded 0.1 $ vsep 0.1 $ map alignL txts
     return d
 
 dia23_2 = do

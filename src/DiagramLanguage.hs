@@ -42,49 +42,6 @@ genLabelDia trl xs g =
 
 
 
--- 特別な形状の射を示す矢印
--- monicの見本
--- monic = 
---     let tailBar = fromOffsets [0 ^& 0.2]
---         morph   = arrowFromLocatedTrail (fromOffsets [1 ^& 0] ) # translateY 0.1
---     in tailBar <> morph
--- connectOutsideシリーズの鏃もmonicの尻尾にできないだろうか？
-    --ArrowShaftにTrailをくっつけることができるか？
-    --指定した矢印のスタイルを更新してmonicにできるのが理想
--- MorphOptsを評価してArrowを生成するスタイルに決定したので凍結
-
--- Trailで定義すればPathの連結モノイドが導入される
-    -- Arrowで使う直前にLocatedに持ち上げれば良し
-monicShaft trl =
-    let p1 = atParam trl 0
-        p2 = atParam trl 1
-        v  = p2 .-. p1 
-        u  = perp . (0.05 *^) . normalize $ v :: V2 Double
-        tailBar = fromOffsets [u,(-2) *^ u,u] :: Trail V2 Double
-        forGap = fromOffsets [0.1*^v,(-0.1) *^ v]
-    in forGap <> tailBar <> trl
-
-measureTrail trl =
-    let p1 = atParam trl 0
-        p2 = atParam trl 1
-    in p2 .-. p1
-
-
--- イコライザの二又の尻尾
-    -- Shaft中腹のドットはQDiagramの段階で合成しないといけないっぽい
-equalizerShaft trl =
-    let v = (0.1 *^) . normalize $ measureTrail trl
-        u = v # rotateBy (3/8)
-        u' = v # rotateBy (5/8)
-        eqTail = fromOffsets [v,-v,u,-u,u',-u'] :: Trail V2 Double
-    in eqTail <> trl
-
-open = arrowV' (with & headStyle %~ fc white . lw 0.5) unitX 
-
--- CoverやEpicなどのArrowHead系には、ArrowOpts単品を渡すことにする
-openHead = with & headStyle %~ fc white . lw 0.3
-
-cover = headStyle %~ fc white . lw 0.5
 
 
 -- ============================== hboxOnlineによるLaTeX文字生成関連 =========================================
@@ -315,7 +272,51 @@ buildLocTrail someFuncOnTrail loctrl =
     let p0 = atParam loctrl 0
     in flip at p0 . someFuncOnTrail . unLoc $ loctrl
 
+-- 特別な形状の射を示す矢印
+-- monicの見本
+-- monic = 
+--     let tailBar = fromOffsets [0 ^& 0.2]
+--         morph   = arrowFromLocatedTrail (fromOffsets [1 ^& 0] ) # translateY 0.1
+--     in tailBar <> morph
+-- connectOutsideシリーズの鏃もmonicの尻尾にできないだろうか？
+    --ArrowShaftにTrailをくっつけることができるか？
+    --指定した矢印のスタイルを更新してmonicにできるのが理想
+-- MorphOptsを評価してArrowを生成するスタイルに決定したので凍結
+
+-- Trailで定義すればPathの連結モノイドが導入される
+    -- Arrowで使う直前にLocatedに持ち上げれば良し
+monicShaft trl =
+    let p1 = atParam trl 0
+        p2 = atParam trl 1
+        v  = p2 .-. p1 
+        u  = perp . (0.05 *^) . normalize $ v :: V2 Double
+        tailBar = fromOffsets [u,(-2) *^ u,u] :: Trail V2 Double
+        forGap = fromOffsets [0.1*^v,(-0.1) *^ v]
+    in forGap <> tailBar <> trl
+
+measureTrail trl =
+    let p1 = atParam trl 0
+        p2 = atParam trl 1
+    in p2 .-. p1
+
+
+-- イコライザの二又の尻尾
+    -- Shaft中腹のドットはQDiagramの段階で合成しないといけないっぽい
+equalizerShaft trl =
+    let v = (0.1 *^) . normalize $ measureTrail trl
+        u = v # rotateBy (3/8)
+        u' = v # rotateBy (5/8)
+        eqTail = fromOffsets [v,-v,u,-u,u',-u'] :: Trail V2 Double
+    in eqTail <> trl
+
+open = arrowV' (with & headStyle %~ fc white . lw 0.5) unitX 
+
+-- CoverやEpicなどのArrowHead系には、ArrowOpts単品を渡すことにする
+openHead = with & headStyle %~ fc white . lw 0.3
+
+cover mopts = mopts & arrOpts . headStyle %~ fc white . lw 0.5
 -- monicの定形ジェネレータ
+
 monic mopts = mopts & locTrail %~ (buildLocTrail monicShaft)
 
 -- epicを表すためのArrowHead値
