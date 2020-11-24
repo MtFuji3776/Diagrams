@@ -5,6 +5,9 @@ import DiagramLanguage
 import Diagrams.Prelude
 import Algebra.Graph hiding(at,(===))
 import PGFSurface
+import qualified Data.List as L (transpose)
+
+type B = PGF
 
 -- スライド用の図式
 
@@ -97,3 +100,60 @@ snake = do
              + path [5,6,9,11] + path [15,4,3,10] + path [17,16,1,2]
         update = id
     return $ padded 0.1 $ genDiagram trl (objs1 ++ objs2) update alga
+
+
+-- ======================= 構想などを整理した図式 ========================
+flow_ver1 = do
+    txts  <- mapM getPGFObj ["構成(ver.1)"     -- 1
+                            ,"\\textcolor{red}{作図のウンチク}" 
+                            ,"TIkZ,InkScape,etcの話と不満点" -- 3
+                            ,"diagrams紹介" 
+                            ,"diagramsでの作図の方法と戦略"] -- 5
+    let trl  = fromOffsets [0.5 *^ unit_Y,0.5 *^unit_Y,0.5 *^unit_Y]
+        t i  = view (ix $ i-1) txts
+        txts' = map t [2,3,4,5]
+        alga = path [2,3,4,5]
+        g    = genDiagram trl txts' id alga
+        w    = diameter unitX g
+        d    = t 1 === strutY 0.1 === hrule w === strutY 0.1 === g
+    return d
+
+-- 図式のテーブルを生成する関数
+table dss = 
+    let maxXY :: V2 Double -> [[Diagram B]] -> [Double]
+        maxXY u = map (foldr max 0 . map (diameter u))
+        dss' = L.transpose dss
+        ws = maxXY unitX dss' 
+        hs = maxXY unitY dss 
+        sizes = [[(w,h) | h <- hs] | w <- ws]
+        boxin d (x,y) = d # centerXY <> uncurry rect (x,y) # lw none
+        boxedDs = zipWith (zipWith boxin) dss sizes
+    in vcat . map hcat $ boxedDs -- 行でくっつけてから列を積み上げる
+
+test = do
+    t1 <- mapM getPGFText　["い","ろ","は","に"]
+    t2 <- mapM getPGFText ["ほ","へ","と","ち"]
+    t3 <- mapM getPGFText ["り","ぬ","る","を"]
+    t4 <- mapM getPGFText ["わ","か","よ","た"]
+    return $ table [t1,t2,t3,t4]
+-- 不具合あり。文字数を増やした場合に列の幅が揃ってくれない。
+
+-- ワンステップ導出図の描画
+onestep = do
+    args <- mapM getPGFObj ["A","B","C"]
+    ret  <- mapM getPGFObj ["D"]
+    let over = hsep 0.2 args # centerXY
+        below = mconcat ret # centerXY
+        width = diameter unitX over
+        line = hrule (1.1 * width) # centerXY # lw thick
+        d = vsep 0.1 [over,line,below] :: Diagram B
+    return d
+
+onestepDerive args ret =
+    let args_ = map alignB args
+        over = hsep 0.2 args_ # centerXY -- 0.2で固定するより、onestepの例のパースが保たれるようサイズに比例させるべき。
+        below = ret # centerXY -- 導出図のroot
+        width = diameter unitX over 
+        line = hrule (1.1 * width) # centerXY -- 架線の太さも図式全体のパースと合うよう工夫したいが、安直に書くと再帰関数なので線がだんだん細くなっていきそうな予感
+        d = vsep 0.1 [over,line,below] :: Diagram B
+    in d
