@@ -142,22 +142,22 @@ test = do
 onestep = do
     args <- mapM getPGFObj ["A","B","C"]
     ret  <- mapM getPGFObj ["D"]
-    let over = hsep 0.2 args # centerXY
+    let above = hsep 0.2 args # centerXY
         below = mconcat ret # centerXY
-        width = diameter unitX over
+        width = diameter unitX above
         line = hrule (1.1 * width) # centerXY # lw thick
-        d = vsep 0.1 [over,line,below] :: Diagram B
+        d = vsep 0.1 [above,line,below] :: Diagram B
     return d
 
 -- これをRoseTree上の高階関数と組み合わせることで、導出図をRoseTreeから一気に作れるはず
     -- RoseTree向けのLensがないか探してみるべし
 onestepDerive args ret =
     let args_ = map alignB args
-        over = hsep 0.2 args_ # centerXY -- 0.2で固定するより、onestepの例のパースが保たれるようサイズに比例させるべき。
+        above = hsep 0.2 args_ # centerXY -- 0.2で固定するより、onestepの例のパースが保たれるようサイズに比例させるべき。
         below = ret # centerXY -- 導出図のroot
-        width = diameter unitX over 
+        width = diameter unitX above
         line = hrule (1.1 * width) # centerXY -- 架線の太さも図式全体のパースと合うよう工夫したいが、安直に書くと再帰関数なので線がだんだん細くなっていきそうな予感
-        d = vsep 0.1 [over,line,below] :: Diagram B
+        d = vsep 0.1 [above,line,below] :: Diagram B
     in d
 
 heyting1 = do
@@ -172,17 +172,17 @@ heyting1 = do
         s3 = onestepDerive [s2] $ f 5
     return s3
 
-deriveTree (Node x []) = x
-deriveTree (Node x ts) = onestepDerive (map deriveTree ts) x
+proofTree (Node x []) = x
+proofTree (Node x ts) = onestepDerive (map proofTree ts) x
 
 heyting1' = do
-    fs <- mapM getPGFObj ["z \\rightarrow x \\leq z \\rightarrow x" -- 1
-                         ,"z \\land (z \\rightarrow x) \\leq x"
-                         ,"z \\rightarrow x \\leq z \\rightarrow y"-- 3
-                         ,"z \\land (z \\rightarrow x) \\leq y"
+    fs <- mapM getPGFObj ["z \\rightarrow x \\leq z \\rightarrow y" -- 1
+                         ,"z \\land (z \\rightarrow x) \\leq y"     
+                         ,"z \\land (z \\rightarrow x) \\leq x"     -- 3
+                         ,"z \\rightarrow x \\leq z \\rightarrow x" 
                          ,"x \\leq y"                              ] -- 5
     let f i = view (ix (i-1)) fs
         alga = path [1,2,3,4] + 2*5
         t = genTree 1 alga
         t' = fmap f t
-    return $ deriveTree t'
+    return $ proofTree t'

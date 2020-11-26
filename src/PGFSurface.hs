@@ -106,11 +106,15 @@ ds = "/Users/fujimotomakoto/Documents/latexs/DailyStrategy/"
 
 renderPGFLua filepath  = renderOnlinePGF' filepath (def & surface .~ lualatexSurface & sizeSpec .~ (mkSizeSpec2D (Just 400) (Just 300))) 
 
-renderPDF = renderOnlinePGF' "/Users/fujimotomakoto/haskell_testing/diagrams/src/FreeNote/test.pdf" $ luaSurafaceSize 600 450
+renderPDF' w h = renderOnlinePGF' "/Users/fujimotomakoto/haskell_testing/diagrams/src/FreeNote/test.pdf" $ luaSurafaceSize w h
+renderPDF = renderPDF' 400 300
 
-renderTex = renderOnlinePGF' "/Users/fujimotomakoto/Documents/latexs/Notes/Free/Whiteboard/img/test.tex" $ luaSurafaceSize 300 225
+renderTex' w h = renderOnlinePGF' "/Users/fujimotomakoto/Documents/latexs/Notes/Free/Whiteboard/img/test.tex" $ luaSurafaceSize w h
+renderTex = renderTex' 300 225
 
-easyRender name = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202011/img/" ++ name) (luaSurafaceSize 300 225)
+easyRender' w h name = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202011/img/" ++ name) (luaSurafaceSize w h)
+easyRender = easyRender' 300 225 
+
 
 renderdom name = renderOnlinePGF' (ds ++ "Work/DomainTheory/img/" ++ name) (luaSurafaceSize 400 300)
 

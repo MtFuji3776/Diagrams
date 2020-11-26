@@ -394,6 +394,17 @@ introTwin i j mp =
     in result
 
 
+-- ================Arc生成関数
+-- Parameterインスタンスと曲率から曲線トレイルを生成
+mkArc_ trl n =
+    let p1 = atParam trl 0
+        p2 = atParam trl 1
+    in arcBetween p1 p2 n
+
+-- moptsからLocatedTrailを取り出し、曲率nの曲線トレイルに置き換える関数
+mkArc n mopts =
+    let trl = view locTrail mopts
+    in mopts & locTrail .~ mkArc_ trl n
 
 --
 -- =======================以下、罫線の構築に関する関数==========================================
