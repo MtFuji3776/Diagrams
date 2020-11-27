@@ -7,10 +7,13 @@ import Algebra.Graph hiding(at,(===))
 import PGFSurface
 
 -- =============== エクスポート用 ===================
-diagrams =         [compositionImage
-                   ,defCoverPair
-                   ,defEpicPair
-                   ,coverThenEpic]
+diagrams =         [("compositionImage.pdf",compositionImage)
+                   ,("defCoverPair.pdf",defCoverPair)
+                   ,("defEpicPair.pdf",defEpicPair)
+                   ,("coverThenEpic.pdf",coverThenEpic)
+                   ,("monicCoverthenEpic.pdf",monicCoverthenIsom)
+                   ,("regEpicIsCover.pdf",regEpicIsCover)
+                   ]
 
 -- =====================1.5.1x
 compositionImage = do
@@ -103,3 +106,68 @@ coverThenEpic = do
 --     in mopts & locTrail .~ mkArc_ trl n
 --どちらもDiagramLanguage行き
 
+
+-- =================1.52 ================
+
+monicCoverthenIsom = do
+    objs <- mapM getPGFObj ["A","A","B"]
+    labs <- mapM getPGFLabel ["1_A","f"]
+    let o i = view (ix (i-1)) objs
+        l i = view (ix (i-1)) labs
+        trl = fromOffsets [unit_Y, unit_X]
+        alga1 = 1*(2+3) + 3*2
+        alga2 = alga1
+        update1 = tackLabel 1 3 (l 1) False
+                . tackLabel 3 2 (l 2) True
+                . tackLabel 1 2 (l 2) True
+                . actOpt 3 2 (monic . cover)
+                . actOpt 1 2 (cover.monic)
+        update2 = tackLabel 1 3 (l 1) False
+                . tackLabel 1 2 (l 2) True
+                . tackLabelTwin 3 2 True (l 2) True
+                . actOpt_Twin 3 2 True (cover.monic)
+                . actOpt 1 2 (cover.monic)
+                . actOpt_Twin 3 2 False (over locTrail reverseLocTrail) 
+                . introTwin 3 2
+        ds = [genDiagram trl objs update1 alga1,genDiagram trl objs update2 alga2]
+        qs = [NoLine,Exists]
+    diagramLanguage qs ds
+
+
+regEpicIsCover = do
+    labs <- mapM getPGFLabel ["x" -- 1
+                             ,"y"
+                             ,"f" -- 3
+                             ,"\\varphi"
+                             ,"\\overline{f}i" -- 5
+                             ,"1_{\\varphi\\Box}"
+                             ,"\\overline{f}" -- 7
+                             ,"i"
+                             ]
+    txt <- getPGFText "次の二つの図式と余イコライザの普遍性から$\\overline{f}i = 1_{\\varphi\\Box}$が成立する："
+    txt1 <- getPGFText "・余イコライザの余射影はcoverであること"
+    let l i = view (ix (i-1)) labs
+        trl = fromOffsets [unitX,unitX,unit_Y]
+        objs = replicate 4 bc
+        alga = path [1,2,3,4] + 2*4
+        update_ = tackLabelTwin 1 2 True (l 1) True . tackLabelTwin 1 2 True (reticle # translateY 0.05) False
+                . tackLabelTwin 1 2 False (l 2) False
+                . tackLabel 2 3 (l 4) True
+                . tackLabel 2 4 (l 4) False
+                . introTwin 1 2
+        update1 = tackLabel 3 4 (l 5) True . update_ 
+        update2 = tackLabel 3 4 (l 6) True . update_
+        ds = map (\x -> genDiagram trl objs x alga) [update1,update2]
+        d  = hsep 0.5 ds
+        update3 = tackLabelTwin 3 4 True (l 7) True
+                . tackLabelTwin 3 4 False (l 8) True
+                . actOpt_Twin 3 4 False (monic)
+                . tackLabelTwin 3 4 True (reticle # translateX 0.05) False
+                . actOpt_Twin 3 4 False (over locTrail reverseLocTrail) 
+                . tackLabel 2 4 (l 3) False
+                . actOpt 2 4 (over symbols (\_ -> []))
+                . actOpt 2 4 (mkArc $ -0.15)
+                . introTwin 3 4 
+                . update_
+        d0 = genDiagram trl objs update3 alga
+    return . padded 0.1 $ txt1 === strutY 0.1 === d0 # centerXY === strutY 0.1 === txt === strutY 0.1 === d # centerXY

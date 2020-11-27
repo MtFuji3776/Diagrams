@@ -95,7 +95,8 @@ vline l q = do
 -- quant s = boxedText s 0.2
 
 -- レティクル記号
-reticle = mconcat [ (0 ^& 0) ~~ (0.05^&0), (0.15 ^& 0) ~~ (0.2 ^& 0)] # translateX (-0.1) <> mconcat [(0 ^& 0) ~~ (0 ^& 0.05), (0 ^& 0.15) ~~ (0 ^& 0.2)] # translateY (-0.1)
+reticle = scale (0.5) 
+        $ mconcat [ (0 ^& 0) ~~ (0.05^&0), (0.15 ^& 0) ~~ (0.2 ^& 0)] # translateX (-0.1) <> mconcat [(0 ^& 0) ~~ (0 ^& 0.05), (0 ^& 0.15) ~~ (0 ^& 0.2)] # translateY (-0.1)
 
 -- 引き戻し記号
 plb = fromOffsets [unitX,unitY] # scale (1/4)
@@ -285,14 +286,16 @@ buildLocTrail someFuncOnTrail loctrl =
 
 -- Trailで定義すればPathの連結モノイドが導入される
     -- Arrowで使う直前にLocatedに持ち上げれば良し
-monicShaft trl =
-    let p1 = atParam trl 0
-        p2 = atParam trl 1
-        v  = p2 .-. p1 
-        u  = perp . (0.05 *^) . normalize $ v :: V2 Double
-        tailBar = fromOffsets [u,(-2) *^ u,u] :: Trail V2 Double
-        forGap = fromOffsets [0.1*^v,(-0.1) *^ v]
-    in forGap <> tailBar <> trl
+-- monicShaft trl =
+--     let p1 = atParam trl 0
+--         p2 = atParam trl 1
+--         v  = p2 .-. p1 
+--         u  = perp . (0.05 *^) . normalize $ v :: V2 Double
+--         tailBar = fromOffsets [u,(-2) *^ u,u] :: Trail V2 Double
+--         forGap = fromOffsets [0.1*^v,(-0.1) *^ v]
+--     in forGap <> tailBar <> trl
+-- atParamによるtackLabelを狂わせるので凍結＆monic修正。
+    -- monicの尻尾はQDiagramをatopすることにした。イコライザの尻尾もそうするべきかも。
 
 measureTrail trl =
     let p1 = atParam trl 0
@@ -317,7 +320,17 @@ openHead = with & headStyle %~ fc white . lw 0.3
 cover mopts = mopts & arrOpts . headStyle %~ fc white . lw 0.5
 -- monicの定形ジェネレータ
 
-monic mopts = mopts & locTrail %~ (buildLocTrail monicShaft)
+monic mopts = 
+    let trl = view locTrail mopts
+        d   = norm $ (atParam trl 1) .-. (atParam trl 0)
+        p0  = atParam trl 0
+        u0  = (0.05 * d *^) . normalize . perp $ tangentAtStart trl
+        line = fromOffsets [u0] <> fromOffsets [-u0]
+        monicTail = place line (p0 .+^ (-0.7 *^ perp u0)) -- ArrowHTのGapの分だけ微調整。正直美しくない
+    in mopts & symbols %~ (monicTail:)
+
+
+
 
 -- epicを表すためのArrowHead値
 epicHead x y = 
@@ -388,8 +401,8 @@ introTwin i j mp =
         result = 
             case mopt of Nothing -> mp;
                           Just mopt' ->
-                                mp  & (Lens.at $ Twin i j True) ?~ (moveTrail (-0.1) mopt')
-                                    & (Lens.at $ Twin i j False) ?~ (moveTrail 0.1 mopt')
+                                mp  & (Lens.at $ Twin i j True) ?~ (moveTrail (-0.05) mopt')
+                                    & (Lens.at $ Twin i j False) ?~ (moveTrail 0.05 mopt')
                                     & sans (Single i j)
     in result
 

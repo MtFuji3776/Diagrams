@@ -102,6 +102,46 @@ snake = do
     return $ padded 0.1 $ genDiagram trl (objs1 ++ objs2) update alga
 
 
+-- ===================== TrailLikeとfromOffsetsの解説：文脈に応じてTrail,LocatedTrail,Path,[P2 Double]に解釈されるところを見せる
+    -- それってワンチャン、ターミナル上の実行結果の値を見せるのでも良いのでは？
+
+
+-- ===================== atop,beside,Origin,Envelopeの解説用図式
+circleAndPentagon = do
+    txt1 <- getPGFText "\\texttt{circle 1 \\# showOrigin}"
+    txt2 <- getPGFText "\\texttt{pentagon 1 \\# showOrigin}"
+    let c = circle 1 # showOrigin
+        p = pentagon 1 # showOrigin
+        ct = c === strutY 0.1 === txt1
+        cp = p === strutY 0.1 === txt2
+    return . padded 0.1 $ ct ||| strutX 0.5 ||| cp
+
+cpAtop = do
+    txt <- getPGFText "\\texttt{circle 1 \\# showOrigin <> pentagon 1 \\# showOrigin}"
+    let c = circle 1 # showOrigin
+        p = pentagon 1 # showOrigin
+    return . padded 0.1 $ (c <> p) === strutY 0.1 === txt
+
+cpBeside1 = do
+    txt <- getPGFText "\\texttt{circle 1 \\# showOrigin ||| pentagon 1 \\# showOrigin}"
+    let c = circle 1 # showOrigin
+        p = pentagon 1 # showOrigin
+    return $ padded 0.1 $ (c ||| p) # centerXY === strutY 0.1 === txt
+
+cpBeside2 = do
+    txt1 <- getPGFText "\\texttt{circle 1 \\# showOrigin === pentagon 1 \\# showOrigin}"
+    txt2 <- getPGFText "\\texttt{pentagon 1 \\# showOrigin === circle 1 \\# showOrigin}"
+    let c = circle 1 # showOrigin
+        p = pentagon 1 # showOrigin
+    return $ padded 0.1 $ ((c === p) # centerXY === strutY 0.1 === txt1) ||| strutX 0.5 ||| ((p === c) # centerXY === strutY 0.1 === txt2)
+
+cpBeside3 = do
+    txt <- getPGFText "\\texttt{beside (unitX + 0.5 *^ unitY) (circle 1 \\# showOrigin) (pentagon 1 \\# showOrigin)}"
+    let c = circle 1 # showOrigin
+        p = pentagon 1 # showOrigin
+        d = beside (unitX + 0.5 *^ unitY) c p
+    return $ padded 0.1 $ d === strutY 0.5 === txt
+
 -- ======================= 構想などを整理した図式 ========================
 flow_ver1 = do
     txts  <- mapM getPGFObj ["構成(ver.1)"     -- 1
