@@ -32,18 +32,18 @@ dia1_1 =
 
 
 -- MorphOptsをLensで編集する練習
-dia2_1 =
-    let loctrl = fromOffsets [unitX + 0.5 *^ unitY] :: Trail V2 Double
-        lab = attachLabel (loctrl `at` origin) (boxedText "f" 0.15 :: Diagram PGF) 0.5
-        mopts = (def :: MorphOpts) & set locTrail ((monicShaft  loctrl) `at` origin)
-                                   & set arrOpts openHead
-                                   & over symbols (lab <|)
-        evalMopts opts = 
-            let trl = view locTrail opts
-                arropts = view arrOpts opts
-                symbs = view symbols opts
-            in arrowFromLocatedTrail' arropts trl <> mconcat symbs
-    in evalMopts mopts <> square 1 # lw none # scale 0.01
+-- dia2_1 =
+--     let loctrl = fromOffsets [unitX + 0.5 *^ unitY] :: Trail V2 Double
+--         lab = attachLabel (loctrl `at` origin) (boxedText "f" 0.15 :: Diagram PGF) 0.5
+--         mopts = (def :: MorphOpts) & set locTrail ((monicShaft  loctrl) `at` origin)
+--                                    & set arrOpts openHead
+--                                    & over symbols (lab <|)
+    --     evalMopts opts = 
+    --         let trl = view locTrail opts
+    --             arropts = view arrOpts opts
+    --             symbs = view symbols opts
+    --         in arrowFromLocatedTrail' arropts trl <> mconcat symbs
+    -- in evalMopts mopts <> square 1 # lw none # scale 0.01
 
 -- 良い出来なので公式採用。DiagramLanguageに移行（コピペ）
 -- evalMorphOpts opts =
@@ -52,9 +52,9 @@ dia2_1 =
 --         symbs   = opts ^. symbols
 --     in arrowFromLocatedTrail' arropts trl <> mconcat symbs
 
-_monic (Morph loctrl opts symbs acts) = 
-    let p1 = atParam loctrl 0 
-    in over locTrail (flip at p1 . monicShaft . unLoc) (Morph loctrl opts symbs acts)
+-- _monic (Morph loctrl opts symbs acts) = 
+--     let p1 = atParam loctrl 0 
+--     in over locTrail (flip at p1 . monicShaft . unLoc) (Morph loctrl opts symbs acts)
 
 -- LocatedTrailを一旦Trailに戻してから、道の結合演算などを施して、再びLocatedTrailに戻す
     -- 戻り値の始点は変更しない仕様
@@ -63,12 +63,12 @@ _monic (Morph loctrl opts symbs acts) =
 --     let p0 = atParam loctrl 0
 --     in flip at p0 . someFuncOnTrail . unLoc $ loctrl
 
-dia3_1 =
-    let mopts = def & locTrail .~ fromOffsets [unitX]
-        trl = mopts ^. locTrail
-        deco mopts = mopts & locTrail %~ buildLocTrail monicShaft
-                           & symbols %~ ((attachLabel trl (boxedText "X" 0.15) 0.5 :) . (attachLabel trl reticle 0.3 :))
-    in evalMorphOpts $ deco mopts
+-- dia3_1 =
+--     let mopts = def & locTrail .~ fromOffsets [unitX]
+--         trl = mopts ^. locTrail
+--         deco mopts = mopts & locTrail %~ buildLocTrail monicShaft
+--                            & symbols %~ ((attachLabel trl (boxedText "X" 0.15) 0.5 :) . (attachLabel trl reticle 0.3 :))
+--     in evalMorphOpts $ deco mopts
 
 -- 文字を含む図のお試し
 dia3_2 =
@@ -517,7 +517,7 @@ dia13_1 = do
         alga = 5 * (1+3 + 4) + (1+3) * 2 + 4*(1+3)
         plback = plb # scale 10 # translateY 7.5
         qs = [Forall,Exists]
-        update mp = mp & (Lens.at (Single 1 2)) %~ (fmap (monic . over arrOpts cover . takeLabel (view (ix 0) labs # centerXY # lw none) 0.5 False))
+        update mp = mp & (Lens.at (Single 1 2)) %~ (fmap (monic . cover . takeLabel (view (ix 0) labs # centerXY # lw none) 0.5 False))
         disd = return $ (mkDiagram $ over _2 update $ genGraphLocTrail trl objs alga) <> plback
         --disd = return $ genDiscrete trl objs alga ||| place test (1 ^& 4)
     disd
@@ -654,8 +654,8 @@ dia14_2 = do
                . tackLabel 5 2 (l 1) True
                . tackLabel_ 5 3 (l 3) True 0.5 0.16
                . tackLabel 6 4 (l 2) False
-               . tackLabel_ 3 1 (prd # scaleX (-1) # rotateBy (1/8)) True 0.19 0
-               . tackLabel_ 5 1 (prd # rotateBy (1/8 + 1/4) # alignB) True 0.20 0
+               -- . tackLabel_ 3 1 (prd # scaleX (-1) # rotateBy (1/8)) True 0.19 0
+               -- . tackLabel_ 5 1 (prd # rotateBy (1/8 + 1/4) # alignB) True 0.20 0
         qs = [Forall,Exists,Forall,ExistsOnly]
         ghost = (place (circle 0.001 # lw none) (unit_Y + 1.5 *^ unit_X)) # rotateBy (1/8)
         putGhost = over (ix 0) (alignB . atop ghost)

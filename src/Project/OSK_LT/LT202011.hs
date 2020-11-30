@@ -9,7 +9,14 @@ import qualified Data.List as L (transpose)
 
 type B = PGF
 
+renderLT' name w h = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/work/osklt202011/" ++ name) $ luaSurafaceSize w h 
+
+renderLT name = renderLT' name 300 225
+
+
 -- スライド用の図式
+
+samples = [logos,compositionOfRelations,snake]
 
 logos = 
     let objs = replicate 7 bc
@@ -104,9 +111,37 @@ snake = do
 
 -- ===================== TrailLikeとfromOffsetsの解説：文脈に応じてTrail,LocatedTrail,Path,[P2 Double]に解釈されるところを見せる
     -- それってワンチャン、ターミナル上の実行結果の値を見せるのでも良いのでは？
+    -- ↑微妙。それより同一のオブジェクトが変換関数に応じて別々の出力を与えるのを画像で示した方がわかりやすい
+trailkei = [trailLike1,trailLike2,trailLikes]
+
+trailLike1 = do
+    txt <- getPGFText "\\texttt{\\textcolor{red}{atPoints} (square 1) (replicate 4 bc)}"
+    txt' <- getPGFText "\\texttt{where bc = circle 0.05 \\# fc black}"
+    let d = atPoints (square 1) (replicate 4 bc)
+    return . padded 0.1 $ d === strutY 0.1 === txt === txt' # translateX (0.1)
+
+trailLike2 = do
+    txt <- getPGFText "\\texttt{\\textcolor{red}{strokePath} (square 1)}"
+    let d = strokePath $ square 1
+    return .padded 0.1 $ d === strutY 0.1 === txt
+
+trailLikes = do
+    txt <- getPGFText "\\texttt{square 1}という一つの値が、使われる文脈に応じて別の値を取る"
+    t1 <- centerXY <$> trailLike1
+    t2 <- centerXY <$> trailLike2
+    return . padded 0.1 $ txt === strutY 0.1 === (t1 ||| vrule 2 # centerXY . lw thin ||| t2) # centerXY
+
+
+-- segments = do
+--     txt <- getPGFText "\\texttt{[(1,1),(-1,1),(-1,-1),(1,-1)]}"
+--     let seg = fromOffsets [unitX + unitY,unit_X + unitY,unit_X + unit_Y,unitX + unit_Y]
+--     return 
+
 
 
 -- ===================== atop,beside,Origin,Envelopeの解説用図式
+atopetc = [circleAndPentagon,cpAtop,cpBeside1,cpBeside2,cpBeside3]
+
 circleAndPentagon = do
     txt1 <- getPGFText "\\texttt{circle 1 \\# showOrigin}"
     txt2 <- getPGFText "\\texttt{pentagon 1 \\# showOrigin}"
@@ -136,11 +171,68 @@ cpBeside2 = do
     return $ padded 0.1 $ ((c === p) # centerXY === strutY 0.1 === txt1) ||| strutX 0.5 ||| ((p === c) # centerXY === strutY 0.1 === txt2)
 
 cpBeside3 = do
-    txt <- getPGFText "\\texttt{beside (unitX + 0.5 *^ unitY) (circle 1 \\# showOrigin) (pentagon 1 \\# showOrigin)}"
-    let c = circle 1 # showOrigin
-        p = pentagon 1 # showOrigin
-        d = beside (unitX + 0.5 *^ unitY) c p
-    return $ padded 0.1 $ d === strutY 0.5 === txt
+    txt <- getPGFText "\\texttt{beside (unitX + 0.5 *\\^\\ unitY) (circle 1 \\# showOrigin) (pentagon 1 \\# showOrigin)}"
+    let c = circle 1 # showOrigin # named "1"
+        p = pentagon 1 # showOrigin # named "2"
+        d = centerXY $ beside (unitX + 0.5 *^ unitY) c p <> arrowV (0.8 *^ normalize $ unitX + 0.5 *^ unitY) # lc red
+    return $ padded 0.1 $ d === strutY 0.1 === txt
+
+
+-- ================== 実例　==================
+example = [getPoints,alga,skelton,exponential]
+
+getPoints = do
+    objs <- mapM getPGFObj ["1","2","3","4","5","6"]
+    txt <- getPGFText "\\texttt{rotateBy (-1/8) \\$ fromOffsets [1 \\^\\ \\& 1,0\\^\\ \\&(-1),0\\^\\ \\&(-1.5),1\\^\\ \\&2.5,1.5\\^\\ \\&0]}"
+    let o i = view (ix $ i-1) objs
+        trl = rotateBy (-1/8) $ fromOffsets [unitX + unitY,unit_Y,1.5 *^ unit_Y, 2.5 *^ unitY + unit_X,1.5 *^ unit_X]
+        alga = path [1,2,3,4,5,6]
+        d = genDiagram trl objs id alga # centerXY
+        update = fmap (fc red)
+    return $ lc magenta $ d === strutY 0.1 === txt
+
+alga = do
+    objs <- mapM getPGFObj ["1","2","3","4"]
+    txt <- getPGFText "1*(2+3*4)"
+    let o i = view (ix $ i-1) objs
+        trl = fromOffsets [unitX + unitY,unit_Y,unit_Y]
+        alga = 1*(2+3*4)
+        d = genDiagram trl objs id alga
+    return $ d # centerXY === strutY 0.1 === txt
+
+skelton = do
+    objs <- mapM getPGFObj $ map show [1,2,3,4,5,6]
+    txts <- mapM getPGFObj ["\\texttt{alga1} = 1+2","\\texttt{alga2} = \\texttt{alga1} + 3*(1+2+4)","\\texttt{alga3} = \\texttt{alga2} + 5*(1+2+6)","\\texttt{alga3} + 5*3 + 6*4"]
+    let trl = rotateBy (-1/8) $ fromOffsets [unitX + unitY,unit_Y,1.5 *^ unit_Y, 2.5 *^ unitY + unit_X,1.5 *^ unit_X]
+        alga1 = 1 + 2
+        alga2 = alga1 + 3*(1+2+4)
+        alga3 = alga2 + 5*(1+2+6)
+        alga4 = alga3 + 5*3 + 6*4
+        f = over (ix 0) (<> place (circle 0.01 # lw none) (1 ^& (-1.5)))
+        ds = zipWith (\x y -> x === strutY 0.1 === y) (map centerXY $ f $ map (genDiagram trl objs id) [alga1,alga2,alga3,alga4]) txts
+        qs = [Forall,Exists,Forall,ExistsOnly]
+    padded 0.1 <$> diagramLanguage qs ds
+
+
+exponential = do
+    objs <- mapM getPGFObj ["A","B","A \\times B^A","B^A","X \\times A","X"]
+    labs <- mapM getPGFLabel ["f" --1
+                            ,"ev"
+                            ,"1 \\times \\lambda f" --3
+                            ,"\\lambda f"]
+    let trl = rotateBy (-1/8) $ fromOffsets [unitX + unitY,unit_Y,1.5 *^ unit_Y, 2.5 *^ unitY + unit_X,1.5 *^ unit_X]
+        alga1 = 1 + 2
+        alga2 = alga1 + 3*(1+2+4)
+        alga3 = alga2 + 5*(1+2+6)
+        alga4 = alga3 + 5*3 + 6*4
+        l i = view (ix $ i-1) labs
+        update = tackLabel 5 3 (l 3) True
+               . tackLabel 3 4 (l 2) True
+               . tackLabel 6 4 (l 4) False
+        f = over (ix 0) (<> place (circle 0.01 # lw none) (1 ^& (-1.5)))
+        ds = f $ map (genDiagram trl objs update) [alga1,alga2,alga3,alga4]
+        qs = [Forall,Exists,Forall,ExistsOnly]
+    padded 0.1 <$> diagramLanguage qs ds
 
 -- ======================= 構想などを整理した図式 ========================
 flow_ver1 = do
@@ -178,6 +270,8 @@ test = do
     return $ table [t1,t2,t3,t4]
 -- 不具合あり。文字数を増やした場合に列の幅が揃ってくれない。
 
+-- ===================== その他 =======================
+
 -- ワンステップ導出図の描画
 onestep = do
     args <- mapM getPGFObj ["A","B","C"]
@@ -199,7 +293,7 @@ onestepDerive args ret =
         line = hrule (1.1 * width) # centerXY -- 架線の太さも図式全体のパースと合うよう工夫したいが、安直に書くと再帰関数なので線がだんだん細くなっていきそうな予感
         d = vsep 0.1 [above,line,below] :: Diagram B
     in d
-
+    
 heyting1 = do
     fs <- mapM getPGFObj ["z \\rightarrow x \\leq z \\rightarrow x" -- 1
                          ,"z \\land (z \\rightarrow x) \\leq x"
@@ -226,3 +320,4 @@ heyting1' = do
         t = genTree 1 alga
         t' = fmap f t
     return $ proofTree t'
+
