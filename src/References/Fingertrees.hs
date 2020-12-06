@@ -1,4 +1,4 @@
-module TextDiagrams.Fingertrees where
+module References.Fingertrees where
 
 import Data.Typeable
 import Diagrams.Prelude

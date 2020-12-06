@@ -1,0 +1,34 @@
+<ul>
+<li><p>圏の間の射に相当するもの</p></li>
+<li><p>写像をモチーフに定義されている</p>
+<ul>
+<li>写像は集合環に定義されるものだが、今は簡単のため大きなクラスの間の写像的対応も写像と呼ぶことにする</li>
+</ul></li>
+<li><p>一般に、共変関手と反変関手という二種類の分類がある</p></li>
+</ul>
+<p>以下、<span class="math inline">\mathbf{A},\mathbf{B}</span>を圏とする。</p>
+<p>写像<span class="math inline">F:\mathbf{A} \to \mathbf{B}</span>が<strong>共変関手</strong>であるとは次が成り立つことを言う：</p>
+<p><span class="math inline">\forall f \in \mathbf{A}.</span></p>
+<ol>
+<li><span class="math inline">F(\Box f) = \Box F(f)</span></li>
+<li><span class="math inline">F(f \Box) = F(f) \Box</span></li>
+<li><span class="math inline">F(fg) = F(f) F(g)\ \ \ \ \text{ただし} f \Box = \Box g</span> 公理の見取り図を に示す。</li>
+</ol>
+<ul>
+<li><p>[※]対象上の写像と射集合の間の写像として定義する本が多いが、対象を恒等射と同一視すれば純粋に射の間の写像として定義される</p></li>
+<li><p>[※]恒等射を恒等射に写すことから、対象上の写像は射の写像の内容に含まれている</p></li>
+</ul>
+<p>参考までに、対象の写像と射の写像として定義した場合は次の感じになる：</p>
+<ol>
+<li><p><span class="math inline">\forall A \in \mathbf{A} (F(A) \in \mathbf{B})</span></p></li>
+<li><p><span class="math inline">\forall A,B \in \mathbf{A} (F:(A,B) \to (F(A),F(B));f \mapsto Ff\text{は写像})</span></p></li>
+<li><p><span class="math inline">\forall A \in \mathbf{A} (F(1_A) = 1_{F(A)})</span></p></li>
+<li><p><span class="math inline">\forall f,g \in \mathbf{A} (F(fg) = F(f)F(g))\ \ \ \ \text{ただし}f\Box = \Box g</span></p></li>
+</ol>
+<p><span class="math inline">F:\mathbf{A} \to \mathbf{B}</span>が <strong>反変関手</strong> であるとは次が成り立つことを言う：</p>
+<p><span class="math inline">\forall f \in \mathbf{A}</span> 1. <span class="math inline">F(\Box f) = F(f)\Box</span></p>
+<ol>
+<li><span class="math inline">F(f\Box) = \Box F(f)</span></li>
+<li><span class="math inline">F(fg) = F(g)F(f)</span></li>
+</ol>
+<p>射の始域と終域が逆転するところが共変関手と異なる。</p>

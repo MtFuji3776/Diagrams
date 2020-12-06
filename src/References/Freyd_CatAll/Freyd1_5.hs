@@ -1,4 +1,4 @@
-module Freyd1_5 where
+module References.Freyd_CatAll.Freyd1_5 where
 
 import Parts
 import DiagramLanguage
@@ -171,3 +171,27 @@ regEpicIsCover = do
                 . update_
         d0 = genDiagram trl objs update3 alga
     return . padded 0.1 $ txt1 === strutY 0.1 === d0 # centerXY === strutY 0.1 === txt === strutY 0.1 === d # centerXY
+
+pullbackInLH = do
+    objs <- mapM getPGFObj ["P","\\to","Z" ,"(x,y)" ,"\\mapsto", "z = f(x) = g(y)" -- 1,2,3,4,5,6
+                           ,"G_n" ,"\\stackrel{\\sim}{\\to}" ,"U_{zf}\\cap U_{zg}" ,"h = f|_{(U_{zf} \\cap U_{zg})} (g|_{U_{zf}\\cap U_{zg}})^{-1}"  --7,8,9
+                           ,"f^{-1}(U_{zf} \\cap U_{zg})", "U_{zf} \\cap U_{zg}"  -- 10,11
+                           ,"g^{-1}(U_{zf} \\cap U_{zg})"] -- 12
+    labs <- mapM getPGFObj ["f|","g|","h = f|(g|)^{-1}"]
+    txt <- getPGFText "ただし"
+    let o i = view (ix $ i -1) objs
+        l i = view (ix $ i - 1) labs
+        alga1 = 1 * 2
+        alga2 = 1*2*3
+        trl1 = fromOffsets [unitX]
+        trl2 = fromOffsets $ map (2 *^ ) [unit_Y,unitX + 0.5 *^ unitY]
+        update2 = tackLabel 1 3 (l 1) True . tackLabel_ 1 2 (l 3) False 0.5 0.45 . tackLabel 2 3 (l 2) False . actOpt 2 3 isom . actOpt 1 3 isom
+        unittrl = origin ~~ unitX
+        d1 = vsep 0.05 [o 1,o 4,o 7]
+        d2 = vsep 0.05 $ map (lw none . flip Parts.box 0.02 . o) [2,5,8]
+        d3 = vsep 0.05 $ map o [3,6,9]
+        d' = hcat [d1,d2,d3]
+        d4 = hsep 0.1 [txt # centerXY,o 10 # centerXY]
+        d5 = genDiagram trl2 (map o [11,12,13]) update2 alga2
+        d = vsep 0.05 [d',d4] === strutY 0.1 === d5
+    return d

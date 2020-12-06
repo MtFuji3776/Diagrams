@@ -1,4 +1,4 @@
-module LT202011 where
+module Project.OSK_LT.LT202011 where
 
 import Parts
 import DiagramLanguage

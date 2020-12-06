@@ -1,4 +1,4 @@
-module Char2 where
+module References.DomainTheory.Char2 where
 
 import Parts
 import DiagramLanguage

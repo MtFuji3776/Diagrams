@@ -1,14 +1,26 @@
-module Project.Drill.Functors where
+module Project.Drill.Functors1.Functors where
 
 import Parts
 import Diagrams.Prelude
 import Algebra.Graph hiding(at,(===))
 import DiagramLanguage
 import Diagrams.Backend.PGF
-import PGFSurface
+import PGFSurface hiding (easyRender,ds)
 
 -- fig:~~毎に分類して保管していく
 
+easyRender name = PGFSurface.render ("/Users/fujimotomakoto/haskell_testing/diagrams/src/Project/Drill/Functors1/img/" <> name <> ".tex")
+
+outputName = ["fig_cat2"
+        ,"fig_def1"
+        ,"diaId"
+        ,"diaProd"
+        ,"q3"]
+ds = [fig_cat2
+         ,fig_def1
+         ,diaId
+         ,diaProd
+         ,q3]
 
 -- fig:cat2
 fig_cat2 = do

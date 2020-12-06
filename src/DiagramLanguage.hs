@@ -104,11 +104,6 @@ plb = fromOffsets [unitX,unitY] # scale (1/4)
 -- 積記号
 prd = fromOffsets [2*^unitX , unit_X , unitY , 2 *^ unit_Y] # scale (1/4)
 
--- 同型射を表す記号
-sim = cubicSpline False [0^&0,1^&0.2, 2^&0, 3^&(-0.2) , 4^&0]
-    # scale (1/8)
-    # translateX 0.25 
-    # translateY 0.05
 
 -- X方向の単位ベクトルの同型射サンプル
 isomUnitX = dia21_1 <> arrowV unitX
@@ -356,6 +351,20 @@ equalizer mopts =
     in mopts & locTrail %~ (buildLocTrail equalizerShaft)
              & dot True . dot False
              & arrOpts.tailGap .~ (local 0.05)
+
+-- 同型射を表す記号
+sim = cubicSpline False [0^&0,1^&0.2, 2^&0, 3^&(-0.2) , 4^&0]
+    # scale (1/8)
+    # centerXY
+    # translateY 0.05
+
+
+isom mopts = 
+    let trl = view locTrail mopts
+        midp = atParam trl 0.5
+        sim' = place sim midp
+    in mopts & symbols %~ (sim':)
+
 
 
 -- 多くの亜種を持つtwin関数系統の一番抽象的なやつ

@@ -115,6 +115,8 @@ renderTex = renderTex' 300 225
 easyRender' w h name = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202011/img/" ++ name) (luaSurafaceSize w h)
 easyRender = easyRender' 300 225 
 
+render' w h path = renderOnlinePGF' path (luaSurafaceSize w h)
+render = render' 200 150
 
 renderdom name = renderOnlinePGF' (ds ++ "Work/DomainTheory/img/" ++ name) (luaSurafaceSize 400 300)
 
