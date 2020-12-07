@@ -6,6 +6,7 @@ import Algebra.Graph hiding(at,(===))
 import DiagramLanguage
 import Diagrams.Backend.PGF
 import PGFSurface hiding (easyRender,ds)
+import ProofTree
 
 -- fig:~~毎に分類して保管していく
 
@@ -89,6 +90,8 @@ diaId = do
         hor = centerXY $ hrule 1.5 ||| labID 
     return $ vsep 0.1 [d,hor,d]
 
+
+
 -- - × Aの形式の１変数関手
 diaProd = do
     objs_ <- mapM getPGFObj ["X","X \\times A","A"]
@@ -112,6 +115,49 @@ diaProd = do
         d = genDiagram trl objs update alga # pad 1.2
     return d
 
+derivHomCov = do
+    objs <- mapM getPGFObj ["A \\stackrel{\\varphi}{\\to} X \\stackrel{f}{\\to} Y","A \\stackrel{\\varphi}{\\to} X","(A,f)"]
+    let alga = 1*2
+        f i = view (ix $ i - 1) objs
+        t = derivTree f 1 alga # centerXY
+        d = t ||| f 3 # scale 0.8
+    return d
+
+homCovUnit1 = do
+    objs <- mapM getPGFObj ["A \\stackrel{\\varphi}{\\to} X \\stackrel{\\Box f}{\\to} X","A \\stackrel{\\varphi}{\\to} X","(A,\\Box f)"]
+    let alga = 1*2
+        f i = view (ix $ i - 1) objs
+        t = derivTree f 1 alga # centerXY ||| f 3 # scale 0.8
+    return t
+
+homCovUnit2 = do
+    objs <- mapM getPGFObj ["A \\stackrel{\\psi}{\\to} Y \\stackrel{f \\Box}{\\to} Y","A \\stackrel{\\psi}{\\to} Y","(A,f \\Box)"]
+    let alga = 1*2
+        f i = view (ix $ i - 1) objs
+        t = derivTree f 1 alga # centerXY ||| f 3 # scale 0.8
+    return t    
+
+homCovMor = do
+    objs <- mapM getPGFObj ["A \\stackrel{\\varphi}{\\to} X \\stackrel{f}{\\to} Y \\stackrel{g}{\\to} Z","A \\stackrel{\\varphi}{\\to} X \\stackrel{f}{\\to} Y","A \\stackrel{\\varphi}{\\to} X","(A,f)","(A,g)","(A,fg)"]
+    let alga = 2*3
+        f i = view (ix $ i - 1) objs
+        subt = derivTree f 2 alga # centerXY ||| f 4 # scale 0.8
+        d = 1.01 * diameter unitX subt
+        t = centerXY (subt === strutY 0.01 === (hrule d # lw veryThin ||| f 5 # scale 0.8) === strutY 0.01 === f 1)
+        -- ここから二つめの導出図
+        alga1 = 1*2
+        t' = centerXY $ derivTree f 1 alga1 # centerXY ||| f 6 # scale 0.8
+    return $ t ||| strutX 0.1 ||| t'
+
+derivProd = do
+    objs <- mapM getPGFObj [
+        "X \\times A \\stackrel{1_X \\times f}{\\to} {X \\times B}"
+        ,"A \\stackrel{f}{\\to} B"
+        ,"X \\times f"]
+    let alga = 1*2
+        f i = view (ix $ i-1) objs
+        t = derivTree f 1 alga # centerXY ||| f 3 # scale 0.8
+    return t
 
 -- ==================================問の証明概要図=====================================================
 
@@ -121,3 +167,16 @@ q3 = do
     f4 <- getPGFObj "\\mathrm{Id}:\\mathbf{A}^{op} \\to \\mathbf{A}"
     return $ vsep 0.2 [f2,f3,f4] # pad 1.2
 
+
+-- =================== その他
+
+modeltriangle = do
+    txts_ <- mapM getPGFText ["作用$\\Leftrightarrow$手続きモデル","構文モデル","公理モデル$\\Leftrightarrow$ 代数"]
+    let trl = map (1.5 *^) $ fromOffsets [unitX, 0.5 *^ (unit_X + sqrt 3 *^ unitY)]
+        alga = 1*2*3
+        txts = over (ix 0) alignR . over (ix 1) alignL $ txts_ 
+        f = set (arrOpts . tailLength) (local 0.05) . set (arrOpts.arrowTail) dart'
+        update = actOpt 1 2 (set (arrOpts.tailLength) (local 0.05) . set (arrOpts.arrowTail) dart')
+                . actOpt 2 3 (f . set (arrOpts.arrowTail) dart)
+                . actOpt 1 3 (f . set (arrOpts . arrowTail) dart)
+    return $ padded 0.1 $ genDiagram trl txts update alga

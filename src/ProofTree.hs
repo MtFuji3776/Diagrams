@@ -50,10 +50,12 @@ onestepDerive args sr ret  =
     in d # centerXY
             
 
-proofTree (Node x []) = x # alignB # showOrigin
+proofTree (Node x []) = x # alignB
 proofTree (Node x ts) = 
     let subRoots = map (view root) ts -- 架線の長さ調節のために深さ1のNode全体を返す
-    in onestepDerive (map proofTree ts) subRoots x # alignB # showOrigin
+    in onestepDerive (map proofTree ts) subRoots x # alignB
+
+derivTree f r = proofTree . formulaTree f . genTree r
 
 test = do
     chars <- mapM getPGFObj ["A","B","C","D","E"]
