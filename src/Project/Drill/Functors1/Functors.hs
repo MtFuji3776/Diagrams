@@ -5,12 +5,14 @@ import Diagrams.Prelude
 import Algebra.Graph hiding(at,(===))
 import DiagramLanguage
 import Diagrams.Backend.PGF
-import PGFSurface hiding (easyRender,ds)
+import PGFSurface hiding (easyRender,ds,easyRender')
 import ProofTree
 
 -- fig:~~毎に分類して保管していく
 
 easyRender name = PGFSurface.render ("/Users/fujimotomakoto/haskell_testing/diagrams/src/Project/Drill/Functors1/img/" <> name <> ".tex")
+
+easyRender' w h name = PGFSurface.render' w h ("/Users/fujimotomakoto/haskell_testing/diagrams/src/Project/Drill/Functors1/img/" <> name <> ".tex")
 
 outputName = ["fig_cat2"
         ,"fig_def1"
@@ -89,20 +91,22 @@ fig_def1 = do
 catAB = do
     objs1 <- mapM getPGFObj ["A_1","A_2","A_3"]
     labs1 <- mapM getPGFLabel ["f_1","f_2"]
+    a <- getPGFObj "\\mathbf{A}:"
     let trl1 = fromOffsets [unitX,unitX]
         alga1 = path [1,2,3]
         l1 i = view (ix $ i - 1) labs1
         update1 = tackLabel 1 2 (l1 1) True . tackLabel 2 3 (l1 2) True
-        d1 = genDiagram trl1 objs1 update1 alga1
+        d1 = a ||| strutX 0.05 ||| genDiagram trl1 objs1 update1 alga1
     objs2 <- mapM getPGFObj ["B_1","B_2","B_3","B_4"]
     labs2 <- mapM getPGFLabel ["g_1","g_2","g_3","g_4","g_5"]
+    b <- getPGFObj "\\mathbf{B}:"
     let trl2 = fromOffsets [unitX,unitX + unit_Y,unit_X]
         alga2 = path [1,2,3,4] + 2*4
         l2 i = view (ix $ i - 1) labs2
         update2 = tackLabelTwin 1 2 True (l2 1) True . tackLabelTwin 1 2 False (l2 2) False . tackLabel 2 3 (l2 4) True . tackLabel 3 4 (l2 5) True . tackLabel 2 4 (l2 3) False
                 . introTwin 1 2
         mark = place reticle (0.5 *^ unitX)
-        d2 = genDiagram trl2 objs2 update2 alga2 <> mark
+        d2 = b ||| strutX 0.05 ||| (genDiagram trl2 objs2 update2 alga2 <> mark)
     return $ d1 === strutY 0.5 === d2
 
 -- ============================= 1.2 色々な関手 =========================
@@ -186,6 +190,35 @@ derivProd = do
         f i = view (ix $ i-1) objs
         t = derivTree f 1 alga # centerXY ||| f 3 # scale 0.8
     return t
+
+-- ========================出題の図式
+
+ordsetP = do
+    objs <- mapM (getPGFObj.show) [0..10]
+    let trl = fromOffsets $ replicate 10 unitX
+        alga = path [1..11]
+    return $ genDiagram trl objs id alga
+
+catA'B = do
+    objs1 <- mapM getPGFObj ["A_1","A_2","A_3","A_4"]
+    labs1 <- mapM getPGFLabel ["f_1","f_2"]
+    a <- getPGFObj "\\mathbf{A}:"
+    let trl1 = fromOffsets [unitX,unitX,unitX]
+        alga1 = 1*2+3*4
+        l1 i = view (ix $ i - 1) labs1
+        update1 = tackLabel 1 2 (l1 1) True . tackLabel 3 4 (l1 2) True
+        d1 = a ||| strutX 0.05 ||| genDiagram trl1 objs1 update1 alga1
+    objs2 <- mapM getPGFObj ["B_1","B_2","B_3","B_4"]
+    labs2 <- mapM getPGFLabel ["g_1","g_2","g_3","g_4","g_5"]
+    b <- getPGFObj "\\mathbf{B}:"
+    let trl2 = fromOffsets [unitX,unitX + unit_Y,unit_X]
+        alga2 = path [1,2,3,4] + 2*4
+        l2 i = view (ix $ i - 1) labs2
+        update2 = tackLabelTwin 1 2 True (l2 1) True . tackLabelTwin 1 2 False (l2 2) False . tackLabel 2 3 (l2 4) True . tackLabel 3 4 (l2 5) True . tackLabel 2 4 (l2 3) False
+                . introTwin 1 2
+        mark = place reticle (0.5 *^ unitX)
+        d2 = b ||| strutX 0.05 ||| (genDiagram trl2 objs2 update2 alga2 <> mark)
+    return $ d1 === strutY 0.5 === d2
 
 -- ==================================問の証明概要図=====================================================
 
