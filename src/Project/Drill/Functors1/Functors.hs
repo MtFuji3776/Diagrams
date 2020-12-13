@@ -16,12 +16,21 @@ outputName = ["fig_cat2"
         ,"fig_def1"
         ,"diaId"
         ,"diaProd"
-        ,"q3"]
+        ,"q3"
+        ,"derivHomCov"
+        ,"homCovUnit1"
+        ,"homCovUnit2"
+        ,"homCovMor"
+        ,"derivProd"]
 ds = [fig_cat2
          ,fig_def1
          ,diaId
          ,diaProd
-         ,q3]
+         ,q3
+         ,derivHomCov
+         ,homCovUnit1
+         ,homCovUnit2
+         ,derivProd]
 
 -- fig:cat2
 fig_cat2 = do
@@ -76,6 +85,25 @@ fig_def1 = do
         d2 = genDiagram trl (map o [3,4]) update2 alga
     return $ pad 1.5 $ d1 === vl === d2
 
+-- 多用する圏A,Bの例
+catAB = do
+    objs1 <- mapM getPGFObj ["A_1","A_2","A_3"]
+    labs1 <- mapM getPGFLabel ["f_1","f_2"]
+    let trl1 = fromOffsets [unitX,unitX]
+        alga1 = path [1,2,3]
+        l1 i = view (ix $ i - 1) labs1
+        update1 = tackLabel 1 2 (l1 1) True . tackLabel 2 3 (l1 2) True
+        d1 = genDiagram trl1 objs1 update1 alga1
+    objs2 <- mapM getPGFObj ["B_1","B_2","B_3","B_4"]
+    labs2 <- mapM getPGFLabel ["g_1","g_2","g_3","g_4","g_5"]
+    let trl2 = fromOffsets [unitX,unitX + unit_Y,unit_X]
+        alga2 = path [1,2,3,4] + 2*4
+        l2 i = view (ix $ i - 1) labs2
+        update2 = tackLabelTwin 1 2 True (l2 1) True . tackLabelTwin 1 2 False (l2 2) False . tackLabel 2 3 (l2 4) True . tackLabel 3 4 (l2 5) True . tackLabel 2 4 (l2 3) False
+                . introTwin 1 2
+        mark = place reticle (0.5 *^ unitX)
+        d2 = genDiagram trl2 objs2 update2 alga2 <> mark
+    return $ d1 === strutY 0.5 === d2
 
 -- ============================= 1.2 色々な関手 =========================
 -- 恒等関手Id

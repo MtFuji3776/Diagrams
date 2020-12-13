@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: deaa6c459bea0c539318fd4db6cc4876945edbfb66f92caf92abdfc7e45fbf64
+-- hash: 62552bd6f5729019f29e1a7b2631f3a94420f75c31bb200637d3d30de891c5bd
 
 name:           diagrams
 version:        0.1.0.0
@@ -44,11 +44,13 @@ library
       ProofTree
       References.DomainTheory.Char2
       References.DomainTheory.Char4
+      References.DomainTheory.Char5
       References.Fingertrees
       References.Freyd_CatAll.AppendB
       References.Freyd_CatAll.Freyd1_3
       References.Freyd_CatAll.Freyd1_5
       References.Freyd_CatAll.Freyd1_8
+      References.Freyd_CatAll.Freyd2_1
       Tutorial
   other-modules:
       Paths_diagrams
