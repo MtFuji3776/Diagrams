@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 62552bd6f5729019f29e1a7b2631f3a94420f75c31bb200637d3d30de891c5bd
+-- hash: 5fc92ec44057d51b5c8d7c530f58bd57d68ef99426a788ac9b4538bdc336dafd
 
 name:           diagrams
 version:        0.1.0.0
@@ -50,6 +50,7 @@ library
       References.Freyd_CatAll.Freyd1_3
       References.Freyd_CatAll.Freyd1_5
       References.Freyd_CatAll.Freyd1_8
+      References.Freyd_CatAll.Freyd1_9
       References.Freyd_CatAll.Freyd2_1
       Tutorial
   other-modules:

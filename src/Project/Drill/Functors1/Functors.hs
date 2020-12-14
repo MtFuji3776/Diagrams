@@ -220,6 +220,24 @@ catA'B = do
         d2 = b ||| strutX 0.05 ||| (genDiagram trl2 objs2 update2 alga2 <> mark)
     return $ d1 === strutY 0.5 === d2
 
+numbers = do
+    objs <- mapM getPGFObj $ map show [0..3] ++ ["\\cdots","n","\\cdots"] 
+    let trl = fromOffsets $ replicate 6 unitX
+        alga1 = path [1..7]
+        alga2 = path [7,6..1]
+        d1 = genDiagram trl objs id alga1 
+        d2 = genDiagram trl objs id alga2
+    return $ d1 === strutY 0.1 === d2
+
+powerset = do
+    let brace x = "\\{" ++ x ++ "\\}"
+    objs <- mapM getPGFObj $ ["\\emptyset"] ++ map brace ["1","2","3","3,1","2,3","1,2","1,2,3"]
+    let trl = fromOffsets [unit_X + unitY,unitX,unitX,unitY,unit_X,unit_X,unitX + unitY]
+        alga = 8*(7+6+5) + (2+3+4)*1 + 7*(2+3) + 6*(3+4) + 5*(2+4)
+        d = genDiagram trl objs id alga
+    return d
+
+
 -- ==================================問の証明概要図=====================================================
 
 q3 = do 
