@@ -16,6 +16,31 @@ diagrams =         [("compositionImage.pdf",compositionImage)
                    ]
 
 -- =====================1.5.1x
+
+-- ============像と逆像の随伴
+imageOf_fA' = do
+    objs <- mapM getPGFObj ["B'","B","A","A'"]
+    labs <- mapM getPGFLabel ["\\overline{f}","f"]
+    let l i = view (ix $ i - 1) labs
+        trl = fromOffsets $ [unitX]  ++ map (0.8 *^) [unitY,unitY]
+        alga = path [4,3,1,2] + 3*2 + 4*1 
+        update = tackLabel 4 1 (l 1) False . tackLabel 3 2 (l 2) True . actOpt 1 2 monic . actOpt 4 3 monic
+        d = genDiagram trl objs update alga
+    return d
+
+rightAdjoint = do
+    objs <- mapM getPGFObj ["B'","B","A","f^{\\#}B'","A'"]
+    labs <- mapM getPGFLabel ["\\overline{f}","f"]
+    let l i = view (ix $ i - 1) labs
+        trl = fromOffsets [unitX,unitY,unit_X,0.5 *^ (unit_X + unitY)]
+        alga1 = path [5,1,2] + path [5,3,2] + 4*(1+3)
+        alga2 = alga1 + 5*4
+        update = tackLabel 5 1 (l 1) False . tackLabel 3 2 (l 2) True . actOpt 1 2 monic . actOpt 4 3 monic . actOpt 5 3 monic
+        ds = map (atop (plb # translateY 0.75 # lw thin) . genDiagram trl objs update) [alga1,alga2]
+        qs = [NoLine,ExistsOnly]
+    padded 0.1 <$> diagramLanguage qs ds
+
+
 compositionImage = do
     objs <- mapM getPGFObj ["A","B","C","Im(f)","Im(g)","Im(fg)"]
     labs <- mapM getPGFLabel ["f" --1

@@ -167,19 +167,27 @@ homCovUnit2 = do
     let alga = 1*2
         f i = view (ix $ i - 1) objs
         t = derivTree f 1 alga # centerXY ||| f 3 # scale 0.8
-    return t    
+    return t
+
+homCovUnits = do
+    u1 <- homCovUnit1
+    u2 <- homCovUnit2
+    return $ u1 ||| strutX 1 ||| u2
 
 homCovMor = do
     objs <- mapM getPGFObj ["A \\stackrel{\\varphi}{\\to} X \\stackrel{f}{\\to} Y \\stackrel{g}{\\to} Z","A \\stackrel{\\varphi}{\\to} X \\stackrel{f}{\\to} Y","A \\stackrel{\\varphi}{\\to} X","(A,f)","(A,g)","(A,fg)"]
+    objs' <- mapM getPGFObj ["A \\stackrel{\\varphi}{\\to} X \\stackrel{fg}{\\to} Z","A \\stackrel{\\varphi}{\\to} X"]
     let alga = 2*3
         f i = view (ix $ i - 1) objs
+        g i = view (ix $ i - 1) objs'
         subt = derivTree f 2 alga # centerXY ||| f 4 # scale 0.8
         d = 1.01 * diameter unitX subt
         t = centerXY (subt === strutY 0.01 === (hrule d # lw veryThin ||| f 5 # scale 0.8) === strutY 0.01 === f 1)
         -- ここから二つめの導出図
         alga1 = 1*2
-        t' = centerXY $ derivTree f 1 alga1 # centerXY ||| f 6 # scale 0.8
-    return $ t ||| strutX 0.1 ||| t'
+        t' = centerXY $ derivTree g 1 alga1 # centerXY ||| f 6 # scale 0.8
+    eq <- getPGFObj "="
+    return $ t ||| strutX 0.3 ||| eq ||| strutX 0.3 ||| t'
 
 derivProd = do
     objs <- mapM getPGFObj [
@@ -190,6 +198,51 @@ derivProd = do
         f i = view (ix $ i-1) objs
         t = derivTree f 1 alga # centerXY ||| f 3 # scale 0.8
     return t
+
+
+-- ======================= 図式と関手
+
+template1 alga = do
+    objs <- mapM getPGFObj $ zipWith (++) (replicate 6 "B_") (map show [1..6])
+    labs <- mapM getPGFLabel ["f_1","f_2","f_3","f_4","f_5","f_6","f_7","f_8","f_9"]
+    let trl = fromOffsets [unitX + unit_Y,unitX,unit_X + unit_Y, unitX,unitX+unit_Y]
+        l i = view (ix $ i-1) labs
+        -- objs = replicate 6 bc
+        update = tackLabel 1 2 (l 1) True . tackLabel 2 4 (l 2) False . tackLabel 2 3 (l 3) True . tackLabel 4 5 (l 4) True . tackLabel 3 5 (l 5) False 
+                . tackLabel 3 4 (l 6) False . tackLabel 4 6 (l 7) False . tackLabel 3 6 (l 8) True . tackLabel 5 6 (l 9) True
+        d = genDiagram trl objs update alga
+    return d
+
+catB = do
+    x <- getPGFObj "\\mathbf{B}:"
+    y <- template1 $ (3+4+5)*6 + path [1,2,4,5] + 2*3 + 3*(4+5)
+    return $ x ||| strutX 0.1 ||| y
+
+subDiagram = do
+    x <- getPGFObj "D:"
+    y <- template1 $ path [2,3,4,5,6]
+    return $ translate (unit_X + unitY) $ x # translate (unitX + unit_Y) ||| strutX 0.1 ||| y
+
+freeCatD = do
+    x <- getPGFObj "\\mathbf{D}:"
+    y <- template1 $ path [2,3,4,5,6] + 2*4 + 3*(5+6) + 4*6
+    return $ translate (unit_X + unitY) $ x # translate (unitX + unit_Y)  ||| strutX 0.1 ||| y
+
+catBColored = do
+    objs <- mapM getPGFObj $ zipWith (++) (replicate 6 "B_") (map show [1..6])
+    labs <- mapM getPGFLabel ["f_1","f_2","f_3","f_4","f_5","f_6","f_7","f_8","f_9"]
+    let trl = fromOffsets [unitX + unit_Y,unitX,unit_X + unit_Y, unitX,unitX+unit_Y]
+        alga = (3+4+5)*6 + path [1,2,4,5] + 2*3 + 3*(4+5)
+        l i = view (ix $ i-1) labs
+        -- objs = replicate 6 bc
+        redarr = over actions (lc red:)
+        greenarr = over actions (lc green :)
+        update = tackLabel 1 2 (l 1) True . tackLabel 2 4 (l 2) False . tackLabel 2 3 (l 3) True . tackLabel 4 5 (l 4) True . tackLabel 3 5 (l 5) False 
+                . tackLabel 3 4 (l 6) False . tackLabel 4 6 (l 7) False . tackLabel 3 6 (l 8) True . tackLabel 5 6 (l 9) True
+                . actOpt 2 3 (over actions (lc red :)) . actOpt 3 4 redarr . actOpt 4 5 redarr . actOpt 5 6 redarr 
+                . actOpt 2 4 greenarr . actOpt 3 5 greenarr . actOpt 4 6 greenarr . actOpt 3 6 greenarr
+        d = genDiagram trl objs update alga
+    return d
 
 -- ========================出題の図式
 
