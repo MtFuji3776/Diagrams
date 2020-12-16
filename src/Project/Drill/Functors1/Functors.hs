@@ -112,15 +112,15 @@ catAB = do
 -- ============================= 1.2 色々な関手 =========================
 -- 恒等関手Id
 diaId = do
-    objs <- mapM getPGFObj ["A","B"]
-    lab <- getPGFLabel "f"
+    objs <- mapM getPGFObj ["A \\stackrel{f}{\\to} B","A \\stackrel{f}{\\to} B"]
+    -- lab <- getPGFLabel "f"
     labID <- getPGFLabel "1_{\\mathbf{A}}"
     let trl = fromOffsets [unitX]
         alga = 1*2
-        update = tackLabel 1 2 lab True 
-        d = genDiagram trl objs update alga # centerXY
-        hor = centerXY $ hrule 1.5 ||| labID 
-    return $ vsep 0.1 [d,hor,d]
+        f i = view (ix $ i-1) objs
+        t = derivTree f 1 alga # centerXY
+        hor = t ||| labID # scale 0.8
+    return hor
 
 
 
@@ -193,11 +193,71 @@ derivProd = do
     objs <- mapM getPGFObj [
         "X \\times A \\stackrel{1_X \\times f}{\\to} {X \\times B}"
         ,"A \\stackrel{f}{\\to} B"
-        ,"X \\times f"]
+        ,"X \\times -"]
     let alga = 1*2
         f i = view (ix $ i-1) objs
         t = derivTree f 1 alga # centerXY ||| f 3 # scale 0.8
     return t
+
+productUnitLaw1 = do
+    objs <- mapM getPGFObj ["X","X \\times A" , "A","A","X \\times A", "X"]
+    labs <- mapM getPGFLabel ["\\pi_1","\\pi_2","1_A","1_X \\times 1_A","1_X","\\pi_1","\\pi_2"]
+    let l i = view (ix $ i - 1) labs
+        alga = 5*(6+4+2) + (6+2)*1 + (2+4)*3
+        trl = fromOffsets [unitX,unitX,unitY,unit_X,unit_X]
+        update = tackLabel 2 1 (l 1) True . tackLabel 2 3 (l 2) False . tackLabel 4 3 (l 3) True . tackLabel_ 5 2 (l 4) True 0.5 0.2 . tackLabel 6 1 (l 5) False
+                . tackLabel 5 6 (l 6) False . tackLabel 5 4 (l 7) True
+        d = genDiagram trl objs update alga
+    return d
+
+productUnitLaw2 = do
+    objs <- mapM getPGFObj ["X","X \\times A" , "A","A","X \\times A", "X"]
+    labs <- mapM getPGFLabel ["\\pi_1","\\pi_2","1_A","1_{X \\times A}","1_X","\\pi_1","\\pi_2"]
+    let l i = view (ix $ i - 1) labs
+        alga = 5*(6+4+2) + (6+2)*1 + (2+4)*3
+        trl = fromOffsets [unitX,unitX,unitY,unit_X,unit_X]
+        update = tackLabel 2 1 (l 1) True . tackLabel 2 3 (l 2) False . tackLabel 4 3 (l 3) True . tackLabel_ 5 2 (l 4) True 0.5 0.2 . tackLabel 6 1 (l 5) False
+                . tackLabel 5 6 (l 6) False . tackLabel 5 4 (l 7) True
+        d = genDiagram trl objs update alga
+    return d
+
+productUnitLaw = do
+    x <- productUnitLaw1
+    y <- productUnitLaw2
+    eq <- getPGFObj "="
+    return $ hsep 0.1 [x,eq # translateY 0.5 ,y]
+
+
+homContraVariant = do
+    objs <- mapM getPGFObj ["X \\stackrel{f}{\\to} Y \\stackrel{\\varphi}{\\to} A","Y \\stackrel{\\varphi}{\\to} A"]
+    let f i = view (ix $ i - 1) objs
+        alga = 1*2
+        t = derivTree f 1 alga # centerXY
+    l <- getPGFObj "(f,A)"
+    return $ hsep 0.05 [t,l]
+
+genDerivation xs lab = do
+    objs <- mapM getPGFObj xs :: OnlineTex [Diagram PGF]
+    let f i = view (ix $ i - 1) objs
+        alga = 1*2
+        t = derivTree f 1 alga # centerXY
+    l <- getPGFObj lab
+    return $ hsep 0.05 [t,l] 
+
+homContraUnit1 = genDerivation ["X \\stackrel{\\Box f}{\\to} X \\stackrel{\\psi}{\\to} A","X \\stackrel{\\psi}{\\to} A"] "(\\Box f,A)"
+
+homContraUnit2 = genDerivation ["Y \\stackrel{f \\Box}{\\to} Y \\stackrel{\\varphi}{\\to} A","Y \\stackrel{\\varphi}{\\to} A"] "(f \\Box,A)"
+
+
+-- 上の方のhomCovMorを参照すべし。
+homContraComposition = do
+    objs <- mapM getPGFObj ["X \\stackrel{f}{\\to} Y \\stackrel{g}{\\to} Z \\stackrel{\\varphi}{\\to} A","Y \\stackrel{g}{\\to} Z \\stackrel{\\varphi}{\\to} A","Z \\stackrel{\\varphi}{\\to} A"]
+    --y <- getPGFObj "(g,A)"
+    --z <- getPGFObj "(f,A)"
+    let alga = path [1,2,3]
+        f i = view (ix $ i - 1) objs
+        t = derivTree f 1 alga # centerXY
+    return $ t
 
 
 -- ======================= 図式と関手

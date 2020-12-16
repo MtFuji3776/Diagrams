@@ -319,10 +319,11 @@ monic mopts =
     let trl = view locTrail mopts
         d   = norm $ (atParam trl 1) .-. (atParam trl 0)
         p0  = atParam trl 0
-        u0  = (0.05 * d *^) . normalize . perp $ tangentAtStart trl
-        line = fromOffsets [u0] <> fromOffsets [-u0]
-        monicTail = place line (p0 .+^ (-0.7 *^ perp u0)) -- ArrowHTのGapの分だけ微調整。正直美しくない
-    in mopts & symbols %~ (monicTail:)
+        u0  = (0.05 *^) . normalize . perp $ tangentAtStart trl
+        line = fromOffsets [u0,(-2) *^ u0,u0]
+        monicTrail = (fromOffsets [tangentAtStart trl,-(tangentAtStart trl)] <> line <> unLoc trl) `at` p0
+        --monicTail = place line (p0 .+^ (-0.7 *^ perp u0)) -- ArrowHTのGapの分だけ微調整。正直美しくない
+    in mopts & locTrail .~ monicTrail
 
 
 
