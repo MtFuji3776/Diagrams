@@ -52,12 +52,13 @@ fig_cat2 = do
         l2 i = view (ix (i-1)) labs2
         update2 = actOpt_Twin 1 2 False (set actions [lc red])
                 . actOpt 2 4 (set actions [lc red]) . tackLabel 4 3 (l2 5) True
-                . tackLabelTwin 1 2 True (l2 2) True . tackLabelTwin 1 2 True reticle False
+                . tackLabelTwin 1 2 True (l2 2) True  -- . tackLabelTwin 1 2 True reticle False
                 . tackLabelTwin 1 2 False (l2 1) False
                 . (tackLabel 2 4 (l2 4) True ) . tackLabel 4 5 (l2 5) True
                 . tackLabel 2 3 (l2 3) True . introTwin 1 2
         d2 = genDiagram trl2 objs2 update2 alga2 <> place (view (ix 4) objs2) (0.3 *^ unit_X)
-    return $ d === strutY 0.2 === place (view (ix 6) labs2) (0.3 *^ unit_X) === strutY 0.1 === d2
+        x = place reticle (0.5 ^& 0) # lw thin
+    return $ d === strutY 0.2 === place (view (ix 6) labs2) (0.3 *^ unit_X) === strutY 0.1 === (d2  <> x)
 
 -- 共変関手の公理1,2
 fig_def1 = do
@@ -82,7 +83,7 @@ fig_def1 = do
         update2 = tackLabel 1 1 (l 4) True
                 . tackLabel 1 2 (l 5) True
                 . tackLabel 2 2 (l 6) True
-        vl = strutY 0.1 === (translateX (-0.1) $ hrule 1.3 # alignL # lw thick) ||| o 5 # translateY (-0.05) === strutY 0.1
+        vl = strutY 0.1 === (translateX (-0.1) $ hrule 1.3 # alignL # lw thin) ||| strutX 0.05 ||| (o 5 # translateY (-0.05) === strutY 0.1)
         d1 = genDiagram trl (map o [1,2]) update1 alga
         d2 = genDiagram trl (map o [3,4]) update2 alga
     return $ pad 1.5 $ d1 === vl === d2
@@ -104,6 +105,68 @@ catAB = do
         alga2 = path [1,2,3,4] + 2*4
         l2 i = view (ix $ i - 1) labs2
         update2 = tackLabelTwin 1 2 True (l2 1) True . tackLabelTwin 1 2 False (l2 2) False . tackLabel 2 3 (l2 4) True . tackLabel 3 4 (l2 5) True . tackLabel 2 4 (l2 3) False
+                . introTwin 1 2
+        mark = place reticle (0.5 *^ unitX)
+        d2 = b ||| strutX 0.05 ||| (genDiagram trl2 objs2 update2 alga2 <> mark)
+    return $ d1 === strutY 0.5 === d2
+
+-- ====== 反変関手の例
+
+derivContraHom = do
+    objs <- mapM getPGFObj ["(X,A) \\stackrel{(f,A)}{\\to} (Y,A)","X \\stackrel{f}{\\to} Y"]
+    func <- getPGFObj "(-,A)"
+    let alga  = 1*2
+        f i = view (ix $ i - 1) objs
+        t = derivTree f 1 alga # centerXY
+        d1 = t ||| strutY 0.05 ||| func
+    objs1 <- mapM getPGFObj ["X \\stackrel{f}{\\to} Y \\stackrel{\\varphi}{\\to} A","Y \\stackrel{\\varphi}{\\to} A"]
+    func1 <- getPGFObj "(f,A)"
+    colon <- getPGFObj ";"
+    let f' i = view (ix $ i - 1) objs1
+        t1 = derivTree f' 1 alga # centerXY
+        d2 = t1 ||| strutY 0.05 ||| func1
+        d = d1 ||| strutX 0.1 ||| colon ||| strutX 0.1 ||| d2
+    return d
+
+contraFunctor = do
+    objs1 <- mapM getPGFObj ["A_1","A_2","A_3"]
+    labs1 <- mapM getPGFLabel ["f_1","f_2"]
+    a <- getPGFObj "\\mathbf{A}:"
+    let trl1 = fromOffsets [unitX,unitX]
+        alga1 = path [1,2,3]
+        l1 i = view (ix $ i - 1) labs1
+        update1 = tackLabel 1 2 (l1 1) True . tackLabel 2 3 (l1 2) True
+        d1 = a ||| strutX 0.05 ||| genDiagram trl1 objs1 update1 alga1
+    objs2 <- mapM getPGFObj ["\\textcolor{red}{FA_3}","\\textcolor{red}{FA_2}","B_4","\\textcolor{red}{FA_1}"]
+    labs2 <- mapM getPGFLabel ["\\textcolor{red}{Ff_2}","g_1","\\textcolor{red}{Ff_1}","g_4","g_5"]
+    b <- getPGFObj "\\mathbf{B}:"
+    let trl2 = fromOffsets [unitX,unitX + unit_Y,unit_X]
+        alga2 = path [1,2,3,4] + 2*4
+        l2 i = view (ix $ i - 1) labs2
+        update2 = actOpt_Twin 1 2 True (set actions [lc red])
+                . actOpt 2 4 (set actions [lc red]) . tackLabelTwin 1 2 True (l2 1) True . tackLabelTwin 1 2 False (l2 2) False . tackLabel 2 3 (l2 4) True . tackLabel 3 4 (l2 5) True . tackLabel 2 4 (l2 3) False
+                . introTwin 1 2
+        mark = place reticle (0.5 *^ unitX)
+        d2 = b ||| strutX 0.05 ||| (genDiagram trl2 objs2 update2 alga2 <> mark)
+    return $ d1 === strutY 0.5 === d2
+
+reverseA = do
+    objs1 <- mapM getPGFObj ["A_1","A_2","A_3"]
+    labs1 <- mapM getPGFLabel ["f_1","f_2"]
+    a <- getPGFObj "\\mathbf{A}^{\\mathrm{op}}:"
+    let trl1 = fromOffsets [unitX,unitX]
+        alga1 = path [3,2,1]
+        l1 i = view (ix $ i - 1) labs1
+        update1 = tackLabel 2 1 (l1 1) True . tackLabel 3 2 (l1 2) True
+        d1 = a ||| strutX 0.05 ||| genDiagram trl1 objs1 update1 alga1
+    objs2 <- mapM getPGFObj ["\\textcolor{red}{FA_3}","\\textcolor{red}{FA_2}","B_4","\\textcolor{red}{FA_1}"]
+    labs2 <- mapM getPGFLabel ["\\textcolor{red}{Ff_2}","g_1","\\textcolor{red}{Ff_1}","g_4","g_5"]
+    b <- getPGFObj "\\mathbf{B}:"
+    let trl2 = fromOffsets [unitX,unitX + unit_Y,unit_X]
+        alga2 = path [1,2,3,4] + 2*4
+        l2 i = view (ix $ i - 1) labs2
+        update2 = actOpt_Twin 1 2 True (set actions [lc red])
+                . actOpt 2 4 (set actions [lc red]) . tackLabelTwin 1 2 True (l2 1) True . tackLabelTwin 1 2 False (l2 2) False . tackLabel 2 3 (l2 4) True . tackLabel 3 4 (l2 5) True . tackLabel 2 4 (l2 3) False
                 . introTwin 1 2
         mark = place reticle (0.5 *^ unitX)
         d2 = b ||| strutX 0.05 ||| (genDiagram trl2 objs2 update2 alga2 <> mark)
@@ -148,11 +211,18 @@ diaProd = do
     return d
 
 derivHomCov = do
+    objs1 <- mapM getPGFObj ["(A,X) \\stackrel{(A,f)}{\\to} (A,Y)","X \\stackrel{f}{\\to} Y"]
+    func1 <- getPGFObj "(A,-)"
+    let alga  = 1*2
+        f' i = view (ix $ i - 1) objs1
+        t' = derivTree f' 1 alga # centerXY
+        d1 = t' ||| strutY 0.05 ||| func1
     objs <- mapM getPGFObj ["A \\stackrel{\\varphi}{\\to} X \\stackrel{f}{\\to} Y","A \\stackrel{\\varphi}{\\to} X","(A,f)"]
-    let alga = 1*2
-        f i = view (ix $ i - 1) objs
+    colon <- getPGFObj ";"
+    let f i = view (ix $ i - 1) objs
         t = derivTree f 1 alga # centerXY
-        d = t ||| f 3 # scale 0.8
+        d2 = t ||| f 3 # scale 0.8
+        d = hsep 0.1 [d1,colon,d2]
     return d
 
 homCovUnit1 = do
@@ -251,13 +321,19 @@ homContraUnit2 = genDerivation ["Y \\stackrel{f \\Box}{\\to} Y \\stackrel{\\varp
 
 -- 上の方のhomCovMorを参照すべし。
 homContraComposition = do
-    objs <- mapM getPGFObj ["X \\stackrel{f}{\\to} Y \\stackrel{g}{\\to} Z \\stackrel{\\varphi}{\\to} A","Y \\stackrel{g}{\\to} Z \\stackrel{\\varphi}{\\to} A","Z \\stackrel{\\varphi}{\\to} A"]
-    --y <- getPGFObj "(g,A)"
-    --z <- getPGFObj "(f,A)"
-    let alga = path [1,2,3]
+    objs <- mapM getPGFObj ["X \\stackrel{f}{\\to} Y \\stackrel{g}{\\to} Z \\stackrel{\\varphi}{\\to} A","Y \\stackrel{g}{\\to} Z \\stackrel{\\varphi}{\\to} A","Y \\stackrel{\\varphi}{\\to} A","(g,A)","(f,A)","(fg,A)"]
+    objs' <- mapM getPGFObj ["X \\stackrel{fg}{\\to} X \\stackrel{\\varphi}{\\to} Z","A \\stackrel{\\varphi}{\\to} X"]
+    let alga = 2*3
         f i = view (ix $ i - 1) objs
-        t = derivTree f 1 alga # centerXY
-    return $ t
+        g i = view (ix $ i - 1) objs'
+        subt = derivTree f 2 alga # centerXY ||| f 4 # scale 0.8
+        d = 1.01 * diameter unitX subt
+        t = centerXY (subt === strutY 0.01 === (hrule d # lw veryThin ||| f 5 # scale 0.8) === strutY 0.01 === f 1)
+        -- ここから二つめの導出図
+        alga1 = 1*2
+        t' = centerXY $ derivTree g 1 alga1 # centerXY ||| f 6 # scale 0.8
+    eq <- getPGFObj "="
+    return $ t ||| strutX 0.2 ||| eq ||| strutX 0.2 ||| t'
 
 
 -- ======================= 図式と関手
