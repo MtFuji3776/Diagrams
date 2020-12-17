@@ -42,6 +42,24 @@ rightAdjoint = do
         qs = [NoLine,ExistsOnly]
     padded 0.1 <$> diagramLanguage qs ds
 
+leftAdjoint = do
+    objs <- mapM getPGFObj ["B'","B","A","f^{\\#}B'","A'"]
+    f <- getPGFLabel "f"
+    let trl = fromOffsets [unitX,unitY,unit_X,0.5 *^ (unit_X + unitY)]
+        alga = 5 *(1+4+3) + 4*(1+3) + (1+3)*2
+        update = actOpt 5 4 monic . actOpt 5 3 monic . actOpt 4 3 monic . actOpt 1 2 monic . tackLabel 3 2 f True
+        d = genDiagram trl objs update alga
+        symb = plb `place` (0^&0.75)
+    return $ d <> symb
+
+allowance1501 = do
+    objs <- mapM getPGFObj ["B'","B","A","A'"]
+    f <- getPGFLabel "f"
+    let trl = fromOffsets [unitX,unitY,unit_X]
+        alga = path[4,1,2] + path[4,3,2]
+        update = actOpt 1 2 monic . actOpt 4 3 monic . tackLabel 3 2 f True
+        d = genDiagram trl objs update alga
+    return d
 
 compositionImage = do
     objs <- mapM getPGFObj ["A","B","C","Im(f)","Im(g)","Im(fg)"]

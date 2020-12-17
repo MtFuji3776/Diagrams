@@ -88,6 +88,88 @@ fig_def1 = do
         d2 = genDiagram trl (map o [3,4]) update2 alga
     return $ pad 1.5 $ d1 === vl === d2
 
+functorAxiom2Commutativeness = do
+    objs1 <- mapM getPGFObj ["A_1","A_2","A_3"]
+    labs1 <- mapM getPGFLabel ["f","g","fg"]
+    let trl1 = fromOffsets [unitX,unit_Y]
+        alga1 = path [1,2,3] + 1*3
+        l xs i = view (ix $ i-1) xs
+        l1 = l labs1
+        update f = tackLabel 1 2 (f 1) True . tackLabel 2 3 (f 2) True . tackLabel 1 3 (f 3) False
+        update1 = update l1
+        d1 = genDiagram trl1 objs1 update1 alga1
+    objs2 <- mapM getPGFObj ["FA_1","FA_2","FA_3"]
+    labs2 <- mapM getPGFLabel ["Ff","Fg","F(fg)"]
+    let l2 = l labs2
+        update2 = update l2
+        d2 = genDiagram trl1 objs2 update2 alga1
+    func <- getPGFObj "F"
+    let line = hrule 1.3 # centerXY # lw thin ||| func
+        d = vsep 0.03 [d1 # centerXY , line, d2 # centerXY]
+    return d
+
+functorAxiom = do
+    x <- fig_def1
+    y <- functorAxiom2Commutativeness
+    return $ hsep 0.1 $ map centerXY [x,y]
+
+
+contraFunctorUnitLaw = do
+    objs <- mapM getPGFObj ["A_1"  -- 1
+                           ,"A_2"
+                           ,"FA_1" -- 3
+                           ,"FA_2"
+                           ,"F"]   -- 5
+    labs <- mapM getPGFLabel ["\\Box f"                 -- 1
+                             ,"f"
+                             ,"f\\Box"                 -- 3
+                             ,"F(\\Box f)"
+                             ,"Ff"                      -- 5
+                             ,"F(f \\Box)"]
+    let alga = 1*(1+2)*2
+        alga' = 2*(1+2)*1
+        trl = fromOffsets [unitX]
+        o i = view (ix (i-1)) objs
+        l i = view (ix (i-1)) labs
+        update1 = tackLabel 1 1 (l 1) True
+                . tackLabel 1 2 (l 2) True
+                . tackLabel 2 2 (l 3) True
+        update2 = tackLabel 1 1 (l 4) True
+                . tackLabel 2 1 (l 5) True
+                . tackLabel 2 2 (l 6) True
+        vl = strutY 0.1 === (translateX (-0.1) $ hrule 1.3 # alignL # lw thin) ||| strutX 0.05 ||| (o 5 # translateY (-0.05) === strutY 0.1)
+        d1 = genDiagram trl (map o [1,2]) update1 alga
+        d2 = genDiagram trl (map o [3,4]) update2 alga'
+    return $ pad 1.5 $ d1 === vl === d2
+
+contraFunctorCommutativeLaw = do
+    objs1 <- mapM getPGFObj ["A_1","A_2","A_3"]
+    labs1 <- mapM getPGFLabel ["f","g","fg"]
+    let trl1 = fromOffsets [unitX,unit_Y]
+        alga1 = path [1,2,3] + 1*3
+        alga1' = path [3,2,1] + 3*1
+        l xs i = view (ix $ i-1) xs
+        l1 = l labs1
+        update f = tackLabel 2 1 (f 1) True . tackLabel 3 2 (f 2) True . tackLabel 3 1 (f 3) False
+        update' f = tackLabel 1 2 (f 1) True . tackLabel 2 3 (f 2) True . tackLabel 1 3 (f 3) False
+        update1 = update' l1
+        d1 = genDiagram trl1 objs1 update1 alga1
+    objs2 <- mapM getPGFObj ["FA_1","FA_2","FA_3"]
+    labs2 <- mapM getPGFLabel ["Ff","Fg","F(fg)"]
+    let l2 = l labs2
+        update2 = update l2
+        d2 = genDiagram trl1 objs2 update2 alga1'
+    func <- getPGFObj "F"
+    let line = hrule 1.3 # centerXY # lw thin ||| func
+        d = vsep 0.03 [d1 # centerXY , line, d2 # centerXY]
+    return d
+
+contraFunctorAxiom = do
+    x <- contraFunctorUnitLaw
+    y <- contraFunctorCommutativeLaw
+    return $ hsep 0.1 $ map centerXY [x,y]
+
+
 -- 多用する圏A,Bの例
 catAB = do
     objs1 <- mapM getPGFObj ["A_1","A_2","A_3"]
@@ -151,13 +233,13 @@ contraFunctor = do
     return $ d1 === strutY 0.5 === d2
 
 reverseA = do
-    objs1 <- mapM getPGFObj ["A_1","A_2","A_3"]
-    labs1 <- mapM getPGFLabel ["f_1","f_2"]
+    objs1 <- mapM getPGFObj ["A_3","A_2","A_1"]
+    labs1 <- mapM getPGFLabel ["f_2","f_1"]
     a <- getPGFObj "\\mathbf{A}^{\\mathrm{op}}:"
     let trl1 = fromOffsets [unitX,unitX]
-        alga1 = path [3,2,1]
+        alga1 = path [1,2,3]
         l1 i = view (ix $ i - 1) labs1
-        update1 = tackLabel 2 1 (l1 1) True . tackLabel 3 2 (l1 2) True
+        update1 = tackLabel 1 2 (l1 1) True . tackLabel 2 3 (l1 2) True
         d1 = a ||| strutX 0.05 ||| genDiagram trl1 objs1 update1 alga1
     objs2 <- mapM getPGFObj ["\\textcolor{red}{FA_3}","\\textcolor{red}{FA_2}","B_4","\\textcolor{red}{FA_1}"]
     labs2 <- mapM getPGFLabel ["\\textcolor{red}{Ff_2}","g_1","\\textcolor{red}{Ff_1}","g_4","g_5"]
@@ -261,17 +343,17 @@ homCovMor = do
 
 derivProd = do
     objs <- mapM getPGFObj [
-        "X \\times A \\stackrel{1_X \\times f}{\\to} {X \\times B}"
-        ,"A \\stackrel{f}{\\to} B"
-        ,"X \\times -"]
+        "A \\times X \\stackrel{1_A \\times f}{\\to} {A \\times Y}"
+        ,"X \\stackrel{f}{\\to} Y"
+        ,"A \\times -"]
     let alga = 1*2
         f i = view (ix $ i-1) objs
         t = derivTree f 1 alga # centerXY ||| f 3 # scale 0.8
     return t
 
 productUnitLaw1 = do
-    objs <- mapM getPGFObj ["X","X \\times A" , "A","A","X \\times A", "X"]
-    labs <- mapM getPGFLabel ["\\pi_1","\\pi_2","1_A","1_X \\times 1_A","1_X","\\pi_1","\\pi_2"]
+    objs <- mapM getPGFObj ["A","A \\times X" , "X","X","A \\times X", "A"]
+    labs <- mapM getPGFLabel ["\\pi_1","\\pi_2","1_X","1_A \\times 1_X","1_A","\\pi_1","\\pi_2"]
     let l i = view (ix $ i - 1) labs
         alga = 5*(6+4+2) + (6+2)*1 + (2+4)*3
         trl = fromOffsets [unitX,unitX,unitY,unit_X,unit_X]
@@ -281,8 +363,8 @@ productUnitLaw1 = do
     return d
 
 productUnitLaw2 = do
-    objs <- mapM getPGFObj ["X","X \\times A" , "A","A","X \\times A", "X"]
-    labs <- mapM getPGFLabel ["\\pi_1","\\pi_2","1_A","1_{X \\times A}","1_X","\\pi_1","\\pi_2"]
+    objs <- mapM getPGFObj ["A","A \\times X" , "X","X","A \\times X", "A"]
+    labs <- mapM getPGFLabel ["\\pi_1","\\pi_2","1_X","1_{A \\times X}","1_A","\\pi_1","\\pi_2"]
     let l i = view (ix $ i - 1) labs
         alga = 5*(6+4+2) + (6+2)*1 + (2+4)*3
         trl = fromOffsets [unitX,unitX,unitY,unit_X,unit_X]
@@ -296,6 +378,28 @@ productUnitLaw = do
     y <- productUnitLaw2
     eq <- getPGFObj "="
     return $ hsep 0.1 [x,eq # translateY 0.5 ,y]
+
+productCompositionLaw = do
+    objs1 <- mapM getPGFObj ["A","A \\times Z","Z","Y","A \\times Y","A","A","A \\times X","X"]
+    labs1 <- mapM getPGFLabel ["\\pi_1","\\pi_2","g","1_A \\times g","1_A","f","1_A \\times f"]
+    let l xs i = view (ix $ i-1) xs
+        l1 = l labs1
+        trl1 = fromOffsets [unitX,unitX,unitY,unit_X,unit_X,unitY,unitX,unitX]
+        alga1 = path [8,7,6,1] + path [8,9,4,3] + path [8,5,2,1] + 5*(6+4) + 2*3
+        update1 = tackLabel 2 1 (l1 1) True . tackLabel 2 3 (l1 2) False . tackLabel 4 3 (l1 3) True . tackLabel_ 5 2 (l1 4) True 0.5 0.2 . tackLabel 6 1 (l1 5) False
+                . tackLabel 6 5 (l1 1) False . tackLabel 5 4 (l1 2) True . tackLabel 7 6 (l1 5) False . tackLabel_ 8 5 (l1 7) True 0.5 0.2 . tackLabel 9 4 (l1 6) True
+                . tackLabel 8 7 (l1 1) False . tackLabel 8 9 (l1 2) True . tackLabel 5 6 (l1 1) False
+        d1 = genDiagram trl1 objs1 update1 alga1
+    objs2 <- mapM getPGFObj ["A","A \\times Z","Z","X","A \\times X","A"]
+    labs2 <- mapM getPGFLabel ["\\pi_1","\\pi_2","1_A","1_A \\times fg","fg"]
+    let l2 = l labs2
+        trl2 = fromOffsets [unitX,unitX,unitY,unit_X,unit_X]
+        alga2 = 5*(2+4+6) + 6*1 + 4*3 + 2*(1+3)
+        update2 = tackLabel 2 1 (l2 1) True . tackLabel 2 3 (l2 2) False . tackLabel 6 1 (l2 3) False . tackLabel_ 5 2 (l2 4) True 0.5 0.2 . tackLabel 4 3 (l2 5) True
+                . tackLabel 5 6 (l2 1) False . tackLabel 5 4 (l2 2) True
+        d2 = genDiagram trl2 objs2 update2 alga2
+    return . hsep 0.3 $ map centerXY [d1,d2]
+
 
 
 homContraVariant = do
@@ -321,8 +425,8 @@ homContraUnit2 = genDerivation ["Y \\stackrel{f \\Box}{\\to} Y \\stackrel{\\varp
 
 -- 上の方のhomCovMorを参照すべし。
 homContraComposition = do
-    objs <- mapM getPGFObj ["X \\stackrel{f}{\\to} Y \\stackrel{g}{\\to} Z \\stackrel{\\varphi}{\\to} A","Y \\stackrel{g}{\\to} Z \\stackrel{\\varphi}{\\to} A","Y \\stackrel{\\varphi}{\\to} A","(g,A)","(f,A)","(fg,A)"]
-    objs' <- mapM getPGFObj ["X \\stackrel{fg}{\\to} X \\stackrel{\\varphi}{\\to} Z","A \\stackrel{\\varphi}{\\to} X"]
+    objs <- mapM getPGFObj ["X \\stackrel{f}{\\to} Y \\stackrel{g}{\\to} Z \\stackrel{\\varphi}{\\to} A","Y \\stackrel{g}{\\to} Z \\stackrel{\\varphi}{\\to} A","Z \\stackrel{\\varphi}{\\to} A","(g,A)","(f,A)","(fg,A)"]
+    objs' <- mapM getPGFObj ["X \\stackrel{fg}{\\to} Z \\stackrel{\\varphi}{\\to} A","Z \\stackrel{\\varphi}{\\to} A"]
     let alga = 2*3
         f i = view (ix $ i - 1) objs
         g i = view (ix $ i - 1) objs'
