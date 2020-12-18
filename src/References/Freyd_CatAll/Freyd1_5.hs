@@ -240,3 +240,21 @@ pullbackInLH = do
         d5 = genDiagram trl2 (map o [11,12,13]) update2 alga2
         d = vsep 0.05 [d',d4] === strutY 0.1 === d5
     return d
+
+regularCatTemplate b = do
+    let trl = fromOffsets [unit_Y,unitX,unitY,0.5*^(unitX + unit_Y)]
+        objs = replicate 5 bc
+        alga1 = 1*(2+4) + (2+4)*3
+        alga2 = alga1 + path [4,5,3]
+        update0 = actOpt 2 3 cover
+        update1 = update0 . actOpt 1 4 cover
+        update2 = update1 . actOpt 4 5 cover . actOpt 5 3 monic
+        ds1 = map (atop sign # translateY (-1)) $ zipWith (genDiagram trl objs) [update0,update1] [alga1,alga1]
+        ds2 = map (atop sign # translateY (-1)) $ zipWith (genDiagram trl objs) [update0 , update2] [alga1,alga2]
+        qs = [Forall,Exists]
+        sign = place plb (0 ^& 0.75) # lw thin
+    if b then diagramLanguage qs ds1  else diagramLanguage qs ds2
+
+preRegularCatDefinition = regularCatTemplate True
+
+regularCatDefinition = regularCatTemplate False
