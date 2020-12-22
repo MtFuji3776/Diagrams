@@ -183,3 +183,17 @@ roundBox innards padding =
         height      = diameter (r2 (0,1)) pad_innards
         width       = diameter (r2 (1,0)) pad_innards
     in centerXY innards <> roundedRect width height 0.05 -- pad_innardsはあくまで寸法測定用で、描画には使わない
+
+
+-- 図式ちゅうのオブジェクトを名前リストで指定して、その中心に特定のオブジェクトを設置する関数
+centerPlace d obj ns = 
+    let ps = map (location . fromMaybe (mkSubdiagram mempty) . flip lookupName d) ns
+        p0 = centroid ps
+        -- u0 = p0 .-. origin
+        obj' = place obj p0
+    in d <> obj'
+
+placeWithName d n obj = 
+    let p = location . fromMaybe (mkSubdiagram mempty) $ lookupName n d
+        obj' = place obj p
+    in d <> obj'

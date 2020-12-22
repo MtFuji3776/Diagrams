@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5fc92ec44057d51b5c8d7c530f58bd57d68ef99426a788ac9b4538bdc336dafd
+-- hash: 7e7feb58be3c44c291813b93b6f1f578fa6b11cd4fa511bbc081470ada73ab3d
 
 name:           diagrams
 version:        0.1.0.0
@@ -43,6 +43,7 @@ library
       Project.OSK_LT.LT202011
       ProofTree
       References.DomainTheory.Char2
+      References.DomainTheory.Char3
       References.DomainTheory.Char4
       References.DomainTheory.Char5
       References.Fingertrees

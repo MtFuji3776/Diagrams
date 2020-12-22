@@ -2,7 +2,7 @@ module Char5 where
 
 import Parts
 import DiagramLanguage
-import PGFSurface hiding (easyRender,renderPDF)
+import PGFSurface hiding (easyRender,easyRender')
 import Diagrams.Prelude
 import Algebra.Graph hiding(at,(===))
 

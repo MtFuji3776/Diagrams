@@ -4,6 +4,7 @@ import Parts
 import Diagrams.Prelude
 import DiagramLanguage
 import Algebra.Graph hiding(at,(===))
+import Algebra.Graph.AdjacencyMap hiding(path)
 import PGFSurface
 import Data.Tree.Lens
 import Data.Maybe (fromMaybe)
@@ -122,4 +123,54 @@ lineLength (Node x ts) m =
 --                                   l = hrule dis # lw thin # centerXY
 --                               in (hsep 0.1 $ map h ts) # alignB === strutY 0.02 === l === strutY 0.02 === fst x # centerXY
 --     in h t'
-        
+
+test3 = do
+    objs <- mapM getPGFObj ["A","B","C","D","E","F","G","H"]
+    let alga = path [1,3,4,5,6] + 1*2
+        tr = genTree 1 alga
+        slopt = def & slWidth  .~ fromMaybe (0,0) . extentX
+                    & slHeight .~ fromMaybe (0,0) . extentY
+                    & slHSep   .~ 0.1 
+                    & slVSep   .~ 0.02
+        f i = view (ix $ i - 1) objs
+        sltree = symmLayout' slopt $ fmap f tr
+    return $ renderTree id (\_ _ -> mempty) sltree
+
+-- 導出図用のSymmLayoutOption
+ptLayoutOpts = def & slWidth  .~ fromMaybe (0,0) . extentX
+                   & slHeight .~ fromMaybe (0,0) . extentY
+                   & slHSep   .~ 0.1 
+                   & slVSep   .~ 0.02
+
+-- 導出図用のrenderTree
+renderPt = renderTree id (\_ _ -> mempty)
+
+-- symmLayout'に導出図用のレイアウトオプションを部分適用したもの
+    -- これを生成するときに、導出図ノードの初期値を生成できないだろうか？
+    -- コンストラクタを引数に取る高階関数にしとくのが無難っぽい。柔軟性もこのほうが高そう
+ptLayout f = symmLayout' ptLayoutOpts . fmap f
+
+test4 = do
+    objs <- mapM getPGFObj ["A","B","CSTUVWXYZ","D","E","F","G"]
+    let alga = path [1,3,4,5,6] + 1*2
+        tr = genTree 1 alga
+        f i = view (ix $ i - 1) objs
+        sltree = ptLayout (evalPTNode . fromIntTree f) tr
+    return $ renderPt sltree
+
+data PTNode a = PTNode{idPTN :: Int
+                      ,elementPTN :: a
+                      ,leftLab :: a
+                      ,rightLab :: a
+                      ,linePTN :: a} deriving(Typeable)
+
+instance Monoid a => Default (PTNode a) where
+    def = PTNode 0 mempty mempty mempty mempty
+
+-- genTreeとAlgaから生成したTree Intを、PTNodeで初期化する。その際、getPGFObjと併用することを見越して、DiagramをIntから指定するコールバック関数fを引数に取らせる。
+    -- ptLayout (fromIntTree f)という形式で使用できるはずだ。
+    -- あ、symmLayout'を使うなら先にPTNodeにしちゃダメかも？
+    -- ↑ダメだろ。ついでにその場でevalしちゃうのも愚策。PTNodeにしたのは後でデータを活用するために他ならない。
+fromIntTree f  = def{idPTN = n,elementPTN = f n}
+
+evalPTNode (PTNode n d ll rl line) = mconcat [d,ll ||| line ||| rl] 
