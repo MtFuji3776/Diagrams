@@ -4,11 +4,12 @@ import Parts
 import Diagrams.Prelude
 import DiagramLanguage
 import Algebra.Graph hiding(at,(===))
-import Algebra.Graph.AdjacencyMap hiding(path)
+import qualified Algebra.Graph.AdjacencyMap as Adjacency
 import PGFSurface
 import Data.Tree.Lens
 import Data.Maybe (fromMaybe)
 import qualified Data.Map as Map
+import qualified Data.Set as Set
 import qualified Control.Lens.At as Lens (at)
 
 type B = PGF
@@ -155,22 +156,114 @@ test4 = do
     let alga = path [1,3,4,5,6] + 1*2
         tr = genTree 1 alga
         f i = view (ix $ i - 1) objs
-        sltree = ptLayout (evalPTNode . fromIntTree f) tr
+        sltree = ptLayout (evalPTNode . fromInt f) tr
     return $ renderPt sltree
 
-data PTNode a = PTNode{idPTN :: Int
-                      ,elementPTN :: a
+data PTNode a = PTNode{elementPTN :: a
                       ,leftLab :: a
                       ,rightLab :: a
                       ,linePTN :: a} deriving(Typeable)
 
 instance Monoid a => Default (PTNode a) where
-    def = PTNode 0 mempty mempty mempty mempty
+    def = PTNode mempty mempty mempty mempty
 
 -- genTreeとAlgaから生成したTree Intを、PTNodeで初期化する。その際、getPGFObjと併用することを見越して、DiagramをIntから指定するコールバック関数fを引数に取らせる。
     -- ptLayout (fromIntTree f)という形式で使用できるはずだ。
     -- あ、symmLayout'を使うなら先にPTNodeにしちゃダメかも？
     -- ↑ダメだろ。ついでにその場でevalしちゃうのも愚策。PTNodeにしたのは後でデータを活用するために他ならない。
-fromIntTree f  = def{idPTN = n,elementPTN = f n}
+fromInt f n = def{elementPTN = f n}
 
-evalPTNode (PTNode n d ll rl line) = mconcat [d,ll ||| line ||| rl] 
+fromDiagram d = def{elementPTN = d}
+
+evalPTNode (PTNode d ll rl line) = mconcat [d,ll ||| line ||| rl]
+
+test5 = do
+    objs <- mapM getPGFObj ["A","B","C","D","E","F"]
+    let f i = view (ix $ i-1) objs
+        alga = path [1,2,3,4,5] + path [2,6,7]
+        t = genTree 1 alga
+        t' = fmap (fromDiagram . uncurry place) $ ptLayout f t
+        ds = flatten t'
+        ks = flatten t
+        kds = zip ks ds
+        mp = Map.fromList kds
+    return mp
+
+evalNodeMap = foldr mappend mempty
+
+makeMap objs t =
+    let f i = view (ix $ i-1) objs
+        ds = map (uncurry place) . flatten . ptLayout f $ t
+        ks = flatten t
+        kds = zip ks ds
+        mp = Map.fromList kds
+    in mp
+
+
+
+-- onestepPair t mp =
+--     let g = Adjacency.tree t
+--         ks = flatten t
+--         kks = map (\x -> (x,Adjacency.postSet x g)) ks
+--         rmMaybe = fromMaybe mempty
+--         ds = map (\(x,ys) -> (rmMaybe $ view (Lens.at x) mp , map (\z -> rmMaybe.view (Lens.at z)) . Set.toList) ys) kks
+--     in ds
+
+onestepLine d [] = mempty
+onestepLine d ds =
+    let w = width d
+        w' = width . mconcat $ ds
+        d0 = if w >= w' then d else mconcat ds
+        y0 = -0.01 + (fst . fromMaybe (0,0) $ extentY d)
+        (x1,x2) = fromMaybe (0,0) . extentX $ d0
+    in (x1 ^& y0) ~~ (x2 ^& y0) :: Diagram PGF
+
+test6 = do
+    objs <- mapM getPGFObj ["A","B","C","D","E"]
+    let alga = 1*(2+3+4+5)
+        f i = view (ix $ i - 1) $ scaleY (-1) objs
+        t = genTree 1 alga
+        t' = fmap (uncurry place) $ ptLayout f t
+        d = rootLabel t'
+        ds = concatMap flatten . subForest $ t'
+    return $scaleY (-1)$centerXY$ d <> mconcat ds <> onestepLine d ds
+
+
+select mp n = fromMaybe mempty . view (Lens.at n) $ mp
+
+onestepObjects mp = over _1 (select mp) . over _2 (map (select mp))
+
+test7 = do
+    objs <- fmap (scaleY (-1)) $ mapM getPGFObj ["A","B","C","D","E","F"] :: OnlineTex [Diagram PGF]
+    let alga = 1*(2+3) + 2*(4+5) + 3*6
+        t = genTree 1 alga
+        mp = makeMap objs t
+        ks = flatten t
+        adjag = Adjacency.tree t
+        derivs = map (onestepObjects mp) $ makeRelations adjag ks
+        ls = map (uncurry onestepLine) derivs
+    return $ scaleY (-1) . centerXY $ mconcat ls <> evalNodeMap mp
+
+onestepRelation g n =
+    let ks = Set.toList $ Adjacency.postSet n g
+    in (n,ks)
+
+makeRelations g ns = map (onestepRelation g) ns
+
+genProofTree objs t =
+    let -- objs' = map (scaleY (-1)) objs
+        mp = makeMap objs t
+        adjag = Adjacency.tree t
+        ks = flatten t
+        kss = makeRelations adjag ks
+        derivs = map (onestepObjects mp) kss
+        ls = map (uncurry onestepLine) derivs
+        d = evalNodeMap mp <> ls
+    in scaleY (-1) . centerXY $ d :: Diagram PGF
+
+test8 = do
+    objs <- mapM getPGFObj ["A","B","C","D","E","F","G"] :: OnlineTex [Diagram PGF]
+    let alga = path [1,2,4] + 2*5 + path [1,3,6]
+        t = genTree 1 alga
+        d = genProofTree objs t
+    return d
