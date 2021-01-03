@@ -6,9 +6,33 @@ import PGFSurface hiding (easyRender,easyRender')
 import Diagrams.Prelude
 import Algebra.Graph hiding(at,(===))
 
-easyRender name = PGFSurface.render $ "/Users/fujimotomakoto/haskell_testing/diagrams/src/References/Freyd_CatAll" <> "/img/" <> name
+easyRender name = PGFSurface.render' 100 75 $ "/Users/fujimotomakoto/Documents/latexs/DailyStrategy/Work/CategoriesAllegories_Freyd/img/" <> name
 
-easyRender' w h name = PGFSurface.render' w h $ "/Users/fujimotomakoto/haskell_testing/diagrams/src/References/Freyd_CatAll" <> "/img/" <> name
+easyRender' w h name = PGFSurface.render' w h $ "/Users/fujimotomakoto/Documents/latexs/DailyStrategy/Work/CategoriesAllegories_Freyd/img/" <> name
+
+
+-- ======================== 1.95
+
+positive1952 = do
+    objs <- mapM getPGFObj ["A","[A]","1","0"]
+    labs <- mapM getPGFLabel ["\\Lambda 1","\\lceil 0 \\rceil"]
+    let trl = fromOffsets [unitX,unitY,unit_X]
+        alga = 4*(1+3) + (1+3)*2
+        l i = view (ix $ i - 1) labs
+        update = tackLabel 1 2 (l 1) False . tackLabel 3 2 (l 2) True
+        d = genDiagram trl objs update alga
+    return d
+
+mapRel1952 = do
+    objs <- mapM getPGFObj ["[B]","B","A","R","B","\\ni_B","B"]
+    labs <- mapM getPGFLabel ["\\Lambda 1","l^{-1}f","l","1","f"]
+    let trl = fromOffsets [unitY,unitY,unitX,unit_Y,unit_Y,unitX]
+        alga = path [4,3,2,1] + path [4,5,6,1] + 5*2 + (4+5+6)*7
+        l i = view (ix $ i - 1) labs
+        update = actOpt 4 3 isom . tackLabel 2 1 (l 1) False . tackLabel 3 2 (l 2) False . tackLabel 4 3 (l 3) False . tackLabel 5 2 (l 4) False . tackLabel 4 5 (l 5) True
+                . tackLabel 4 7 (l 5) True . tackLabel 5 7 (l 4) True
+        d = genDiagram trl objs update alga
+    return d
 
 -- ======================== 1.98
 
