@@ -54,7 +54,7 @@ getPGFSymbol d xs = do
     lab <- hboxOnline . mathEnv $ xs
     return $ lab # scale d # centerXY
 
-getPGFLabel = getPGFSymbol 0.01
+getPGFLabel = getPGFSymbol 0.015
 
 getPGFObj = getPGFSymbol 0.015
 
@@ -100,6 +100,43 @@ reticle = scale (0.5)
 
 -- 引き戻し記号
 plb = fromOffsets [unitX,unitY] # scale (1/4)
+
+pullback_ lctrl1 lctrl2 = let 
+    -- 直線状LocatedTrailの長さを求める関数。arcLengthの方がより汎用的と思われる。
+    loclength :: Located (Trail V2 Double) -> Double
+    loclength lc = let 
+        s = atParam lc 0
+        t = atParam lc 1
+        v = s .-. t
+        in norm v :: Double
+    d1 = loclength lctrl1
+    d2 = loclength lctrl2
+    -- LocatedTrailの長さに応じて、長い方と短い方を抽象的に指定する。choiceはそれをさらに抽象化したもの。
+    choice b = if b then lctrl1 else lctrl2
+    shortOne = choice (d1 < d2)
+    longOne =  choice (d2 < d1)
+    -- 短い方のLocatedTrailの始点と終点をp0,p1とし、長い方のそれをq0,q1とする。
+    (p0,p1) = (atParam shortOne 0,atParam shortOne 1)
+    (q0,q1) = (atParam longOne 0,atParam longOne 1)
+    -- 短い方のLocatedTrailを主体として、引き戻し記号の端点pを決める。これにより、引き戻し記号の一辺の長さが決定する。
+    v = 1/4 *^ (p1 .-. p0)
+    p = p0 .+^ v
+    -- 長い方のLocatedTrail上に端点を取る際は、始点からの距離がp0,p間距離と一致するようパラメータを計算してとる。dist p0 pでdist q0 q1を割れば、適切なパラメータが計算できる。
+    dist = norm v
+    whole = norm $ q1 .-. q0
+    prm = dist / whole
+    q = atParam longOne prm
+    -- p,qの中点を取得し、そこから線分pqの法線ベクトルを取る。法線ベクトルを適切に拡大して、p,mid,qが直角二等辺三角形を成すよう計算する。これにより、引き戻し記号は直角になる。
+    z = 1/2 *^ (p .-. q)
+    mid_ = q .+^ z
+    l = norm z
+    u = normalize . perp $ z
+    w = l *^ u
+    mid = mid_ .+^ w
+    -- 三点p,mid,qを結んで完成。
+    in lw thin $ p ~~ mid <> mid ~~ q
+
+
 
 -- 積記号
 prd = fromOffsets [2*^unitX , unit_X , unitY , 2 *^ unit_Y] # scale (1/4)
@@ -355,15 +392,20 @@ equalizer mopts =
 
 -- 同型射を表す記号
 sim = cubicSpline False [0^&0,1^&0.2, 2^&0, 3^&(-0.2) , 4^&0]
-    # scale (1/8)
+    # scale (1/16)
     # centerXY
     # translateY 0.05
+    # lw veryThin
 
+angledSim lctrl = let 
+    vt = tangentAtParam lctrl 0.5
+    a = signedAngleBetween vt unitX
+    in rotate a sim :: Diagram PGF
 
 isom mopts = 
     let trl = view locTrail mopts
         midp = atParam trl 0.5
-        sim' = place sim midp
+        sim' = place (angledSim trl) midp
     in mopts & symbols %~ (sim':)
 
 

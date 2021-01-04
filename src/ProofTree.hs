@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 module ProofTree where
 
 import Parts
@@ -146,10 +147,16 @@ ptLayoutOpts = def & slWidth  .~ fromMaybe (0,0) . extentX
 -- 導出図用のrenderTree
 renderPt = renderTree id (\_ _ -> mempty)
 
+putGhost (Node x []) = 
+    let w = width x
+        h = height x
+    in Node x [Node (rect w h # lw none) []]
+putGhost (Node x ts) = Node x (map putGhost ts)
+
 -- symmLayout'に導出図用のレイアウトオプションを部分適用したもの
     -- これを生成するときに、導出図ノードの初期値を生成できないだろうか？
     -- コンストラクタを引数に取る高階関数にしとくのが無難っぽい。柔軟性もこのほうが高そう
-ptLayout f = symmLayout' ptLayoutOpts . fmap f
+ptLayout f = symmLayout' ptLayoutOpts . putGhost . fmap f
 
 test4 = do
     objs <- mapM getPGFObj ["A","B","CSTUVWXYZ","D","E","F","G"]
@@ -191,6 +198,8 @@ test5 = do
 
 evalNodeMap = foldr mappend mempty
 
+
+-- 改良すべき関数。部分導出木の１段が横に長いときに、下の無関係な式にも架線がかかってしまう不具合。
 makeMap objs t =
     let f i = view (ix $ i-1) objs
         ds = map (uncurry place) . flatten . ptLayout f $ t
@@ -226,7 +235,7 @@ test6 = do
         t' = fmap (uncurry place) $ ptLayout f t
         d = rootLabel t'
         ds = concatMap flatten . subForest $ t'
-    return $scaleY (-1)$centerXY$ d <> mconcat ds <> onestepLine d ds
+    return $ scaleY (-1) $ centerXY $ d <> mconcat ds <> onestepLine d ds
 
 
 select mp n = fromMaybe mempty . view (Lens.at n) $ mp
@@ -253,29 +262,53 @@ makeRelations g ns = map (onestepRelation g) ns
 -- オブジェクトリストとTree Intから導出図を生成する
     -- ひとまず完成したが、後で改良すべき関数。mpをDiagram PGFではなくPTNodeマップにして、ラベル付けや架線の装飾を出来るようにしたい
     -- それとlsをPTNodeマップに統合して、架線の装飾をマップ上で済ませられるようにしたい。引数にupdate関数を取るよう後々設計し直す。
-genProofTree objs t =
+
+
+data DerivingLine a = DLine{_derivingLine :: a
+                            ,_leftLabel :: a
+                            ,_rightLabel :: a}deriving(Typeable)
+
+$(makeLenses ''DerivingLine)
+
+instance Monoid a => Default (DerivingLine a) where
+    def = DLine mempty mempty mempty
+
+evalDLine (DLine dl ll rl) = 
+    let (l,r) = fromMaybe (0,0) $ extentX dl
+        y = (uncurry (+) $ fromMaybe (0,0) $ extentY dl) / 2
+        rl' = place (rl # alignL) (r ^& y)
+        ll' = place (ll # alignR :: Diagram PGF) (l ^& y)
+        dl' = mconcat [dl,rl',ll']
+    in dl'
+
+genProofTree update objs t =
     let objs' = map (scaleY (-1)) objs
         mp = makeMap objs' t
         adjag = Adjacency.tree t
         ks = flatten t
         kss = makeRelations adjag ks
         derivs = map (onestepObjects mp) kss
-        ls = map (uncurry onestepLine) derivs
-        d = evalNodeMap mp <> mconcat ls
+        initLine l = def & derivingLine .~ l
+        ls = map (initLine . uncurry onestepLine) derivs
+        mpDLine' = Map.fromList . zip ks $ ls
+        mpDLine = update mpDLine'
+        d = evalNodeMap mp <> foldr mappend mempty (fmap evalDLine mpDLine)
     in scaleY (-1) $ centerXY  d :: Diagram PGF
+
+genProofTree_ = genProofTree id
 
 test8 = do
     objs <- mapM getPGFObj ["A\\land A \\Rightarrow B \\to B","B","C","D","E","F","G"] :: OnlineTex [Diagram PGF]
     let alga = path [1,2,4] + 2*5 + path [1,3,6]
         t = genTree 1 alga
-        d = genProofTree objs t
+        d = genProofTree_ objs t
     return d
 
 test9 = do
     let alga = path [1,2,3,4,5,6,7,8] + path [2,9,10,11] + path [2,12,13,14,15] + path [4,16,17] + path [9,18,19]
         t = genTree 1 alga
     objs <- mapM (getPGFObj.show) $ flatten t
-    let d = genProofTree objs t
+    let d = genProofTree_ objs t
     return d
 
 
@@ -284,11 +317,42 @@ getFormula = mapM (fmap alignB . getPGFObj . ("\\mathstrut " <>))
 test10 = do
     objs <- mapM (fmap alignB . getPGFObj . ("\\mathstrut " <>)) ["(z \\Rightarrow x) \\to (z \\Rightarrow x)","z \\land (z \\Rightarrow x) \\to x","x \\to y","z \\land (z \\Rightarrow x) \\to y","z \\Rightarrow x \\to z \\Rightarrow y"]
     let alga = path [5,4,2,1] + 4*3
-        d = genProofTree objs $ genTree 5 alga
+        d = genProofTree_ objs $ genTree 5 alga
     return d
 
 test11 = do
     objs <- getFormula ["z \\Rightarrow x \\rightharpoonup z \\Rightarrow y","z \\land (z \\Rightarrow x) \\rightharpoonup x","x \\rightharpoonup y","z \\land (z \\Rightarrow x) \\rightharpoonup y","z \\Rightarrow x \\rightharpoonup z \\Rightarrow y"]
     let alga = path [5,4,2,1] + 4*3
-        d = genProofTree objs $ genTree 5 alga
+        d = genProofTree_ objs $ genTree 5 alga
+    return d
+
+test12 = do
+    objs <- getFormula ["z \\Rightarrow x \\rightharpoonup z \\Rightarrow y","z \\land (z \\Rightarrow x) \\rightharpoonup x","x \\rightharpoonup y","z \\land (z \\Rightarrow x) \\rightharpoonup y","z \\Rightarrow x \\rightharpoonup z \\Rightarrow y"] :: OnlineTex [Diagram PGF]
+    lab1 <- fmap (scaleY (-1)) $ getPGFLabel "[\\Rightarrow]"
+    lab2 <- fmap (scaleY (-1)) $ getPGFLabel "[\\rightharpoonup \\rightharpoonup]"
+    lab3 <- fmap (scaleY (-1)) $ getPGFLabel "[\\Rightarrow]"
+    let alga = path [5,4,2,1] + 4*3
+        update mp = over (Lens.at 5) (fmap $ set rightLabel lab1)  . over (Lens.at 2) (fmap $ set rightLabel lab3) . over (Lens.at 4) (fmap $ set rightLabel lab2) $ mp 
+        d = genProofTree update objs (genTree 5 alga)
+    return d
+
+oneSequent sym xs ys = between xs ys sym
+
+(|-) = oneSequent " \\vdash "
+
+(-->) = oneSequent " \\rightharpoonup "
+
+test13 = do
+    objs <- getFormula ["\\exists x (B \\land A)" --> "\\exists x A \\land B"
+                        ,"\\exists x (B \\land A)" --> "B \\land \\exists x A"
+                        ,"B \\land A" --> "|x| \\land \\exists x A \\land B"
+                        ,"B \\land A" --> "|x| \\land \\exists x A"
+                        ,"B \\land A" --> "B"
+                        ,"A" --> "|x| \\land \\exists x A"
+                        ,"\\exists x A" --> "\\exists x A"
+                        ,"B \\land A" --> "A" 
+                        ,"B \\land A"
+                        ]
+    let alga = path [1,2,3,4,6,7] + 4*(8) + 3*5 + 5*9
+        d = genProofTree id objs (genTree 1 alga)
     return d
