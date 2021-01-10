@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7e7feb58be3c44c291813b93b6f1f578fa6b11cd4fa511bbc081470ada73ab3d
+-- hash: d293fa7feb34842320423ef4796854972f6b6036294aec3cd4004d16abdc7dce
 
 name:           diagrams
 version:        0.1.0.0
@@ -40,6 +40,7 @@ library
       Parts
       PGFSurface
       Project.Drill.Functors1.Functors
+      Project.Drill.Relation.Relation
       Project.OSK_LT.LT202011
       ProofTree
       References.DomainTheory.Char2

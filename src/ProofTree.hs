@@ -153,10 +153,38 @@ putGhost (Node x []) =
     in Node x [Node (rect w h # lw none) []]
 putGhost (Node x ts) = Node x (map putGhost ts)
 
+
+boxingNodes t = let 
+    subts = subForest t
+    ds = map (view root) subts
+    d = hsep 0.15 ds
+    l = width d
+    t' = over root (atop (strutX l)) t
+    in over branches (map boxingNodes) t'
+
+
 -- symmLayout'に導出図用のレイアウトオプションを部分適用したもの
     -- これを生成するときに、導出図ノードの初期値を生成できないだろうか？
     -- コンストラクタを引数に取る高階関数にしとくのが無難っぽい。柔軟性もこのほうが高そう
-ptLayout f = symmLayout' ptLayoutOpts . putGhost . fmap f
+ptLayout f = symmLayout' ptLayoutOpts . boxingNodes . fmap f
+
+-- zipのRoseTree版の感じで、DiagramツリーとPointツリーからタプルツリーを生成する
+-- zipTree :: Tree (Diagram B) -> Tree (P2 Double) -> Tree (Diagram B,P2 Double)
+zipTrees (Node x []) (Node p subf) = Node (x , p) []
+zipTrees (Node x subf) (Node p []) = Node (x,p) []
+zipTrees (Node x subf1) (Node p subf2) = Node (x , p) (zipWith zipTrees subf1 subf2)
+
+-- boxingNodesを交えて計算した座標を、box無しのオブジェクトに付与する関数
+modifiedLayout f nt = let 
+    -- boxingNodesでレイアウトをとって、座標だけ取得する
+    dpt = ptLayout f nt
+    pt = fmap snd dpt
+    -- boxingなしのオブジェクトツリーを作る
+    dt = fmap f nt
+    -- boxingなしのオブジェクトツリーに座標を付与
+    in zipTrees dt pt
+
+
 
 test4 = do
     objs <- mapM getPGFObj ["A","B","CSTUVWXYZ","D","E","F","G"]
@@ -202,7 +230,7 @@ evalNodeMap = foldr mappend mempty
 -- 改良すべき関数。部分導出木の１段が横に長いときに、下の無関係な式にも架線がかかってしまう不具合。
 makeMap objs t =
     let f i = view (ix $ i-1) objs
-        ds = map (uncurry place) . flatten . ptLayout f $ t
+        ds = map (uncurry place) . flatten . modifiedLayout f $ t
         ks = flatten t
         kds = zip ks ds
         mp = Map.fromList kds
@@ -328,9 +356,9 @@ test11 = do
 
 test12 = do
     objs <- getFormula ["z \\Rightarrow x \\rightharpoonup z \\Rightarrow y","z \\land (z \\Rightarrow x) \\rightharpoonup x","x \\rightharpoonup y","z \\land (z \\Rightarrow x) \\rightharpoonup y","z \\Rightarrow x \\rightharpoonup z \\Rightarrow y"] :: OnlineTex [Diagram PGF]
-    lab1 <- fmap (scaleY (-1)) $ getPGFLabel "[\\Rightarrow]"
-    lab2 <- fmap (scaleY (-1)) $ getPGFLabel "[\\rightharpoonup \\rightharpoonup]"
-    lab3 <- fmap (scaleY (-1)) $ getPGFLabel "[\\Rightarrow]"
+    lab1 <- fmap (scale 0.6 . scaleY (-1)) $ getPGFLabel "[\\Rightarrow]"
+    lab2 <- fmap (scale 0.6 . scaleY (-1)) $ getPGFLabel "[\\rightharpoonup \\rightharpoonup]"
+    lab3 <- fmap (scale 0.6 . scaleY (-1)) $ getPGFLabel "[\\Rightarrow]"
     let alga = path [5,4,2,1] + 4*3
         update mp = over (Lens.at 5) (fmap $ set rightLabel lab1)  . over (Lens.at 2) (fmap $ set rightLabel lab3) . over (Lens.at 4) (fmap $ set rightLabel lab2) $ mp 
         d = genProofTree update objs (genTree 5 alga)
@@ -353,6 +381,20 @@ test13 = do
                         ,"B \\land A" --> "A" 
                         ,"B \\land A"
                         ]
-    let alga = path [1,2,3,4,6,7] + 4*(8) + 3*5 + 5*9
+    let alga = path [1,2,3,4,6,7] + 4*(8) + 3*5 
         d = genProofTree id objs (genTree 1 alga)
     return d
+
+test14 = do
+    objs <- getFormula $ map show [1,2,3,4,5,6,7,8,9,10]
+    let alga = path [1,3,5,7] + path [1,2,8] + path [1,4,6,9] + 5 * 10
+        d = genProofTree id objs (genTree 1 alga)
+    return d
+
+-- boxingNodes t = let 
+--     subts = subForest t
+--     ds = map (view root) subts
+--     d = hsep 0.5 ds
+--     l = width d
+--     t' = over root (atop (strutX l)) t
+--     in over branches (map boxingNodes) t'
