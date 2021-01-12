@@ -956,4 +956,11 @@ packages:
       sha256: fabcf810fb21f84374415a4af17fa67ceec35c09e550af880e2ac35f2131c05f
   original:
     hackage: math-functions-0.3.4.1@sha256:a6e458d2a78f03e83440062e8803c0baf7c1474dc2687489661690f4c6d46416,4775
+- completed:
+    hackage: raw-strings-qq-1.1@sha256:3ea0f14f036649e3576749aef0db4dd0b1102c5331f2e0e2551250e2030ce669,1467
+    pantry-tree:
+      size: 379
+      sha256: 473e62ea5320c8734f66049e48b308dd0ab197c6d3071c8ca1a828b05b7536ae
+  original:
+    hackage: raw-strings-qq-1.1@sha256:3ea0f14f036649e3576749aef0db4dd0b1102c5331f2e0e2551250e2030ce669,1467
 snapshots: []

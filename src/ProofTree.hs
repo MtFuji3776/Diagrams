@@ -1,8 +1,8 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell,QuasiQuotes #-}
 module ProofTree where
 
 import Parts
-import Diagrams.Prelude
+import Diagrams.Prelude hiding(star)
 import DiagramLanguage
 import Algebra.Graph hiding(at,(===))
 import qualified Algebra.Graph.AdjacencyMap as Adjacency
@@ -12,6 +12,7 @@ import Data.Maybe (fromMaybe)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import qualified Control.Lens.At as Lens (at)
+import Text.RawString.QQ
 
 type B = PGF
 
@@ -159,7 +160,7 @@ boxingNodes t = let
     ds = map (view root) subts
     d = hsep 0.15 ds
     l = width d
-    t' = over root (atop (strutX l)) t
+    t' = over root (atop (strutX l # centerXY)) t
     in over branches (map boxingNodes) t'
 
 
@@ -378,16 +379,16 @@ test13 = do
                         ,"B \\land A" --> "B"
                         ,"A" --> "|x| \\land \\exists x A"
                         ,"\\exists x A" --> "\\exists x A"
+                        ,[r|B \land A|] |- [r|B \land A|] 
                         ,"B \\land A" --> "A" 
-                        ,"B \\land A"
                         ]
-    let alga = path [1,2,3,4,6,7] + 4*(8) + 3*5 
+    let alga = path [1,2,3,4,6,7] + 4*(8) + 3*9 
         d = genProofTree id objs (genTree 1 alga)
     return d
 
 test14 = do
-    objs <- getFormula $ map show [1,2,3,4,5,6,7,8,9,10]
-    let alga = path [1,3,5,7] + path [1,2,8] + path [1,4,6,9] + 5 * 10
+    objs <- getFormula $ map show [1,2,3,4,5,6,7,8,9,10,11]
+    let alga = path [1,3,5,7] + path [1,2,8] + path [1,4,6,9] + star 5 [10,11]
         d = genProofTree id objs (genTree 1 alga)
     return d
 
@@ -398,3 +399,24 @@ test14 = do
 --     l = width d
 --     t' = over root (atop (strutX l)) t
 --     in over branches (map boxingNodes) t'
+
+test15 = do
+    objs <- getFormula $ [
+            [r|\forall x (B \land A)|] --> [r|B \land \forall x A|],
+            [r|\forall x (B \land A)|] --> "\\forall x A",
+            [r|\forall x (B \land A) \land |x||] --> "A",
+            [r|\forall x (B \land A) \land |x||] --> "B \\land A",
+            [r|\forall x (B \land A)|] --> [r|\forall x (B \land A)|],
+            [r|B \land A|] --> "A",
+            [r|\forall x (B \land A)|] --> "B",
+            [r|\forall x (B \land A)|] --> [r|\forall x B|],
+            [r|B \land A|] --> "B",
+            [r|\forall x B|] --> "B",
+            [r|\forall x B|] --> [r|B \land |x||],
+            "B \\land |x|" --> "B",
+            [r|\forall x B \land |A||] --> "B",
+            [r|\forall x B|] --> [r|\forall x B|]
+            ]
+    let alga = path [1,2,3,4,5] + 3*6 + path [1,7,10,11,13,14] + path [7,8,9] + 10 * 12
+        t = genProofTree id objs (genTree 1 alga)
+    return t

@@ -37,7 +37,7 @@ dependencies:
 - texrunner
 # - turtle
 # - random
-
+- raw-strings-qq
 
 library:
   source-dirs: src

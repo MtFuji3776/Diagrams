@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d293fa7feb34842320423ef4796854972f6b6036294aec3cd4004d16abdc7dce
+-- hash: e720fd395897adc865568bf692b53bf05eb5c9f33bb8622c23e20660db9fbd0d
 
 name:           diagrams
 version:        0.1.0.0
@@ -73,6 +73,7 @@ library
     , diagrams-pgf
     , diagrams-svg
     , lens
+    , raw-strings-qq
     , split
     , texrunner
     , time
@@ -100,6 +101,7 @@ executable diagrams-exe
     , diagrams-pgf
     , diagrams-svg
     , lens
+    , raw-strings-qq
     , split
     , texrunner
     , time
@@ -128,6 +130,7 @@ test-suite diagrams-test
     , diagrams-pgf
     , diagrams-svg
     , lens
+    , raw-strings-qq
     , split
     , texrunner
     , time
