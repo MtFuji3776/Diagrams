@@ -133,7 +133,7 @@ test3 = do
         tr = genTree 1 alga
         slopt = def & slWidth  .~ fromMaybe (0,0) . extentX
                     & slHeight .~ fromMaybe (0,0) . extentY
-                    & slHSep   .~ 0.1 
+                    & slHSep   .~ 0.15 
                     & slVSep   .~ 0.02
         f i = view (ix $ i - 1) objs
         sltree = symmLayout' slopt $ fmap f tr
@@ -158,8 +158,8 @@ putGhost (Node x ts) = Node x (map putGhost ts)
 boxingNodes t = let 
     subts = subForest t
     ds = map (view root) subts
-    d = hsep 0.15 ds
-    l = width d
+    d = hsep 0.2 ds
+    l = 1.1 * width d
     t' = over root (atop (strutX l # centerXY)) t
     in over branches (map boxingNodes) t'
 
@@ -414,9 +414,12 @@ test15 = do
             [r|\forall x B|] --> "B",
             [r|\forall x B|] --> [r|B \land |x||],
             "B \\land |x|" --> "B",
-            [r|\forall x B \land |A||] --> "B",
-            [r|\forall x B|] --> [r|\forall x B|]
+            [r|\forall x B \land |x||] --> "B",
+            [r|\forall x B|] --> [r|\forall x B\text{test test test test test test test test test test}|]
             ]
+    -- lab <- getFormula ["[\\Rightarrow]"]
     let alga = path [1,2,3,4,5] + 3*6 + path [1,7,10,11,13,14] + path [7,8,9] + 10 * 12
-        t = genProofTree id objs (genTree 1 alga)
+        update = id
+        t = genProofTree update objs (genTree 1 alga)
     return t
+    
