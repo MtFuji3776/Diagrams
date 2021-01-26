@@ -1,4 +1,4 @@
-module Relation where
+module Project.Drill.Relation.Relation where
 
 import Parts
 import DiagramLanguage

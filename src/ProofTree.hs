@@ -417,9 +417,7 @@ test15 = do
             [r|\forall x B \land |x||] --> "B",
             [r|\forall x B|] --> [r|\forall x B\text{test test test test test test test test test test}|]
             ]
-    -- lab <- getFormula ["[\\Rightarrow]"]
     let alga = path [1,2,3,4,5] + 3*6 + path [1,7,10,11,13,14] + path [7,8,9] + 10 * 12
-        update = id
-        t = genProofTree update objs (genTree 1 alga)
+        t = genProofTree id objs (genTree 1 alga)
     return t
     

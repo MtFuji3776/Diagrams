@@ -1,4 +1,4 @@
-module AppendB() where
+module References.Freyd_CatAll.AppendB() where
 
 import Parts
 import DiagramLanguage

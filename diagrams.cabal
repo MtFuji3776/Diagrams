@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e720fd395897adc865568bf692b53bf05eb5c9f33bb8622c23e20660db9fbd0d
+-- hash: 10623d3f811b9ca223b699c9177bb21f87895bea5da288f17350ddacc058cb17
 
 name:           diagrams
 version:        0.1.0.0
@@ -31,6 +31,7 @@ library
       AnalyticTableau
       CmSymbols
       DiagramLanguage
+      Diary.Before0110
       DrawCD
       FreeNote.FN202010
       FreeNote.FN202011

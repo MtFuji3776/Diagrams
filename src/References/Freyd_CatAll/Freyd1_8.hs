@@ -1,4 +1,4 @@
-module TextDiagrams.Freyd_CatAll.Freyd1_8 where
+module References.Freyd_CatAll.Freyd1_8 where
 
 import Parts
 import DiagramLanguage

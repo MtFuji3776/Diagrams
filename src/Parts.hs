@@ -197,3 +197,7 @@ placeWithName d n obj =
     let p = location . fromMaybe (mkSubdiagram mempty) $ lookupName n d
         obj' = place obj p
     in d <> obj'
+
+-- =====================直線のスタイル用==================
+
+dashed = dashingN [0.03,0.03] 0
