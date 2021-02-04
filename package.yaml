@@ -38,6 +38,9 @@ dependencies:
 # - turtle
 # - random
 - raw-strings-qq
+- sqlite-simple
+- text
+- bytestring
 
 library:
   source-dirs: src
@@ -69,3 +72,4 @@ default-extensions:
 - TypeFamilies
 - FlexibleContexts
 - NoMonomorphismRestriction
+- OverloadedStrings

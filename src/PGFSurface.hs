@@ -4,8 +4,16 @@ import Diagrams.Backend.PGF
 import Diagrams.Backend.PGF.Surface
 import Diagrams.Prelude
 import Parts hiding(sizeSpec)
-import DiagramLanguage
+import DiagramLanguage hiding(open)
 import System.Texrunner
+import Database.SQLite.Simple
+import Database.SQLite.Simple.FromRow
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Text.Encoding
+import qualified Data.Text.IO as TIO
+import Data.ByteString.Char8 (ByteString)
+import qualified Data.ByteString.Char8 as Byte
 
 
 preamble1 :: String
@@ -121,3 +129,24 @@ render = render' 200 150
 renderdom name = renderOnlinePGF' (ds ++ "Work/DomainTheory/img/" ++ name) (luaSurafaceSize 400 300)
 
 rendersato name = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/Work/SatoDrill/img/" ++ name) (luaSurafaceSize 300 225)
+
+dbFilePath :: String
+dbFilePath = "/Users/fujimotomakoto/haskell_testing/diagrams/src/test.db"
+
+filePathTex :: String
+filePathTex = "/Users/fujimotomakoto/haskell_testing/diagrams/src/temp.tex"
+
+filePathPdf :: String
+filePathPdf = "/Users/fujimotomakoto/haskell_testing/diagrams/src/temp.pdf"
+
+renderIntoDb' :: Double -> Double -> (OnlineTex (Diagram PGF)) -> IO ()
+renderIntoDb' w h d = do
+    renderOnlinePGF' filePathTex (luaSurafaceSize w h) d
+    renderOnlinePGF' filePathPdf (luaSurafaceSize w h) d
+    tex <- T.pack <$> readFile filePathTex
+    pdf <- Byte.readFile filePathPdf
+    conn <- open dbFilePath
+    execute conn "INSERT INTO test_ (textData,pdfData,titleOfDiagram,dateCreated,dateLastUpdate) VALUES (?,?,'notitle',datetime('now','localtime'),'unset')" ((tex,pdf) :: (Text,ByteString))
+    close conn
+
+renderIntoDb = renderIntoDb' 200 150

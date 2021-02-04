@@ -159,7 +159,7 @@ boxingNodes t = let
     subts = subForest t
     ds = map (view root) subts
     d = hsep 0.2 ds
-    l = 1.1 * width d
+    l = 1.2 * width d
     t' = over root (atop (strutX l # centerXY)) t
     in over branches (map boxingNodes) t'
 

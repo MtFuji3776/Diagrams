@@ -1,4 +1,4 @@
-module Freyd2_1() where
+module References.Freyd_CatAll.Freyd2_1() where
 
 import Diagrams.Prelude
 import Parts

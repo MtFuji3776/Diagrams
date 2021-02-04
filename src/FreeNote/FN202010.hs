@@ -1,4 +1,4 @@
-module FreeNote.FN202010 where
+module FreeNote.FN202010() where
 
 import Parts 
 import DiagramLanguage
@@ -10,10 +10,10 @@ import Diagrams.BoundingBox
 import Data.List.Split
 import Diagrams.Core.Points
 
-
+type B = PGF
 
 -- ArrowOptsを先に生成してからconnectOutside'などに渡す仕組みのフローチャートの原案
-dia18_1 :: (Show n, Typeable n, RealFloat n) => QDiagram SVG V2 n Any
+dia18_1 :: (Show n, Typeable n, RealFloat n) => QDiagram B V2 n Any
 dia18_1 = 
     ((boxedText "Alga" 1) # named "1" 
     ||| strutX 1 

@@ -1,5 +1,5 @@
 {-# LANGUAGE NoMonomorphismRestriction, FlexibleContexts, TypeFamilies #-}
-module Guide_Arrows where
+module Guide_Arrows() where
 
 import Diagrams.Prelude
 import Diagrams.TwoD.Arrow

@@ -42,4 +42,4 @@ initialAlgebra = do
         update = tackLabel 1 2 (l 1) False . tackLabel 3 2 (l 2) True . tackLabel 4 3 (l 3) True . tackLabel 4 1 (l 4) False
         qs = [NoLine,Forall,ExistsOnly]
         ds = map (genDiagram trl objs update) [alga1,alga2,alga3]
-    diagramLanguage qs ds
+    diagramLanguage qs d

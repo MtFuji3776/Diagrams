@@ -4,5 +4,5 @@ import Parts
 import DiagramLanguage
 import PGFSurface
 import Diagrams.Prelude
-import Algebrai.Graph hiding (at,(===))
+import Algebra.Graph hiding (at,(===))
 

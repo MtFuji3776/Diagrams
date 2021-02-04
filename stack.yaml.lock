@@ -963,4 +963,32 @@ packages:
       sha256: 473e62ea5320c8734f66049e48b308dd0ab197c6d3071c8ca1a828b05b7536ae
   original:
     hackage: raw-strings-qq-1.1@sha256:3ea0f14f036649e3576749aef0db4dd0b1102c5331f2e0e2551250e2030ce669,1467
+- completed:
+    hackage: sqlite-simple-0.4.18.0@sha256:3ceea56375c0a3590c814e411a4eb86943f8d31b93b110ca159c90689b6b39e5,3002
+    pantry-tree:
+      size: 1930
+      sha256: e58b9955e483d51ee0966f8ba4384305d871480e2a38b32ee0fcd4573d74cf95
+  original:
+    hackage: sqlite-simple-0.4.18.0@sha256:3ceea56375c0a3590c814e411a4eb86943f8d31b93b110ca159c90689b6b39e5,3002
+- completed:
+    hackage: Only-0.1@sha256:f92f5da97e647451f1ee7f5bf44914fb75062d08ccd3f36b2000d649c63d13aa,1373
+    pantry-tree:
+      size: 210
+      sha256: e999ae7690fc1e13bb471bc1ead6d7a5c245843d17862d3d27f7f0f752513257
+  original:
+    hackage: Only-0.1@sha256:f92f5da97e647451f1ee7f5bf44914fb75062d08ccd3f36b2000d649c63d13aa,1373
+- completed:
+    hackage: blaze-textual-0.2.1.0@sha256:d9d2426ba9f57d70fa81f3642973e0eb1f07036f83b14f248df00d5f338d174c,2449
+    pantry-tree:
+      size: 556
+      sha256: e17bbd6ad4945b715e1bb346a318b17bd44b3d1216abd0f67c67e96fc0c13ec6
+  original:
+    hackage: blaze-textual-0.2.1.0@sha256:d9d2426ba9f57d70fa81f3642973e0eb1f07036f83b14f248df00d5f338d174c,2449
+- completed:
+    hackage: direct-sqlite-2.3.26@sha256:04e835402f1508abca383182023e4e2b9b86297b8533afbd4e57d1a5652e0c23,3718
+    pantry-tree:
+      size: 770
+      sha256: 11874ab21e10c5b54cd1e02a037b677dc1e2ee9986f38c599612c56654dc01c3
+  original:
+    hackage: direct-sqlite-2.3.26@sha256:04e835402f1508abca383182023e4e2b9b86297b8533afbd4e57d1a5652e0c23,3718
 snapshots: []

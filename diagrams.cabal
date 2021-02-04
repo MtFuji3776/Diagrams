@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 10623d3f811b9ca223b699c9177bb21f87895bea5da288f17350ddacc058cb17
+-- hash: 5930cf3c0b068ec48d771cb56941d8fcd0990b31421346f51d614c2bd52e336d
 
 name:           diagrams
 version:        0.1.0.0
@@ -55,16 +55,18 @@ library
       References.Freyd_CatAll.Freyd1_8
       References.Freyd_CatAll.Freyd1_9
       References.Freyd_CatAll.Freyd2_1
+      Sqlite
       Tutorial
   other-modules:
       Paths_diagrams
   hs-source-dirs:
       src
-  default-extensions: TypeFamilies FlexibleContexts NoMonomorphismRestriction
+  default-extensions: TypeFamilies FlexibleContexts NoMonomorphismRestriction OverloadedStrings
   build-depends:
       SVGFonts
     , algebraic-graphs
     , base >=4.7 && <5
+    , bytestring
     , containers
     , data-default-class
     , diagrams-builder
@@ -76,7 +78,9 @@ library
     , lens
     , raw-strings-qq
     , split
+    , sqlite-simple
     , texrunner
+    , text
     , time
   default-language: Haskell2010
 
@@ -86,12 +90,13 @@ executable diagrams-exe
       Paths_diagrams
   hs-source-dirs:
       app
-  default-extensions: TypeFamilies FlexibleContexts NoMonomorphismRestriction
+  default-extensions: TypeFamilies FlexibleContexts NoMonomorphismRestriction OverloadedStrings
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       SVGFonts
     , algebraic-graphs
     , base >=4.7 && <5
+    , bytestring
     , containers
     , data-default-class
     , diagrams
@@ -104,7 +109,9 @@ executable diagrams-exe
     , lens
     , raw-strings-qq
     , split
+    , sqlite-simple
     , texrunner
+    , text
     , time
   default-language: Haskell2010
 
@@ -115,12 +122,13 @@ test-suite diagrams-test
       Paths_diagrams
   hs-source-dirs:
       test
-  default-extensions: TypeFamilies FlexibleContexts NoMonomorphismRestriction
+  default-extensions: TypeFamilies FlexibleContexts NoMonomorphismRestriction OverloadedStrings
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       SVGFonts
     , algebraic-graphs
     , base >=4.7 && <5
+    , bytestring
     , containers
     , data-default-class
     , diagrams
@@ -133,6 +141,8 @@ test-suite diagrams-test
     , lens
     , raw-strings-qq
     , split
+    , sqlite-simple
     , texrunner
+    , text
     , time
   default-language: Haskell2010

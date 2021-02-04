@@ -99,7 +99,7 @@ reticle = scale (0.5)
         $ mconcat [ (0 ^& 0) ~~ (0.05^&0), (0.15 ^& 0) ~~ (0.2 ^& 0)] # translateX (-0.1) <> mconcat [(0 ^& 0) ~~ (0 ^& 0.05), (0 ^& 0.15) ~~ (0 ^& 0.2)] # translateY (-0.1)
 
 -- 引き戻し記号
-plb = fromOffsets [unitX,unitY] # scale (1/4)
+--plb = fromOffsets [unitX,unitY] # scale (1/4)
 
 pullback_ lctrl1 lctrl2 = let 
     -- 直線状LocatedTrailの長さを求める関数。arcLengthの方がより汎用的と思われる。
@@ -135,6 +135,12 @@ pullback_ lctrl1 lctrl2 = let
     mid = mid_ .+^ w
     -- 三点p,mid,qを結んで完成。
     in lw thin $ p ~~ mid <> mid ~~ q
+
+pullback (n1,n2) (m1,m2) mp = let 
+    getLocTrail (n,m) mp = fromMaybe (mempty `at` origin) $ view (Lens.at $ Single n m) mp
+    lctrl1 = getLocTrail (n1,n2) mp
+    lctrl2 = getLocTrail (m1,m2) mp
+    in pullback_ lctrl1 lctrl2
 
 
 
@@ -183,6 +189,12 @@ mkLocTrail (nm1,nm2) d =
     in pointLocTrailOS p1 p2 sub1 sub2
 
 
+-- 平行な射を扱うためにMapのキーを拡張する
+    -- Twinはコンストラクタによってのみ生成される
+    -- ３つ以上の平行な射にも対応すべきか検討してみよう
+data KeyOfMorph = Single Int Int
+                | Twin Int Int Bool
+                deriving (Eq,Ord,Show)
 
 -- genGraphLocTrailが生成するのはLocatedTrailのMapではなくMorphOptsのMapであるべきだ
     -- arrOpts_,symbols_はwith,[]という初期値で、locTrail_だけ計算結果を入れる
@@ -204,12 +216,6 @@ instance Default MorphOpts where
 
 $(makeLenses ''MorphOpts)
 
--- 平行な射を扱うためにMapのキーを拡張する
-    -- Twinはコンストラクタによってのみ生成される
-    -- ３つ以上の平行な射にも対応すべきか検討してみよう
-data KeyOfMorph = Single Int Int
-                | Twin Int Int Bool
-                deriving (Eq,Ord,Show)
 
 -- オブジェクト内部から輪郭に向けてレイを飛ばし、境界上の点を得る関数
     -- nはname,aはangle
@@ -400,7 +406,7 @@ sim = cubicSpline False [0^&0,1^&0.2, 2^&0, 3^&(-0.2) , 4^&0]
 angledSim lctrl = let 
     vt = tangentAtParam lctrl 0.5
     a = signedAngleBetween vt unitX
-    in rotate a sim :: Diagram PGF
+    in rotate a (scale 0.5 $ sim :: Diagram PGF)
 
 isom mopts = 
     let trl = view locTrail mopts

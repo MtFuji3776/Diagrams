@@ -1,4 +1,4 @@
-module Freyd1_9 where
+module References.Freyd_CatAll.Freyd1_9 where
 
 import Parts
 import DiagramLanguage
