@@ -114,7 +114,7 @@ ds = "/Users/fujimotomakoto/Documents/latexs/DailyStrategy/"
 
 renderPGFLua filepath  = renderOnlinePGF' filepath (def & surface .~ lualatexSurface & sizeSpec .~ (mkSizeSpec2D (Just 400) (Just 300))) 
 
-renderPDF' w h = renderOnlinePGF' "/Users/fujimotomakoto/haskell_testing/diagrams/src/FreeNote/test.pdf" $ luaSurafaceSize w h
+renderPDF' w h = renderOnlinePGF' "/Users/fujimotomakoto/haskell_testing/diagrams/img/test.pdf" $ luaSurafaceSize w h
 renderPDF = renderPDF' 400 300
 
 renderTex' w h = renderOnlinePGF' "/Users/fujimotomakoto/Documents/latexs/Notes/Free/Whiteboard/img/test.tex" $ luaSurafaceSize w h

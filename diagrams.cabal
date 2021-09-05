@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5930cf3c0b068ec48d771cb56941d8fcd0990b31421346f51d614c2bd52e336d
+-- hash: 5de8e0f2da72d2878feb27211573afe53fbb5022c99b3caffebe41bdb8e2e2a4
 
 name:           diagrams
 version:        0.1.0.0
@@ -27,10 +27,130 @@ source-repository head
 
 library
   exposed-modules:
+      DiagramLanguage
+      GraphParser
+      Parts
+      PGFSurface
+      ProofTree
+      Sqlite
+      Yaml
+  other-modules:
+      Paths_diagrams
+  hs-source-dirs:
+      src
+  default-extensions:
+      TypeFamilies
+      FlexibleContexts
+      NoMonomorphismRestriction
+      OverloadedStrings
+  build-depends:
+      SVGFonts
+    , aeson
+    , algebraic-graphs
+    , attoparsec
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , data-default-class
+    , diagrams-builder
+    , diagrams-contrib
+    , diagrams-core
+    , diagrams-lib
+    , diagrams-pgf
+    , diagrams-svg
+    , lens
+    , raw-strings-qq
+    , split
+    , sqlite-simple
+    , texrunner
+    , text
+    , time
+    , yaml
+  default-language: Haskell2010
+
+executable diagrams-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_diagrams
+  hs-source-dirs:
+      app
+  default-extensions:
+      TypeFamilies
+      FlexibleContexts
+      NoMonomorphismRestriction
+      OverloadedStrings
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      SVGFonts
+    , aeson
+    , algebraic-graphs
+    , attoparsec
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , data-default-class
+    , diagrams
+    , diagrams-builder
+    , diagrams-contrib
+    , diagrams-core
+    , diagrams-lib
+    , diagrams-pgf
+    , diagrams-svg
+    , lens
+    , raw-strings-qq
+    , split
+    , sqlite-simple
+    , texrunner
+    , text
+    , time
+    , yaml
+  default-language: Haskell2010
+
+executable diagrams-ext-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_diagrams
+  hs-source-dirs:
+      external
+  default-extensions:
+      TypeFamilies
+      FlexibleContexts
+      NoMonomorphismRestriction
+      OverloadedStrings
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      SVGFonts
+    , aeson
+    , algebraic-graphs
+    , attoparsec
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , data-default-class
+    , diagrams
+    , diagrams-builder
+    , diagrams-contrib
+    , diagrams-core
+    , diagrams-lib
+    , diagrams-pgf
+    , diagrams-svg
+    , lens
+    , raw-strings-qq
+    , split
+    , sqlite-simple
+    , texrunner
+    , text
+    , time
+    , yaml
+  default-language: Haskell2010
+
+test-suite diagrams-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
       AbacusDesign
       AnalyticTableau
       CmSymbols
-      DiagramLanguage
       Diary.Before0110
       DrawCD
       FreeNote.FN202010
@@ -38,12 +158,9 @@ library
       Guide_Arrows
       Guide_Text
       Lib
-      Parts
-      PGFSurface
       Project.Drill.Functors1.Functors
       Project.Drill.Relation.Relation
       Project.OSK_LT.LT202011
-      ProofTree
       References.DomainTheory.Char2
       References.DomainTheory.Char3
       References.DomainTheory.Char4
@@ -55,78 +172,21 @@ library
       References.Freyd_CatAll.Freyd1_8
       References.Freyd_CatAll.Freyd1_9
       References.Freyd_CatAll.Freyd2_1
-      Sqlite
       Tutorial
-  other-modules:
-      Paths_diagrams
-  hs-source-dirs:
-      src
-  default-extensions: TypeFamilies FlexibleContexts NoMonomorphismRestriction OverloadedStrings
-  build-depends:
-      SVGFonts
-    , algebraic-graphs
-    , base >=4.7 && <5
-    , bytestring
-    , containers
-    , data-default-class
-    , diagrams-builder
-    , diagrams-contrib
-    , diagrams-core
-    , diagrams-lib
-    , diagrams-pgf
-    , diagrams-svg
-    , lens
-    , raw-strings-qq
-    , split
-    , sqlite-simple
-    , texrunner
-    , text
-    , time
-  default-language: Haskell2010
-
-executable diagrams-exe
-  main-is: Main.hs
-  other-modules:
-      Paths_diagrams
-  hs-source-dirs:
-      app
-  default-extensions: TypeFamilies FlexibleContexts NoMonomorphismRestriction OverloadedStrings
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      SVGFonts
-    , algebraic-graphs
-    , base >=4.7 && <5
-    , bytestring
-    , containers
-    , data-default-class
-    , diagrams
-    , diagrams-builder
-    , diagrams-contrib
-    , diagrams-core
-    , diagrams-lib
-    , diagrams-pgf
-    , diagrams-svg
-    , lens
-    , raw-strings-qq
-    , split
-    , sqlite-simple
-    , texrunner
-    , text
-    , time
-  default-language: Haskell2010
-
-test-suite diagrams-test
-  type: exitcode-stdio-1.0
-  main-is: Spec.hs
-  other-modules:
       Paths_diagrams
   hs-source-dirs:
       test
-  default-extensions: TypeFamilies FlexibleContexts NoMonomorphismRestriction OverloadedStrings
+  default-extensions:
+      TypeFamilies
+      FlexibleContexts
+      NoMonomorphismRestriction
+      OverloadedStrings
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       SVGFonts
+    , aeson
     , algebraic-graphs
+    , attoparsec
     , base >=4.7 && <5
     , bytestring
     , containers
@@ -145,4 +205,5 @@ test-suite diagrams-test
     , texrunner
     , text
     , time
+    , yaml
   default-language: Haskell2010

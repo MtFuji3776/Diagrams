@@ -41,6 +41,9 @@ dependencies:
 - sqlite-simple
 - text
 - bytestring
+- aeson
+- yaml
+- attoparsec
 
 library:
   source-dirs: src
@@ -55,7 +58,16 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - diagrams
-    
+  
+  diagrams-ext-exe:
+    main:               Main.hs
+    source-dirs:        external
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - diagrams
 
 tests:
   diagrams-test:
