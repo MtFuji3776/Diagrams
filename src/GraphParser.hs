@@ -20,13 +20,25 @@ expr = buildExpressionParser
         [
              [Infix (do symb "*"; return Connect) AssocRight]
         ,    [Infix (do symb "+"; return Overlay) AssocRight]
+        --,    [Infix (do symb ","; return mkPath)  AssocRight]
         ]  term <?> "expression"
 
-term = parens expr <|> vert <?> "simple expression"
+term = parens expr <|> vert <|> parensSquare mkPath <?> "simple expression"
 
 vert = numb
 
 parens p = do symb "("; e <- p; symb ")"; return e
+
+parensSquare p = do symb "["; e <- p; symb "]"; return e
+
+
+
+-- カンマで区切った数列を読み取り、リスト値にして返すパーサー
+mkList = sepBy1 T.decimal (T.string ",")
+
+-- mkListの結果で得られた数リストにpathを適用
+mkPath = path <$> mkList
+
 
 
 -- 以下、attoparsec-exprより写経
