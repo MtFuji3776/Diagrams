@@ -20,25 +20,25 @@ import Data.Char
 -- 課題：PGFバックエンドとSVGバックエンドで統一的に関数を定義できないか考えてみること
 --      それができれば縮尺の違いはバックエンドの違いで場合分けして対処できる
 
--- ラベルにグラフの頂点で名前をつける
-genLabels xs g = 
-    let vs = vertexList g
-    --in zipWith named vs (map (\x -> boxedText x 0.2) xs)
-    in zipWith named vs (map (\x -> boxedText x 0.12 # centerXY) xs)
+-- -- ラベルにグラフの頂点で名前をつける
+-- genLabels xs g = 
+--     let vs = vertexList g
+--     --in zipWith named vs (map (\x -> boxedText x 0.2) xs)
+--     in zipWith named vs (map (\x -> boxedText x 0.12 # centerXY) xs)
 
--- genBCDiaの仕様をちょっと変更し、ラベル用の文字列リストを受け取るようになっている
-    -- 文字ラベルはatPointsに渡す[Point]の順序と対応させる必要がある
-    -- Stringリストを渡す仕様上、黒円と文字ラベルが混じり合った図式は作れない
-    -- そっちは別に定義する必要ありか。
-genLabelDia trl xs g =
-    let vs = vertexList g
-        es = edgeList g
-        arrOpts = with & headLength .~ (local 0.05)
-                       & gaps       .~ (local 0.03)
-        arrows = foldr (.) id . map (uncurry (connectOutside' arrOpts)) $ es
-        objs = genLabels xs g
-        labelmap = Map.fromList $ zip vs objs
-    in pad 1.3 $ arrows $ atPoints trl [labelmap Map.! k | k <- vs]
+-- -- genBCDiaの仕様をちょっと変更し、ラベル用の文字列リストを受け取るようになっている
+--     -- 文字ラベルはatPointsに渡す[Point]の順序と対応させる必要がある
+--     -- Stringリストを渡す仕様上、黒円と文字ラベルが混じり合った図式は作れない
+--     -- そっちは別に定義する必要ありか。
+-- genLabelDia trl xs g =
+--     let vs = vertexList g
+--         es = edgeList g
+--         arrOpts = with & headLength .~ (local 0.05)
+--                        & gaps       .~ (local 0.03)
+--         arrows = foldr (.) id . map (uncurry (connectOutside' arrOpts)) $ es
+--         objs = genLabels xs g
+--         labelmap = Map.fromList $ zip vs objs
+--     in pad 1.3 $ arrows $ atPoints trl [labelmap Map.! k | k <- vs]
 
 
 
@@ -54,11 +54,11 @@ getPGFSymbol d xs = do
     lab <- hboxOnline . mathEnv $ xs
     return $ lab # scale d # centerXY
 
-getPGFLabel = getPGFSymbol 0.015
+--getPGFLabel = getPGFSymbol 0.015
 
 getPGFObj = getPGFSymbol 0.015
 
-getPGFText xs = centerXY . scale 0.01 <$> hboxOnline xs
+--getPGFText xs = centerXY . scale 0.01 <$> hboxOnline xs
 
 --
 -- ============================== 図式言語 ==========================================

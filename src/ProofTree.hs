@@ -9,8 +9,8 @@ import qualified Algebra.Graph.AdjacencyMap as Adjacency
 import PGFSurface
 import Data.Tree.Lens
 import Data.Maybe (fromMaybe)
-import qualified Data.Map as Map
-import qualified Data.Set as Set
+import qualified Data.Map as Map(fromList)
+import qualified Data.Set as Set (toList)
 import qualified Control.Lens.At as Lens (at)
 import Text.RawString.QQ
 
@@ -61,33 +61,33 @@ proofTree (Node x ts) =
 
 derivTree f r = proofTree . formulaTree f . genTree r
 
-test = do
-    chars <- mapM getPGFObj ["A","B","C","D","E"]
-    let objs = hsep 0.2 chars # centerXY :: Diagram B
-        objs' = objs === objs === (view (ix 3)chars)
-        width = diameter unitX objs'
-        height = diameter unitY objs'
-        feet = objs' # clipTo (rect width (0.2*height) # alignB)
-        width1 = diameter unitX feet
-        line = hrule width1 # centerXY
-    return $ (objs'  === line === (view (ix 0) chars))
+-- test = do
+--     chars <- mapM getPGFObj ["A","B","C","D","E"]
+--     let objs = hsep 0.2 chars # centerXY :: Diagram B
+--         objs' = objs === objs === (view (ix 3)chars)
+--         width = diameter unitX objs'
+--         height = diameter unitY objs'
+--         feet = objs' # clipTo (rect width (0.2*height) # alignB)
+--         width1 = diameter unitX feet
+--         line = hrule width1 # centerXY
+--     return $ (objs'  === line === (view (ix 0) chars))
 
-test1 = do
-    chars <- mapM getPGFObj ["A","B\\land X","C\\to Y","D\\lor (Z \\land W)","E"]
-    let alga = 1*(2+3+4) + 4*(5+6+7+8)
-        l i = view (ix $ i-1) chars
-        t = proofTree . formulaTree l . genTree 1 $ alga
-        ds = vsep 0.05 . map (showEnvelope . showOrigin . l) $ [1,2,3,4,5]
-        ds1 = showEnvelope . showOrigin . centerXY . hsep 0.2 . map l $ [2,3,4]
-    -- num <- getPGFText . show $ diameter unitX t
-    return (proofTree . formulaTree (\x -> t) . genTree (1 :: Int) $ alga)
+-- test1 = do
+--     chars <- mapM getPGFObj ["A","B\\land X","C\\to Y","D\\lor (Z \\land W)","E"]
+--     let alga = 1*(2+3+4) + 4*(5+6+7+8)
+--         l i = view (ix $ i-1) chars
+--         t = proofTree . formulaTree l . genTree 1 $ alga
+--         ds = vsep 0.05 . map (showEnvelope . showOrigin . l) $ [1,2,3,4,5]
+--         ds1 = showEnvelope . showOrigin . centerXY . hsep 0.2 . map l $ [2,3,4]
+--     -- num <- getPGFText . show $ diameter unitX t
+--     return (proofTree . formulaTree (\x -> t) . genTree (1 :: Int) $ alga)
 
-test2 = do
-    chars <- mapM getPGFObj ["A","B \\land X", "C \\to Y", "D \\lor (Z \\land W)" , "E"]
-    let alga = 1* (2+3) + 2*4 + 3 * 5
-        l i = view (ix $ i - 1) chars
-        t = proofTree . formulaTree l . genTree 1 $ alga
-    return t
+-- test2 = do
+--     chars <- mapM getPGFObj ["A","B \\land X", "C \\to Y", "D \\lor (Z \\land W)" , "E"]
+--     let alga = 1* (2+3) + 2*4 + 3 * 5
+--         l i = view (ix $ i - 1) chars
+--         t = proofTree . formulaTree l . genTree 1 $ alga
+--     return t
 
 proofTree_ (Node x []) = x # alignB
 proofTree_ (Node x ts) = hsep 0.1 (map (alignB  . proofTree) ts) === strutY 0.1 === x # centerXY
@@ -127,17 +127,17 @@ lineLength (Node x ts) m =
 --                               in (hsep 0.1 $ map h ts) # alignB === strutY 0.02 === l === strutY 0.02 === fst x # centerXY
 --     in h t'
 
-test3 = do
-    objs <- mapM getPGFObj ["A","B","C","D","E","F","G","H"]
-    let alga = path [1,3,4,5,6] + 1*2
-        tr = genTree 1 alga
-        slopt = def & slWidth  .~ fromMaybe (0,0) . extentX
-                    & slHeight .~ fromMaybe (0,0) . extentY
-                    & slHSep   .~ 0.15 
-                    & slVSep   .~ 0.02
-        f i = view (ix $ i - 1) objs
-        sltree = symmLayout' slopt $ fmap f tr
-    return $ renderTree id (\_ _ -> mempty) sltree
+-- test3 = do
+--     objs <- mapM getPGFObj ["A","B","C","D","E","F","G","H"]
+--     let alga = path [1,3,4,5,6] + 1*2
+--         tr = genTree 1 alga
+--         slopt = def & slWidth  .~ fromMaybe (0,0) . extentX
+--                     & slHeight .~ fromMaybe (0,0) . extentY
+--                     & slHSep   .~ 0.15 
+--                     & slVSep   .~ 0.02
+--         f i = view (ix $ i - 1) objs
+--         sltree = symmLayout' slopt $ fmap f tr
+--     return $ renderTree id (\_ _ -> mempty) sltree
 
 -- 導出図用のSymmLayoutOption
 ptLayoutOpts = def & slWidth  .~ fromMaybe (0,0) . extentX
@@ -187,13 +187,13 @@ modifiedLayout f nt = let
 
 
 
-test4 = do
-    objs <- mapM getPGFObj ["A","B","CSTUVWXYZ","D","E","F","G"]
-    let alga = path [1,3,4,5,6] + 1*2
-        tr = genTree 1 alga
-        f i = view (ix $ i - 1) objs
-        sltree = ptLayout (evalPTNode . fromInt f) tr
-    return $ renderPt sltree
+-- test4 = do
+--     objs <- mapM getPGFObj ["A","B","CSTUVWXYZ","D","E","F","G"]
+--     let alga = path [1,3,4,5,6] + 1*2
+--         tr = genTree 1 alga
+--         f i = view (ix $ i - 1) objs
+--         sltree = ptLayout (evalPTNode . fromInt f) tr
+--     return $ renderPt sltree
 
 data PTNode a = PTNode{elementPTN :: a
                       ,leftLab :: a
@@ -213,17 +213,17 @@ fromDiagram d = def{elementPTN = d}
 
 evalPTNode (PTNode d ll rl line) = mconcat [d,ll ||| line ||| rl]
 
-test5 = do
-    objs <- mapM getPGFObj ["A","B","C","D","E","F"]
-    let f i = view (ix $ i-1) objs
-        alga = path [1,2,3,4,5] + path [2,6,7]
-        t = genTree 1 alga
-        t' = fmap (fromDiagram . uncurry place) $ ptLayout f t
-        ds = flatten t'
-        ks = flatten t
-        kds = zip ks ds
-        mp = Map.fromList kds
-    return mp
+-- test5 = do
+--     objs <- mapM getPGFObj ["A","B","C","D","E","F"]
+--     let f i = view (ix $ i-1) objs
+--         alga = path [1,2,3,4,5] + path [2,6,7]
+--         t = genTree 1 alga
+--         t' = fmap (fromDiagram . uncurry place) $ ptLayout f t
+--         ds = flatten t'
+--         ks = flatten t
+--         kds = zip ks ds
+--         mp = Map.fromList kds
+--     return mp
 
 evalNodeMap = foldr mappend mempty
 
@@ -256,31 +256,31 @@ onestepLine d ds =
         (x1,x2) = fromMaybe (0,0) . extentX $ d0
     in (x1 ^& y0) ~~ (x2 ^& y0) :: Diagram PGF
 
-test6 = do
-    objs <- mapM getPGFObj ["A","B","C","D","E"]
-    let alga = 1*(2+3+4+5)
-        f i = view (ix $ i - 1) $ scaleY (-1) objs
-        t = genTree 1 alga
-        t' = fmap (uncurry place) $ ptLayout f t
-        d = rootLabel t'
-        ds = concatMap flatten . subForest $ t'
-    return $ scaleY (-1) $ centerXY $ d <> mconcat ds <> onestepLine d ds
+-- test6 = do
+--     objs <- mapM getPGFObj ["A","B","C","D","E"]
+--     let alga = 1*(2+3+4+5)
+--         f i = view (ix $ i - 1) $ scaleY (-1) objs
+--         t = genTree 1 alga
+--         t' = fmap (uncurry place) $ ptLayout f t
+--         d = rootLabel t'
+--         ds = concatMap flatten . subForest $ t'
+--     return $ scaleY (-1) $ centerXY $ d <> mconcat ds <> onestepLine d ds
 
 
 select mp n = fromMaybe mempty . view (Lens.at n) $ mp
 
 onestepObjects mp = over _1 (select mp) . over _2 (map (select mp))
 
-test7 = do
-    objs <- fmap (scaleY (-1)) $ mapM getPGFObj ["A","B","C","D","E","F"] :: OnlineTex [Diagram PGF]
-    let alga = 1*(2+3) + 2*(4+5) + 3*6
-        t = genTree 1 alga
-        mp = makeMap objs t
-        ks = flatten t
-        adjag = Adjacency.tree t
-        derivs = map (onestepObjects mp) $ makeRelations adjag ks
-        ls = map (uncurry onestepLine) derivs
-    return $ scaleY (-1) . centerXY $ mconcat ls <> evalNodeMap mp
+-- test7 = do
+--     objs <- fmap (scaleY (-1)) $ mapM getPGFObj ["A","B","C","D","E","F"] :: OnlineTex [Diagram PGF]
+--     let alga = 1*(2+3) + 2*(4+5) + 3*6
+--         t = genTree 1 alga
+--         mp = makeMap objs t
+--         ks = flatten t
+--         adjag = Adjacency.tree t
+--         derivs = map (onestepObjects mp) $ makeRelations adjag ks
+--         ls = map (uncurry onestepLine) derivs
+--     return $ scaleY (-1) . centerXY $ mconcat ls <> evalNodeMap mp
 
 onestepRelation g n =
     let ks = Set.toList $ Adjacency.postSet n g
@@ -326,44 +326,44 @@ genProofTree update objs t =
 
 genProofTree_ = genProofTree id
 
-test8 = do
-    objs <- mapM getPGFObj ["A\\land A \\Rightarrow B \\to B","B","C","D","E","F","G"] :: OnlineTex [Diagram PGF]
-    let alga = path [1,2,4] + 2*5 + path [1,3,6]
-        t = genTree 1 alga
-        d = genProofTree_ objs t
-    return d
+-- test8 = do
+--     objs <- mapM getPGFObj ["A\\land A \\Rightarrow B \\to B","B","C","D","E","F","G"] :: OnlineTex [Diagram PGF]
+--     let alga = path [1,2,4] + 2*5 + path [1,3,6]
+--         t = genTree 1 alga
+--         d = genProofTree_ objs t
+--     return d
 
-test9 = do
-    let alga = path [1,2,3,4,5,6,7,8] + path [2,9,10,11] + path [2,12,13,14,15] + path [4,16,17] + path [9,18,19]
-        t = genTree 1 alga
-    objs <- mapM (getPGFObj.show) $ flatten t
-    let d = genProofTree_ objs t
-    return d
+-- test9 = do
+--     let alga = path [1,2,3,4,5,6,7,8] + path [2,9,10,11] + path [2,12,13,14,15] + path [4,16,17] + path [9,18,19]
+--         t = genTree 1 alga
+--     objs <- mapM (getPGFObj.show) $ flatten t
+--     let d = genProofTree_ objs t
+--     return d
 
 
 getFormula = mapM (fmap alignB . getPGFObj . ("\\mathstrut " <>))
 
-test10 = do
-    objs <- mapM (fmap alignB . getPGFObj . ("\\mathstrut " <>)) ["(z \\Rightarrow x) \\to (z \\Rightarrow x)","z \\land (z \\Rightarrow x) \\to x","x \\to y","z \\land (z \\Rightarrow x) \\to y","z \\Rightarrow x \\to z \\Rightarrow y"]
-    let alga = path [5,4,2,1] + 4*3
-        d = genProofTree_ objs $ genTree 5 alga
-    return d
+-- test10 = do
+--     objs <- mapM (fmap alignB . getPGFObj . ("\\mathstrut " <>)) ["(z \\Rightarrow x) \\to (z \\Rightarrow x)","z \\land (z \\Rightarrow x) \\to x","x \\to y","z \\land (z \\Rightarrow x) \\to y","z \\Rightarrow x \\to z \\Rightarrow y"]
+--     let alga = path [5,4,2,1] + 4*3
+--         d = genProofTree_ objs $ genTree 5 alga
+--     return d
 
-test11 = do
-    objs <- getFormula ["z \\Rightarrow x \\rightharpoonup z \\Rightarrow y","z \\land (z \\Rightarrow x) \\rightharpoonup x","x \\rightharpoonup y","z \\land (z \\Rightarrow x) \\rightharpoonup y","z \\Rightarrow x \\rightharpoonup z \\Rightarrow y"]
-    let alga = path [5,4,2,1] + 4*3
-        d = genProofTree_ objs $ genTree 5 alga
-    return d
+-- test11 = do
+--     objs <- getFormula ["z \\Rightarrow x \\rightharpoonup z \\Rightarrow y","z \\land (z \\Rightarrow x) \\rightharpoonup x","x \\rightharpoonup y","z \\land (z \\Rightarrow x) \\rightharpoonup y","z \\Rightarrow x \\rightharpoonup z \\Rightarrow y"]
+--     let alga = path [5,4,2,1] + 4*3
+--         d = genProofTree_ objs $ genTree 5 alga
+--     return d
 
-test12 = do
-    objs <- getFormula ["z \\Rightarrow x \\rightharpoonup z \\Rightarrow y","z \\land (z \\Rightarrow x) \\rightharpoonup x","x \\rightharpoonup y","z \\land (z \\Rightarrow x) \\rightharpoonup y","z \\Rightarrow x \\rightharpoonup z \\Rightarrow y"] :: OnlineTex [Diagram PGF]
-    lab1 <- fmap (scale 0.6 . scaleY (-1)) $ getPGFLabel "[\\Rightarrow]"
-    lab2 <- fmap (scale 0.6 . scaleY (-1)) $ getPGFLabel "[\\rightharpoonup \\rightharpoonup]"
-    lab3 <- fmap (scale 0.6 . scaleY (-1)) $ getPGFLabel "[\\Rightarrow]"
-    let alga = path [5,4,2,1] + 4*3
-        update mp = over (Lens.at 5) (fmap $ set rightLabel lab1)  . over (Lens.at 2) (fmap $ set rightLabel lab3) . over (Lens.at 4) (fmap $ set rightLabel lab2) $ mp 
-        d = genProofTree update objs (genTree 5 alga)
-    return d
+-- test12 = do
+--     objs <- getFormula ["z \\Rightarrow x \\rightharpoonup z \\Rightarrow y","z \\land (z \\Rightarrow x) \\rightharpoonup x","x \\rightharpoonup y","z \\land (z \\Rightarrow x) \\rightharpoonup y","z \\Rightarrow x \\rightharpoonup z \\Rightarrow y"] :: OnlineTex [Diagram PGF]
+--     lab1 <- fmap (scale 0.6 . scaleY (-1)) $ getPGFLabel "[\\Rightarrow]"
+--     lab2 <- fmap (scale 0.6 . scaleY (-1)) $ getPGFLabel "[\\rightharpoonup \\rightharpoonup]"
+--     lab3 <- fmap (scale 0.6 . scaleY (-1)) $ getPGFLabel "[\\Rightarrow]"
+--     let alga = path [5,4,2,1] + 4*3
+--         update mp = over (Lens.at 5) (fmap $ set rightLabel lab1)  . over (Lens.at 2) (fmap $ set rightLabel lab3) . over (Lens.at 4) (fmap $ set rightLabel lab2) $ mp 
+--         d = genProofTree update objs (genTree 5 alga)
+--     return d
 
 oneSequent sym xs ys = between xs ys sym
 
@@ -371,26 +371,26 @@ oneSequent sym xs ys = between xs ys sym
 
 (-->) = oneSequent " \\rightharpoonup "
 
-test13 = do
-    objs <- getFormula ["\\exists x (B \\land A)" --> "\\exists x A \\land B"
-                        ,"\\exists x (B \\land A)" --> "B \\land \\exists x A"
-                        ,"B \\land A" --> "|x| \\land \\exists x A \\land B"
-                        ,"B \\land A" --> "|x| \\land \\exists x A"
-                        ,"B \\land A" --> "B"
-                        ,"A" --> "|x| \\land \\exists x A"
-                        ,"\\exists x A" --> "\\exists x A"
-                        ,[r|B \land A|] |- [r|B \land A|] 
-                        ,"B \\land A" --> "A" 
-                        ]
-    let alga = path [1,2,3,4,6,7] + 4*(8) + 3*9 
-        d = genProofTree id objs (genTree 1 alga)
-    return d
+-- test13 = do
+--     objs <- getFormula ["\\exists x (B \\land A)" --> "\\exists x A \\land B"
+--                         ,"\\exists x (B \\land A)" --> "B \\land \\exists x A"
+--                         ,"B \\land A" --> "|x| \\land \\exists x A \\land B"
+--                         ,"B \\land A" --> "|x| \\land \\exists x A"
+--                         ,"B \\land A" --> "B"
+--                         ,"A" --> "|x| \\land \\exists x A"
+--                         ,"\\exists x A" --> "\\exists x A"
+--                         ,[r|B \land A|] |- [r|B \land A|] 
+--                         ,"B \\land A" --> "A" 
+--                         ]
+--     let alga = path [1,2,3,4,6,7] + 4*(8) + 3*9 
+--         d = genProofTree id objs (genTree 1 alga)
+--     return d
 
-test14 = do
-    objs <- getFormula $ map show [1,2,3,4,5,6,7,8,9,10,11]
-    let alga = path [1,3,5,7] + path [1,2,8] + path [1,4,6,9] + star 5 [10,11]
-        d = genProofTree id objs (genTree 1 alga)
-    return d
+-- test14 = do
+--     objs <- getFormula $ map show [1,2,3,4,5,6,7,8,9,10,11]
+--     let alga = path [1,3,5,7] + path [1,2,8] + path [1,4,6,9] + star 5 [10,11]
+--         d = genProofTree id objs (genTree 1 alga)
+--     return d
 
 -- boxingNodes t = let 
 --     subts = subForest t
@@ -400,30 +400,30 @@ test14 = do
 --     t' = over root (atop (strutX l)) t
 --     in over branches (map boxingNodes) t'
 
-test15 = do
-    objs <- getFormula $ [
-            [r|\forall x (B \land A)|] --> [r|B \land \forall x A|],
-            [r|\forall x (B \land A)|] --> "\\forall x A",
-            [r|\forall x (B \land A) \land |x||] --> "A",
-            [r|\forall x (B \land A) \land |x||] --> "B \\land A",
-            [r|\forall x (B \land A)|] --> [r|\forall x (B \land A)|],
-            [r|B \land A|] --> "A",
-            [r|\forall x (B \land A)|] --> "B",
-            [r|\forall x (B \land A)|] --> [r|\forall x B|],
-            [r|B \land A|] --> "B",
-            [r|\forall x B|] --> "B",
-            [r|\forall x B|] --> [r|B \land |x||],
-            "B \\land |x|" --> "B",
-            [r|\forall x B \land |x||] --> "B",
-            [r|\forall x B|] --> [r|\forall x B\text{test test test test test test test test test test}|]
-            ]
-    let alga = path [1,2,3,4,5] + 3*6 + path [1,7,10,11,13,14] + path [7,8,9] + 10 * 12
-        t = genProofTree id objs (genTree 1 alga)
-    return t
+-- test15 = do
+--     objs <- getFormula $ [
+--             [r|\forall x (B \land A)|] --> [r|B \land \forall x A|],
+--             [r|\forall x (B \land A)|] --> "\\forall x A",
+--             [r|\forall x (B \land A) \land |x||] --> "A",
+--             [r|\forall x (B \land A) \land |x||] --> "B \\land A",
+--             [r|\forall x (B \land A)|] --> [r|\forall x (B \land A)|],
+--             [r|B \land A|] --> "A",
+--             [r|\forall x (B \land A)|] --> "B",
+--             [r|\forall x (B \land A)|] --> [r|\forall x B|],
+--             [r|B \land A|] --> "B",
+--             [r|\forall x B|] --> "B",
+--             [r|\forall x B|] --> [r|B \land |x||],
+--             "B \\land |x|" --> "B",
+--             [r|\forall x B \land |x||] --> "B",
+--             [r|\forall x B|] --> [r|\forall x B\text{test test test test test test test test test test}|]
+--             ]
+--     let alga = path [1,2,3,4,5] + 3*6 + path [1,7,10,11,13,14] + path [7,8,9] + 10 * 12
+--         t = genProofTree id objs (genTree 1 alga)
+--     return t
 
-test16 = do
-    let sequent = ("\\Gamma" |-)
-        alga = 1*(2+3)
-    objs <- getFormula $ map sequent ["\\varphi \\wedge \\psi", "\\varphi", "\\psi"]
-    return $ genProofTree id objs  (genTree 1 alga)
+-- test16 = do
+--     let sequent = ("\\Gamma" |-)
+--         alga = 1*(2+3)
+--     objs <- getFormula $ map sequent ["\\varphi \\wedge \\psi", "\\varphi", "\\psi"]
+--     return $ genProofTree id objs  (genTree 1 alga)
 

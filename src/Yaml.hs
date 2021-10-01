@@ -1,13 +1,13 @@
 {-# LANGUAGE DeriveGeneric #-}
 module Yaml where
 
-import GHC.Generics
+import GHC.Generics(Generic)
 import Data.Yaml(decodeFileEither,ParseException)
-import Data.Aeson
+import Data.Aeson(FromJSON,ToJSON)
 import Data.Aeson.Types(parseEither)
 import Data.Either(fromRight)
 import Data.Text(Text)
-import Algebra.Graph
+import Algebra.Graph()
 import Data.String(IsString,fromString)
 
 instance FromJSON a => FromJSON(Graph a)

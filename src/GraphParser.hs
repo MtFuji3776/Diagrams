@@ -2,16 +2,17 @@ module GraphParser(
     expr
 ) where
 
-import qualified Data.Attoparsec.Text as T
+import qualified Data.Attoparsec.Text as T (sepBy1,string,decimal)
+--import Data.Attoparsec(Parser)
 --import qualified Data.Attoparsec.Text.Internal as PT(Parser)
-import Algebra.Graph
+import Algebra.Graph(Graph(..),path)
 --import Control.Monad(mplus)
 import Data.Text(Text)
 import Data.Either(fromLeft,fromRight)
 import Control.Applicative
 import Data.Monoid
-import Data.Attoparsec.Combinator
-import Data.Attoparsec.Types
+import Data.Attoparsec.Combinator(choice,(<?>))
+import Data.Attoparsec.Types(Parser)
 
 type G = Graph Int
 
@@ -34,7 +35,7 @@ parensSquare p = do symb "["; e <- p; symb "]"; return e
 
 
 -- カンマで区切った数列を読み取り、リスト値にして返すパーサー
-mkList = sepBy1 T.decimal (T.string ",")
+mkList = T.sepBy1 T.decimal (T.string ",")
 
 -- mkListの結果で得られた数リストにpathを適用
 mkPath = path <$> mkList
@@ -112,7 +113,7 @@ token p = do
     a <- p
     return a
 
-symb :: Text -> T.Parser Text
+symb :: Text -> Parser Text Text
 symb cs = token $ T.string cs
 
 numb = Vertex <$> token (T.decimal)
