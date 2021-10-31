@@ -222,6 +222,8 @@ data KeyOfMorph = Single Int Int
                 | Twin Int Int Bool
                 deriving (Eq,Ord,Show)
 
+type KeyOfMorphOption = (Int,Int,Int) -- 最初の２成分は射の始域と終域のデータ、最後の成分は同じ２対象間に複数の射が存在する場合のID。
+
 -- genGraphLocTrailが生成するのはLocatedTrailのMapではなくMorphOptsのMapであるべきだ
     -- arrOpts_,symbols_はwith,[]という初期値で、locTrail_だけ計算結果を入れる
     -- arrOpts_,symbols_の更新を次の関数で実施
@@ -278,6 +280,21 @@ genMorphOpts es d =
                     in Lens.at (Single i j) Lens.?~ opts $ mp
     in foldr insert' Map.empty es
 
+genMorphOptsFromJson :: [KeyOfMorphOption] -> Diagram PGF -> Map.Map KeyOfMorphOption MorphOpts
+genMorphOptsFromJson esk d =
+    let insert' (i,j,k) mp =
+            if i == j
+                then
+                    let p = anglePoint i (1/3) d
+                        opts = def & locTrail .~ (arc (direction unitX) ((-4/5) @@ turn) 
+                                   # scale (-0.1) . rotateBy (1/8)) `at` p
+                    in Lens.at (i,j,k) Lens.?~ opts $ mp
+                else 
+                    let opts = def & locTrail .~ mkLocTrail (i,j) d
+                                   & arrOpts . headLength .~ (local 10)
+                    in Lens.at (i,j,k) Lens.?~ opts $ mp
+    in foldr insert' Map.empty esk
+
 -- Algaから図式の抽象グラフ構造を読み取り、Trailから座標情報を読み取り、離散グラフとLocatedTrailのMapの組を作って返す
     -- このあと、LocatedTrailのMapを装飾しつつarrowFromLocatedTrailに適用し、離散圏に射を入れていく関数が続く
     -- SVG専用になってしまってるのが癪。バックエンドを抽象化できないものか？
@@ -289,15 +306,24 @@ genGraphLocTrail trl objs g =
         morphmap' = fmap (over (arrOpts.gaps) (+ local 0.03) . set (arrOpts.headLength) (local 0.05)) morphmap 
     in (disd :: Diagram PGF,morphmap')
 
+-- Json由来のデータに対応して関数を作り直した
+genGraphLocTrailFromJson esk d = (d,genMorphOptsFromJson esk d)
+
 -- MorphOptsを評価して、ArrowのQDiagramを生成する関数
 evalMorphOpts (Morph loc opts symbs acts) =
     let protoarr = mconcat $ (arrowFromLocatedTrail' opts loc):symbs
     in foldr (.) id acts $ protoarr
 
+
 mkDiagram (disd,morphmap) =
     let arrowDia = foldr (\x y -> evalMorphOpts x # lw veryThin <> y) mempty morphmap 
     in arrowDia <> disd :: Diagram PGF
 
+-- Jsonデータから可換図式を生成するための関数
+mkDiagramFromJson :: (Diagram PGF,Map.Map KeyOfMorphOption MorphOpts) -> Diagram PGF
+mkDiagramFromJson (d,moptmap) = 
+    let arrowDia = foldr (\x y -> evalMorphOpts x # lw veryThin <> y) mempty moptmap
+    in arrowDia <> d 
 
 genDiagram trl objs update = mkDiagram . over _2 update . genGraphLocTrail trl objs 
 
