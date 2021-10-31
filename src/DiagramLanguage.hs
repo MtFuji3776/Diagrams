@@ -294,7 +294,7 @@ genMorphOptsFromJson ms d =
                     let opts = def & locTrail .~ mkLocTrail (i,j) d
                                    & arrOpts . headLength .~ (local 10)
                     in Lens.at (i,j,k) Lens.?~ opts $ mp
-    in foldr insert' Map.empty esk
+    in foldr insert' Map.empty ms
 
 -- Algaから図式の抽象グラフ構造を読み取り、Trailから座標情報を読み取り、離散グラフとLocatedTrailのMapの組を作って返す
     -- このあと、LocatedTrailのMapを装飾しつつarrowFromLocatedTrailに適用し、離散圏に射を入れていく関数が続く
@@ -308,7 +308,17 @@ genGraphLocTrail trl objs g =
     in (disd :: Diagram PGF,morphmap')
 
 -- Json由来のデータに対応して関数を作り直した
---genGraphLocTrailFromJson esk d = genMorphOptsFromjson esk d >>= \x -> return (d,x)
+genGraphLocTrailFromJson esk d = (d,genMorphOptsFromJson esk d)
+
+genGraphWithLabeledMorphism :: [MorphismSource] -> Diagram PGF -> OnlineTex (Diagram PGF)
+genGraphWithLabeledMorphism ms d = do
+    xs <- mapM getPGFObj $ map snd ms :: OnlineTex [Diagram PGF]
+    let keys = map fst ms :: [(Int,Int,Int)]
+        mpLabels = Map.fromList $ zip keys xs
+        mp' = fmap (over (arrOpts.gaps) (+ local 0.03) . set (arrOpts.headLength) (local 0.05)) $ genMorphOptsFromJson ms d
+        mp = Map.foldrWithKey (tackLabelFromJson_ 0.5 0.1) mp' mpLabels :: Map.Map KeyOfMorphOption MorphOpts
+        d' = mkDiagramFromJson (d,mp)
+    return d'
 
 -- MorphOptsを評価して、ArrowのQDiagramを生成する関数
 evalMorphOpts (Morph loc opts symbs acts) =
@@ -348,6 +358,8 @@ actOpt i j f = over (Lens.at (Single i j)) (fmap f)
 -- Twin用
 actOpt_Twin i j b f = over (Lens.at (Twin i j b)) (fmap f)
 
+actOptWithJson i j k f = over (Lens.at (i,j,k)) (fmap f)
+
 -- actOptとtakeLabelの併せ
     -- takeLabelはMorphOpts上の関数
     -- MorphOpts上の関数として定義→actOptでMap上に持ち上げ
@@ -355,6 +367,10 @@ tackLabel i j l b = if i /= j
                     then actOpt i j (takeLabel l 0.5 b)
                     else actOpt i j (takeLabel_ l 0.38 0.23 b)
 tackLabel_ i j l b d1 d2 = actOpt i j (takeLabel_ l d1 d2 b)
+
+-- この関数で、Jsonデータから射のラベル付けを実現できるはず。
+-- tackLabelFromJson_ :: Double -> Double -> (Int,Int,Int) -> String -> 
+tackLabelFromJson_ d1 d2 (i,j,k) label = actOptWithJson i j k (takeLabel_ label d1 d2 True)
 
 tackLabelTwin i j b1 l b2 = actOpt_Twin i j b1 (takeLabel l 0.5 b2)
 takeLabelTwin_ i j b1 l b2 d1 d2 = actOpt_Twin i j b1 (takeLabel_ l d1 d2 b2)

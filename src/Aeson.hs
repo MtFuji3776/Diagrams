@@ -12,7 +12,7 @@ type MorphismData = ((Int,Int,Int),String)
 
 genJson :: IO ()
 genJson = do
-    let j = M.fromList $ zip [1,2,3] [((2,1),"\\mathfrak{testP}"), ((-1,0),"test") ,((3,2),"\\mathfrak{O}")  ] :: M.Map Int ((Double,Double),String)
+    let j = M.fromList $ zip [1,2,3] [((2,1),"X"), ((-1,0),"Y") ,((3,2),"Z")  ] :: M.Map Int ((Double,Double),String)
         j1 = M.fromList $ zip [(1,2,0),(1,3,0),(2,3,0)] ["f","g","h"] :: M.Map (Int,Int,Int) String
         bs1 = fromMaybe Null $ decode $ encode j :: Value
         bs2 = fromMaybe Null $ decode $ encode j1 :: Value
