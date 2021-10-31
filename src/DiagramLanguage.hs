@@ -185,7 +185,13 @@ genObject (n,((x,y),str)) = do
         p = p2 (x,y)
     return $ place obj p
 
---genDiscreteFromJson :: ObjectSource
+-- Jsonファイル由来のデータを引数にとって離散圏図式を生成する関数
+genDiscreteFromJson :: [ObjectSource] -> OnlineTex (Diagram PGF)
+genDiscreteFromJson objs = 
+    let dias' = sequence . map genObject $ objs :: OnlineTex [Diagram PGF]
+        dias = fmap (foldr (<>) mempty) dias' :: OnlineTex (Diagram PGF)
+    in dias
+
 
 -- 離散圏図式生成機。対象だけ描画する
 genDiscrete trl objs g =
