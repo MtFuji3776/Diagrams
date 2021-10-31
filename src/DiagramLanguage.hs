@@ -15,7 +15,13 @@ import qualified Data.Map as Map
 import qualified Control.Lens as Lens ((?~),at)
 import Data.Maybe (fromMaybe,isNothing)
 import Data.Char
+import Diagrams.TwoD.Image(loadImageEmb,image)
+import Data.Either(fromRight)
+import Aeson
+-- import Diagrams.Backend.Rasterific
 -- import CmSymbols
+
+
 
 -- 課題：PGFバックエンドとSVGバックエンドで統一的に関数を定義できないか考えてみること
 --      それができれば縮尺の違いはバックエンドの違いで場合分けして対処できる
@@ -166,6 +172,20 @@ example1 = do
 
 
 -- =================================================図式言語生成用の主要関数==================================================================
+
+-- Jsonからデコードするオブジェクト用のデータ
+type ObjectSource = (Int,((Double,Double),String))
+
+-- 対象のJsonデータから対象を生成する関数
+    -- これをmapする関数を定義すればgenDiscreteのJson対応版になる
+genObject :: ObjectSource -> OnlineTex (Diagram PGF)
+genObject (n,((x,y),str)) = do
+    obj' <- getPGFObj str
+    let obj = named n obj'
+        p = p2 (x,y)
+    return $ place obj p
+
+--genDiscreteFromJson :: ObjectSource
 
 -- 離散圏図式生成機。対象だけ描画する
 genDiscrete trl objs g =

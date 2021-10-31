@@ -117,7 +117,7 @@ renderPGFLua filepath  = renderOnlinePGF' filepath (def & surface .~ lualatexSur
 renderPDF' w h = renderOnlinePGF' "/Users/fujimotomakoto/haskell_testing/diagrams/img/test.pdf" $ luaSurafaceSize w h
 renderPDF = renderPDF' 400 300
 
-renderTex' w h = renderOnlinePGF' "/Users/fujimotomakoto/Documents/latexs/Notes/Free/Whiteboard/img/test.tex" $ luaSurafaceSize w h
+renderTex' w h = renderOnlinePGF' "/Users/fujimotomakoto/haskell_testing/diagrams/img/test.tex" $ luaSurafaceSize w h
 renderTex = renderTex' 300 225
 
 easyRender' w h name = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202012/img/" ++ name) (luaSurafaceSize w h)
