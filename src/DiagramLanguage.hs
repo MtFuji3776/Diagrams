@@ -175,6 +175,7 @@ example1 = do
 
 -- Jsonからデコードするオブジェクト用のデータ
 type ObjectSource = (Int,((Double,Double),String))
+type MorphismSource = ((Int,Int,Int),String)
 
 -- 対象のJsonデータから対象を生成する関数
     -- これをmapする関数を定義すればgenDiscreteのJson対応版になる
@@ -280,9 +281,9 @@ genMorphOpts es d =
                     in Lens.at (Single i j) Lens.?~ opts $ mp
     in foldr insert' Map.empty es
 
-genMorphOptsFromJson :: [KeyOfMorphOption] -> Diagram PGF -> Map.Map KeyOfMorphOption MorphOpts
-genMorphOptsFromJson esk d =
-    let insert' (i,j,k) mp =
+genMorphOptsFromJson :: [MorphismSource] -> Diagram PGF -> Map.Map KeyOfMorphOption MorphOpts
+genMorphOptsFromJson ms d =
+    let insert' ((i,j,k),str) mp =
             if i == j
                 then
                     let p = anglePoint i (1/3) d
@@ -307,7 +308,7 @@ genGraphLocTrail trl objs g =
     in (disd :: Diagram PGF,morphmap')
 
 -- Json由来のデータに対応して関数を作り直した
-genGraphLocTrailFromJson esk d = (d,genMorphOptsFromJson esk d)
+--genGraphLocTrailFromJson esk d = genMorphOptsFromjson esk d >>= \x -> return (d,x)
 
 -- MorphOptsを評価して、ArrowのQDiagramを生成する関数
 evalMorphOpts (Morph loc opts symbs acts) =
@@ -327,7 +328,7 @@ mkDiagramFromJson (d,moptmap) =
 
 genDiagram trl objs update = mkDiagram . over _2 update . genGraphLocTrail trl objs 
 
-
+--genDiagramFromJson 
 -- attachLabelのアレンジ
 takeLabel_ l asp1 asp2 b opts =
     let trl = opts ^. locTrail
