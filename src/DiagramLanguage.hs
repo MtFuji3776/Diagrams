@@ -18,6 +18,7 @@ import Data.Char
 import Diagrams.TwoD.Image(loadImageEmb,image)
 import Data.Either(fromRight)
 import Aeson
+import Control.Monad(join)
 -- import Diagrams.Backend.Rasterific
 -- import CmSymbols
 
@@ -338,7 +339,12 @@ mkDiagramFromJson (d,moptmap) =
 
 genDiagram trl objs update = mkDiagram . over _2 update . genGraphLocTrail trl objs 
 
---genDiagramFromJson 
+
+genDiagramFromJson :: [ObjectSource] -> [MorphismSource] -> OnlineTex (Diagram PGF)
+genDiagramFromJson objsrc morsrc = join $ genGraphWithLabeledMorphism morsrc <$> genDiscreteFromJson objsrc
+
+
+
 -- attachLabelのアレンジ
 takeLabel_ l asp1 asp2 b opts =
     let trl = opts ^. locTrail
