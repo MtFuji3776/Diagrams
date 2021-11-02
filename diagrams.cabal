@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5de8e0f2da72d2878feb27211573afe53fbb5022c99b3caffebe41bdb8e2e2a4
+-- hash: e9a2a95804ef7d0418a5d7576f7279daf7648e13a511654dfbc031b6d305669d
 
 name:           diagrams
 version:        0.1.0.0
@@ -27,6 +27,7 @@ source-repository head
 
 library
   exposed-modules:
+      Aeson
       DiagramLanguage
       GraphParser
       Parts
