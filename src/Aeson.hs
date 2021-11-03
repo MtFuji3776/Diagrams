@@ -35,7 +35,8 @@ getMorphismData = do
     bs <- BL.readFile "data.json"
     let protomp = fromMaybe M.empty $ decode bs :: M.Map String Value
         bs' = fromMaybe Null . M.lookup "morphisms" $ protomp 
-        mp' = fromMaybe M.empty . decode . encode $ bs' :: M.Map (Int,Int,Int) String
-        --mp = M.mapKeys (fromMaybe (0,0,0) . decode . fromString) mp'
-    return . M.toList $ mp'
+        mp'' = fromMaybe M.empty . decode . encode $ bs' :: M.Map String String
+        mp' = M.mapKeys (\x -> read x :: [Int]) mp'' :: M.Map [Int] String
+        mp  = fromMaybe M.empty . decode . encode $ mp' :: M.Map (Int,Int,Int) String
+    return . M.toList $ mp
 

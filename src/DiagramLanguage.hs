@@ -61,7 +61,7 @@ getPGFSymbol d xs = do
     lab <- hboxOnline . mathEnv $ xs
     return $ lab # scale d # centerXY
 
---getPGFLabel = getPGFSymbol 0.015
+getPGFLabel = getPGFSymbol 0.01
 
 getPGFObj = getPGFSymbol 0.015
 
@@ -313,7 +313,7 @@ genGraphLocTrailFromJson esk d = (d,genMorphOptsFromJson esk d)
 
 genGraphWithLabeledMorphism :: [MorphismSource] -> Diagram PGF -> OnlineTex (Diagram PGF)
 genGraphWithLabeledMorphism ms d = do
-    xs <- mapM getPGFObj $ map snd ms :: OnlineTex [Diagram PGF]
+    xs <- mapM getPGFLabel $ map snd ms :: OnlineTex [Diagram PGF]
     let keys = map fst ms :: [(Int,Int,Int)]
         mpLabels = Map.fromList $ zip keys xs
         mp' = fmap (over (arrOpts.gaps) (+ local 0.03) . set (arrOpts.headLength) (local 0.05)) $ genMorphOptsFromJson ms d
