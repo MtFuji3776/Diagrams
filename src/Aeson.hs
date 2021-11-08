@@ -1,15 +1,34 @@
+{-# LANGUAGE DeriveGeneric #-}
 module Aeson where
 
-import Data.Aeson(encode,decode,Value(..))
+import Data.Aeson(encode,decode,Value(..),FromJSON,ToJSON)
 import qualified Data.ByteString.Lazy as BL (readFile,writeFile,ByteString)
 import qualified Data.Map as M (toList,empty,Map(..),singleton,fromList,mapKeys,lookup)
 import Data.Maybe(fromMaybe)
 import Data.String(fromString)
+import GHC.Generics
 
 
-type ObjectData = (Int,((Double,Double),String))
-type MorphismData = ((Int,Int,Int),String)
+-- type ObjectData = (Int,((Double,Double),String))
+-- type MorphismData = ((Int,Int,Int),String)
 
+data ObjectData
+    = ObjData {
+        idOfData      :: Int
+    ,   coordinate    :: (Double,Double)
+    ,   labelOfObject :: String
+    } deriving(Show,Generic)
+
+instance FromJSON ObjectData
+
+data MorphismData
+    = MorphData{
+        idOfMorphism    :: (Int,Int,Int)
+    ,   labelOfMorphism :: String
+    ,   sideOfLabel     :: Bool
+    } deriving(Show,Generic)
+
+instance FromJSON MorphismData  
 
 genJson :: IO ()
 genJson = do
@@ -20,23 +39,25 @@ genJson = do
         mp = M.fromList $ zip ["objects","morphisms"] [bs1,bs2] :: M.Map String Value
     BL.writeFile "data.json" $ encode mp
 
-getObjectData :: IO [(Int,((Double,Double),String))]
+getObjectData :: IO [ObjectData] --[(Int,((Double,Double),String))]
 getObjectData = do
     bs <- BL.readFile "data.json"
     let protomp = fromMaybe M.empty $ decode bs :: M.Map String Value
         val = fromMaybe Null $ M.lookup "objects" protomp
-        mp' = decode . encode $ val :: Maybe (M.Map Int ((Double,Double),String))
-        mp = fromMaybe M.empty mp'
-        xs = M.toList mp
-    return xs
+        mp' = fromMaybe M.empty . decode . encode $ val :: M.Map Int ((Double,Double),String)
+        -- xs = fromMaybe [] mp'
+        xs = M.toList mp'
+        toObjectData (n,((n1,n2),str)) = ObjData n (n1,n2) str
+    return $ map toObjectData xs 
 
-getMorphismData :: IO [((Int,Int,Int),String)]
+getMorphismData :: IO [MorphismData]--[((Int,Int,Int),String)]
 getMorphismData = do
     bs <- BL.readFile "data.json"
     let protomp = fromMaybe M.empty $ decode bs :: M.Map String Value
         bs' = fromMaybe Null . M.lookup "morphisms" $ protomp 
-        mp'' = fromMaybe M.empty . decode . encode $ bs' :: M.Map String String
-        mp' = M.mapKeys (\x -> read x :: [Int]) mp'' :: M.Map [Int] String
-        mp  = fromMaybe M.empty . decode . encode $ mp' :: M.Map (Int,Int,Int) String
-    return . M.toList $ mp
+        -- mp'' = fromMaybe M.empty . decode . encode $ bs' :: M.Map String String
+        -- mp' = M.mapKeys (\x -> read x :: [Int]) mp'' :: M.Map [Int] String
+        -- mp  = fromMaybe M.empty . decode . encode $ mp' :: M.Map (Int,Int,Int) String
+        md = fromMaybe [] $ decode . encode $ bs' :: [MorphismData]
+    return md
 

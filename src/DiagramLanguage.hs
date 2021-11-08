@@ -175,20 +175,23 @@ example1 = do
 -- =================================================図式言語生成用の主要関数==================================================================
 
 -- Jsonからデコードするオブジェクト用のデータ
-type ObjectSource = (Int,((Double,Double),String))
-type MorphismSource = ((Int,Int,Int),String)
+-- type ObjectSource = (Int,((Double,Double),String))
+-- type MorphismSource = ((Int,Int,Int),String)
 
 -- 対象のJsonデータから対象を生成する関数
     -- これをmapする関数を定義すればgenDiscreteのJson対応版になる
-genObject :: ObjectSource -> OnlineTex (Diagram PGF)
-genObject (n,((x,y),str)) = do
+genObject :: ObjectData -> OnlineTex (Diagram PGF)
+genObject obj = do
+    let n = idOfData obj
+        (x,y) = coordinate obj
+        str = labelOfObject obj
     obj' <- getPGFObj str
     let obj = named n obj'
         p = p2 (x,y)
     return $ place obj p
 
 -- Jsonファイル由来のデータを引数にとって離散圏図式を生成する関数
-genDiscreteFromJson :: [ObjectSource] -> OnlineTex (Diagram PGF)
+genDiscreteFromJson :: [ObjectData] -> OnlineTex (Diagram PGF)
 genDiscreteFromJson objs = 
     let dias' = sequence . map genObject $ objs :: OnlineTex [Diagram PGF]
         dias = fmap (foldr (<>) mempty) dias' :: OnlineTex (Diagram PGF)
@@ -282,20 +285,25 @@ genMorphOpts es d =
                     in Lens.at (Single i j) Lens.?~ opts $ mp
     in foldr insert' Map.empty es
 
-genMorphOptsFromJson :: [MorphismSource] -> Diagram PGF -> Map.Map KeyOfMorphOption MorphOpts
+genMorphOptsFromJson :: [MorphismData] -> Diagram PGF -> Map.Map KeyOfMorphOption MorphOpts
 genMorphOptsFromJson ms d =
-    let insert' ((i,j,k),str) mp =
-            if i == j
-                then
-                    let p = anglePoint i (1/3) d
-                        opts = def & locTrail .~ (arc (direction unitX) ((-4/5) @@ turn) 
-                                   # scale (-0.1) . rotateBy (1/8)) `at` p
-                    in Lens.at (i,j,k) Lens.?~ opts $ mp
-                else 
-                    let opts = def & locTrail .~ mkLocTrail (i,j) d
-                                   & arrOpts . headLength .~ (local 10)
-                    in Lens.at (i,j,k) Lens.?~ opts $ mp
-    in foldr insert' Map.empty ms
+    let insert' :: (Int,Int,Int) -> MorphismData -> Map.Map (Int,Int,Int) MorphOpts -> Map.Map (Int,Int,Int) MorphOpts
+        insert' (i,j,k) md moptsmp = -- locTrail成分を構成する関数。なぜinsertとかいう名前なの？
+            -- let str = labelOfMorphism md
+            --     b   = sideOfLabel md
+            -- in
+                if i == j
+                    then
+                        let p = anglePoint i (1/3) d
+                            opts = def & locTrail .~ (arc (direction unitX) ((-4/5) @@ turn) 
+                                       # scale (-0.1) . rotateBy (1/8)) `at` p
+                        in Lens.at (i,j,k) Lens.?~ opts $ moptsmp
+                    else 
+                        let opts = def & locTrail .~ mkLocTrail (i,j) d
+                                       & arrOpts . headLength .~ (local 10)
+                        in Lens.at (i,j,k) Lens.?~ opts $ moptsmp
+        mp = Map.fromList $ zip (map idOfMorphism ms) ms :: Map.Map (Int,Int,Int) MorphismData -- [MorphismData]値をMap化。これにfoldrKeysを適用して値を更新していくつもり。
+    in Map.foldrWithKey insert' Map.empty mp
 
 -- Algaから図式の抽象グラフ構造を読み取り、Trailから座標情報を読み取り、離散グラフとLocatedTrailのMapの組を作って返す
     -- このあと、LocatedTrailのMapを装飾しつつarrowFromLocatedTrailに適用し、離散圏に射を入れていく関数が続く
@@ -311,13 +319,37 @@ genGraphLocTrail trl objs g =
 -- Json由来のデータに対応して関数を作り直した
 genGraphLocTrailFromJson esk d = (d,genMorphOptsFromJson esk d)
 
-genGraphWithLabeledMorphism :: [MorphismSource] -> Diagram PGF -> OnlineTex (Diagram PGF)
+data MorphismDataWithDiagramLabel
+    = MorphDataDiagram{
+        idOfMorphism_ :: (Int,Int,Int)
+    ,   labelOfMorphism_ :: Diagram PGF
+    ,   sideOfLabel_  :: Bool
+    }
+
+fromMorphismData :: MorphismData -> Diagram PGF -> MorphismDataWithDiagramLabel
+fromMorphismData md d =
+    let k = idOfMorphism md
+        sol = sideOfLabel md
+    in MorphDataDiagram k d sol
+
+genGraphWithLabeledMorphism :: [MorphismData] -> Diagram PGF -> OnlineTex (Diagram PGF)
 genGraphWithLabeledMorphism ms d = do
-    xs <- mapM getPGFLabel $ map snd ms :: OnlineTex [Diagram PGF]
-    let keys = map fst ms :: [(Int,Int,Int)]
+    xs <- mapM getPGFLabel $ map labelOfMorphism ms :: OnlineTex [Diagram PGF]
+    let keys = map idOfMorphism ms :: [(Int,Int,Int)]
         mpLabels = Map.fromList $ zip keys xs
         mp' = fmap (over (arrOpts.gaps) (+ local 0.03) . set (arrOpts.headLength) (local 0.05)) $ genMorphOptsFromJson ms d
-        mp = Map.foldrWithKey (tackLabelFromJson_ 0.5 0.1) mp' mpLabels :: Map.Map KeyOfMorphOption MorphOpts
+        mdwd = Map.fromList $ zip keys $ zipWith fromMorphismData ms xs -- データが集約されたMap。これを素材にしてMorphOptsマップを作る。
+        -- f (i,j,k) a b = 
+        --     let label = fromMaybe empty $ Map.lookup (i,j,k) mpLabels
+        --         Map.update (tackLabelFromJson_  (i,j,k) 
+        update (i,j,k) md' = 
+            let k = idOfMorphism_ md'
+                b = sideOfLabel_ md'
+                f = tackLabelFromJson_ 0.5 0.1 b k $ labelOfMorphism_ md'
+            in f
+        mp = Map.foldrWithKey update mp' mdwd
+        --mp = Map.foldrWithKey (tackLabelFromJson_ 0.5 (0.1)) mp' mpLabels -- :: Map.Map KeyOfMorphOption MorphOpts
+        morphDataMap = Map.fromList $ zip keys ms
         d' = mkDiagramFromJson (d,mp)
     return d'
 
@@ -340,7 +372,7 @@ mkDiagramFromJson (d,moptmap) =
 genDiagram trl objs update = mkDiagram . over _2 update . genGraphLocTrail trl objs 
 
 
-genDiagramFromJson :: [ObjectSource] -> [MorphismSource] -> OnlineTex (Diagram PGF)
+genDiagramFromJson :: [ObjectData] -> [MorphismData] -> OnlineTex (Diagram PGF)
 genDiagramFromJson objsrc morsrc = join $ genGraphWithLabeledMorphism morsrc <$> genDiscreteFromJson objsrc
 
 
@@ -376,7 +408,11 @@ tackLabel_ i j l b d1 d2 = actOpt i j (takeLabel_ l d1 d2 b)
 
 -- この関数で、Jsonデータから射のラベル付けを実現できるはず。
 -- tackLabelFromJson_ :: Double -> Double -> (Int,Int,Int) -> String -> 
-tackLabelFromJson_ d1 d2 (i,j,k) label = actOptWithJson i j k (takeLabel_ label d1 d2 True)
+tackLabelFromJson_ d1 d2 b (i,j,k) label = actOptWithJson i j k (takeLabel_ label d1 d2 b)
+    --let (i,j,k) = idOfMorphism dm
+    --actOptWithJson i j k (takeLabel_ (labelOfMorphism dm) d1 d2 $ sideOfLabel dm) mopts
+
+
 
 tackLabelTwin i j b1 l b2 = actOpt_Twin i j b1 (takeLabel l 0.5 b2)
 takeLabelTwin_ i j b1 l b2 d1 d2 = actOpt_Twin i j b1 (takeLabel_ l d1 d2 b2)
