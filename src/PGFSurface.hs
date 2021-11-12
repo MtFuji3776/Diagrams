@@ -66,6 +66,19 @@ preamble1 = "\\documentclass{ltjsarticle}\n"
     -- ++ "\\author{}\n"
     -- ++ "\\date{\\today}\n"
 
+preamble1_ :: String -> String
+preamble1_ macro = 
+    "\\documentclass{ltjsarticle}\n"
+    ++ "\\usepackage{luatexja-otf}\n"
+    ++ "\\usepackage[]{luatexja,luatexja-fontspec}"
+    ++ "\\usepackage{array}\n"
+    ++ "\\usepackage{mathpazo}\n"
+    ++ "\\usepackage{amsmath}\n"
+    ++ "\\usepackage{amssymb}\n"
+    ++ "\\usepackage{amsfonts}\n"
+    ++ "\\usepackage[noheadfoot,top=0mm,bottom=0mm,hmargin=-5mm]{geometry}\n"
+    ++ "\\usepackage{color}\n"
+    ++ macro
 
 preamble2 :: String
 preamble2 = "\\documentclass{article}\n"
@@ -88,8 +101,15 @@ lualatexSurface = def & command .~ "lualatex"
                                               ++ "\\pageheight=" ++ show h ++ "bp\n"
                                               ++ "\\textheight=" ++ show h ++ "bp\n")
                       
+lualatexSurFace_ :: String -> Surface
+lualatexSurFace_ macro
+    = def & command .~ "lualatex"
+          & preamble .~ (preamble1_ macro)
+          & pageSize ?~ (\(V2 w h) -> "\\pagewidth=" ++ show w ++ "bp\n"
+                                    ++ "\\pageheight=" ++ show h ++ "bp\n"
+                                    ++ "\\textheight=" ++ show h ++ "bp\n")
 
--- lualatexSurface = Surface
+    -- ualatexSurface = Surface
 --     {   _texFormat = LaTeX
 --     ,   _command   = "lualatex"
 --     ,   _arguments = []--"$dvipdf='dvipdfmx %O %S'"]
@@ -110,6 +130,9 @@ pgfTest s = renderOnlinePGF' "test1.pdf" (def & surface .~ s & standalone .~ Fal
 luaSurafaceSize w h = def & surface .~ lualatexSurface
                           & sizeSpec .~ (mkSizeSpec2D (Just w) (Just h))
 
+luaSurfaceSize_ macro w h = def & surface .~ (lualatexSurFace_ macro)
+                                & sizeSpec .~ (mkSizeSpec2D (Just w) (Just h))
+
 ds = "/Users/fujimotomakoto/Documents/latexs/DailyStrategy/"
 
 renderPGFLua filepath  = renderOnlinePGF' filepath (def & surface .~ lualatexSurface & sizeSpec .~ (mkSizeSpec2D (Just 400) (Just 300))) 
@@ -119,6 +142,8 @@ renderPDF = renderPDF' 400 300
 
 renderTex' w h = renderOnlinePGF' "/Users/fujimotomakoto/haskell_testing/diagrams/img/test.tex" $ luaSurafaceSize w h
 renderTex = renderTex' 300 225
+
+renderTexWithMacro macro w h = renderOnlinePGF' "/Users/fujimotomakoto/haskell_testing/diagrams/img/test.tex" $ luaSurfaceSize_ macro w h
 
 easyRender' w h name = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202012/img/" ++ name) (luaSurafaceSize w h)
 easyRender = easyRender' 300 225 
