@@ -25,7 +25,9 @@ data MorphismData
     = MorphData{
         idOfMorphism    :: (Int,Int,Int)
     ,   labelOfMorphism :: String
-    ,   sideOfLabel     :: Bool
+    -- ,   sideOfLabel     :: Bool
+    ,   ratioOfLabel    :: Double
+    ,   distanceOfLabel    :: Double
     } deriving(Show,Generic)
 
 instance FromJSON MorphismData  

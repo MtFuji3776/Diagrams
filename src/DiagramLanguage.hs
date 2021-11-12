@@ -323,14 +323,17 @@ data MorphismDataWithDiagramLabel
     = MorphDataDiagram{
         idOfMorphism_ :: (Int,Int,Int)
     ,   labelOfMorphism_ :: Diagram PGF
-    ,   sideOfLabel_  :: Bool
+    -- ,   sideOfLabel_  :: Bool
+    ,   ratioOfLabel_  :: Double
+    ,   distanceOfLabel_ :: Double
     }
 
 fromMorphismData :: MorphismData -> Diagram PGF -> MorphismDataWithDiagramLabel
 fromMorphismData md d =
     let k = idOfMorphism md
-        sol = sideOfLabel md
-    in MorphDataDiagram k d sol
+        rol = ratioOfLabel md
+        dol = distanceOfLabel md
+    in MorphDataDiagram k d rol dol
 
 genGraphWithLabeledMorphism :: [MorphismData] -> Diagram PGF -> OnlineTex (Diagram PGF)
 genGraphWithLabeledMorphism ms d = do
@@ -344,8 +347,9 @@ genGraphWithLabeledMorphism ms d = do
         --         Map.update (tackLabelFromJson_  (i,j,k) 
         update (i,j,k) md' = 
             let k = idOfMorphism_ md'
-                b = sideOfLabel_ md'
-                f = tackLabelFromJson_ 0.5 0.1 b k $ labelOfMorphism_ md'
+                rol = ratioOfLabel_ md'
+                dol = distanceOfLabel_ md'
+                f = tackLabelFromJson_ rol dol True k $ labelOfMorphism_ md'
             in f
         mp = Map.foldrWithKey update mp' mdwd
         --mp = Map.foldrWithKey (tackLabelFromJson_ 0.5 (0.1)) mp' mpLabels -- :: Map.Map KeyOfMorphOption MorphOpts
