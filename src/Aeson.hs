@@ -50,6 +50,7 @@ getObjectData = do
         toObjectData (n,((n1,n2),str)) = ObjData n (n1,n2) str
     return $ map toObjectData xs 
 
+
 getMorphismData :: IO [MorphismData]--[((Int,Int,Int),String)]
 getMorphismData = do
     bs <- BL.readFile "data.json"
@@ -61,3 +62,11 @@ getMorphismData = do
         md = fromMaybe [] $ decode . encode $ bs' :: [MorphismData]
     return md
 
+
+getMacros :: IO String
+getMacros = do
+    bs <- BL.readFile "data.json"
+    let protomp = fromMaybe M.empty $ decode bs :: M.Map String Value
+        macros' = fromMaybe Null . M.lookup "macros" $ protomp
+        macros = fromMaybe "" . decode . encode $ macros' :: String
+    return macros

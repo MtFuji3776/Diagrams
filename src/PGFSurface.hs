@@ -143,7 +143,8 @@ renderPDF = renderPDF' 400 300
 renderTex' w h = renderOnlinePGF' "/Users/fujimotomakoto/haskell_testing/diagrams/img/test.tex" $ luaSurafaceSize w h
 renderTex = renderTex' 300 225
 
-renderTexWithMacro macro w h = renderOnlinePGF' "/Users/fujimotomakoto/haskell_testing/diagrams/img/test.tex" $ luaSurfaceSize_ macro w h
+renderTexWithMacro' macro w h = renderOnlinePGF' "/Users/fujimotomakoto/haskell_testing/diagrams/img/test.tex" $ luaSurfaceSize_ macro w h
+renderTexWithMacro macro = renderTexWithMacro' macro 300 225
 
 easyRender' w h name = renderOnlinePGF' ("/Users/fujimotomakoto/Documents/latexs/DailyStrategy/202012/img/" ++ name) (luaSurafaceSize w h)
 easyRender = easyRender' 300 225 

@@ -5,7 +5,7 @@ module Main where
 --import Diagrams.Prelude()
 import Parts(genTree,genBCDia)
 -- import DiagramLanguage()
-import PGFSurface(renderPDF,renderTex)
+import PGFSurface(renderPDF,renderTex,renderTexWithMacro)
 import ProofTree(getFormula,genProofTree)
 import DiagramLanguage(Quantification,genDiagram,genDiagramFromJson)
 import Algebra.Graph(Graph(..)) -- hiding(at,(===))
@@ -89,9 +89,10 @@ main = do
     -- let x = fromMaybe (ST (SI 200 150) [] mempty) y' -- ここもメタデータから取得できるようにするべし
     objs <- getObjectData
     morphs <- getMorphismData
+    macros <- getMacros
     print objs
     print morphs
-    renderTex $ genDiagramFromJson objs morphs
+    renderTexWithMacro macros $ genDiagramFromJson objs morphs
     --     ns = nodes x
     --     objs = getFormula ns
     --     noSpaceExpr = pack . fromRight mempty . parseOnly rmSpace . structure $ x
