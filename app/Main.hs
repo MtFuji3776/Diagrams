@@ -87,12 +87,19 @@ main = do
     -- y <- BL.readFile "data.json"
     -- let y' = decode y :: Maybe SimpleTree
     -- let x = fromMaybe (ST (SI 200 150) [] mempty) y' -- ここもメタデータから取得できるようにするべし
-    objs <- getObjectData
-    morphs <- getMorphismData
-    macros <- getMacros
-    print objs
-    print morphs
-    renderTexWithMacro macros $ genDiagramFromJson objs morphs
+    c <- getContent
+    if c == "CommutativeDiagram"
+    then do
+        objs <- getObjectData
+        morphs <- getMorphismData
+        macros <- getMacros
+        print objs
+        print morphs
+        renderTexWithMacro macros $ genDiagramFromJson objs morphs
+    else if c == "ProofTree"
+    then return ()
+    else return ()
+        
     --     ns = nodes x
     --     objs = getFormula ns
     --     noSpaceExpr = pack . fromRight mempty . parseOnly rmSpace . structure $ x
