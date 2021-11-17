@@ -326,6 +326,7 @@ data MorphismDataWithDiagramLabel
     -- ,   sideOfLabel_  :: Bool
     ,   ratioOfLabel_  :: Double
     ,   distanceOfLabel_ :: Double
+    ,   vshift_ :: Double
     }
 
 fromMorphismData :: MorphismData -> Diagram PGF -> MorphismDataWithDiagramLabel
@@ -333,7 +334,17 @@ fromMorphismData md d =
     let k = idOfMorphism md
         rol = ratioOfLabel md
         dol = distanceOfLabel md
-    in MorphDataDiagram k d rol dol
+        vsh = vshift md
+    in MorphDataDiagram k d rol dol vsh
+
+-- LocatedTrailを指定した大きさだけ平行移動させる関数。矢印を並行移動させるのに使う。TikZでいうところのtransformcanvas yshift的な何か。
+  -- ここではとりあえず矢印と垂直方向に並行移動するタイプのtranslateを書いた。
+translateLocTrailVertical n mop =
+    let lt = mop ^. locTrail
+        u  = n *^ normalAtParam lt 0
+    in mop & locTrail %~ translate u
+
+
 
 genGraphWithLabeledMorphism :: [MorphismData] -> Diagram PGF -> OnlineTex (Diagram PGF)
 genGraphWithLabeledMorphism ms d = do
@@ -346,11 +357,13 @@ genGraphWithLabeledMorphism ms d = do
         --     let label = fromMaybe empty $ Map.lookup (i,j,k) mpLabels
         --         Map.update (tackLabelFromJson_  (i,j,k) 
         update (i,j,k) md' = 
-            let k = idOfMorphism_ md'
+            let --k = idOfMorphism_ md'
                 rol = ratioOfLabel_ md'
                 dol = distanceOfLabel_ md'
-                f = tackLabelFromJson_ rol dol True k $ labelOfMorphism_ md'
-            in f
+                vsh = vshift_ md'
+                f1 = translateLocTrailVertical vsh 
+                f2 = takeLabel_ (labelOfMorphism_ md') rol dol True --k $ labelOfMorphism_ md'
+            in actOptWithJson i j k (f2 . f1)
         mp = Map.foldrWithKey update mp' mdwd
         --mp = Map.foldrWithKey (tackLabelFromJson_ 0.5 (0.1)) mp' mpLabels -- :: Map.Map KeyOfMorphOption MorphOpts
         morphDataMap = Map.fromList $ zip keys ms
@@ -578,6 +591,8 @@ introTwin i j mp =
                                     & (Lens.at $ Twin i j False) ?~ (moveTrail 0.05 mopt')
                                     & sans (Single i j)
     in result
+
+
 
 
 -- ================Arc生成関数

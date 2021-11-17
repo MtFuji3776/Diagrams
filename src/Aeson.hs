@@ -28,6 +28,7 @@ data MorphismData
     -- ,   sideOfLabel     :: Bool
     ,   ratioOfLabel    :: Double
     ,   distanceOfLabel    :: Double
+    ,   vshift :: Double
     } deriving(Show,Generic)
 
 instance FromJSON MorphismData  
@@ -72,3 +73,11 @@ getMacros = do
         macros' = fromMaybe Null . M.lookup "macros" $ protomp
         macros = fromMaybe "" . decode . encode $ macros' :: String
     return macros
+
+getContent :: IO String
+getContent = do
+    bs <- BL.readFile "data.json"
+    let protomp  = fromMaybe M.empty $ decode bs :: M.Map String Value
+        content' = fromMaybe Null . M.lookup "content" $ protomp
+        content  = fromMaybe "" . decode . encode $ content' :: String
+    return content
