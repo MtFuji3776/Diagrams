@@ -29,6 +29,8 @@ data MorphismData
     ,   ratioOfLabel    :: Double
     ,   distanceOfLabel    :: Double
     ,   vshift :: Double
+    ,   dash :: Double
+    ,   dashwhite :: Double
     } deriving(Show,Generic)
 
 instance FromJSON MorphismData  

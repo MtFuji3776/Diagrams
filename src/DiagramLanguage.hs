@@ -327,6 +327,8 @@ data MorphismDataWithDiagramLabel
     ,   ratioOfLabel_  :: Double
     ,   distanceOfLabel_ :: Double
     ,   vshift_ :: Double
+    ,   dash_ :: Double
+    ,   dashwhite_ :: Double
     }
 
 fromMorphismData :: MorphismData -> Diagram PGF -> MorphismDataWithDiagramLabel
@@ -335,7 +337,9 @@ fromMorphismData md d =
         rol = ratioOfLabel md
         dol = distanceOfLabel md
         vsh = vshift md
-    in MorphDataDiagram k d rol dol vsh
+        dsh = dash md
+        dshwhite = dashwhite md
+    in MorphDataDiagram k d rol dol vsh dsh dshwhite
 
 -- LocatedTrailを指定した大きさだけ平行移動させる関数。矢印を並行移動させるのに使う。TikZでいうところのtransformcanvas yshift的な何か。
   -- ここではとりあえず矢印と垂直方向に並行移動するタイプのtranslateを書いた。
@@ -344,6 +348,9 @@ translateLocTrailVertical n mop =
         u  = n *^ normalAtParam lt 0
     in mop & locTrail %~ translate u
 
+dashedArrow d1 d2 mop =
+    let dash = dashingN [d1,d2] 0
+    in over actions (dash <|) mop
 
 
 genGraphWithLabeledMorphism :: [MorphismData] -> Diagram PGF -> OnlineTex (Diagram PGF)
@@ -361,9 +368,12 @@ genGraphWithLabeledMorphism ms d = do
                 rol = ratioOfLabel_ md'
                 dol = distanceOfLabel_ md'
                 vsh = vshift_ md'
+                dsh = dash_ md'
+                dshw = dashwhite_ md'
                 f1 = translateLocTrailVertical vsh 
                 f2 = takeLabel_ (labelOfMorphism_ md') rol dol True --k $ labelOfMorphism_ md'
-            in actOptWithJson i j k (f2 . f1)
+                f3 = if dsh == 0.0 || dshw == 0.0 then id else dashedArrow dsh dshw -- 入力されたdash,dashwhiteのどちらかが0ならば何もせず、両方0でなければその値で矢印を点線化する
+            in actOptWithJson i j k (f3 . f2 . f1)
         mp = Map.foldrWithKey update mp' mdwd
         --mp = Map.foldrWithKey (tackLabelFromJson_ 0.5 (0.1)) mp' mpLabels -- :: Map.Map KeyOfMorphOption MorphOpts
         morphDataMap = Map.fromList $ zip keys ms
@@ -377,13 +387,13 @@ evalMorphOpts (Morph loc opts symbs acts) =
 
 
 mkDiagram (disd,morphmap) =
-    let arrowDia = foldr (\x y -> evalMorphOpts x # lw veryThin <> y) mempty morphmap 
+    let arrowDia = foldr (\x y -> evalMorphOpts x # lw thin <> y) mempty morphmap 
     in arrowDia <> disd :: Diagram PGF
 
 -- Jsonデータから可換図式を生成するための関数
 mkDiagramFromJson :: (Diagram PGF,Map.Map KeyOfMorphOption MorphOpts) -> Diagram PGF
 mkDiagramFromJson (d,moptmap) = 
-    let arrowDia = foldr (\x y -> evalMorphOpts x # lw veryThin <> y) mempty moptmap
+    let arrowDia = foldr (\x y -> evalMorphOpts x  <> y) mempty moptmap
     in arrowDia <> d 
 
 genDiagram trl objs update = mkDiagram . over _2 update . genGraphLocTrail trl objs 
