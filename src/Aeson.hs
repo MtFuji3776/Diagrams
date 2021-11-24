@@ -8,7 +8,7 @@ import Data.Maybe(fromMaybe)
 import Data.String(fromString)
 import GraphParser
 import GHC.Generics
-import Algebra.Graph(Graph(..),vertexSet)
+import Algebra.Graph(Graph(..),vertexSet,edgeSet)
 import Data.Set(Set(..))
 import Data.Text (Text)
 
@@ -96,13 +96,15 @@ getDiagramType = do
         diagramtype  = fromMaybe "" . decode . encode $ diagramtype' :: String
     return diagramtype
 
-getAlgas :: IO [(Set Int)]
+getAlgas :: IO ([Set Int],[Set(Int,Int)])
 getAlgas = do
     bs <- BL.readFile "data.json"
     let protomp = fromMaybe M.empty $ decode bs :: M.Map String Value
         algas'  = fromMaybe Null . M.lookup "algas" $ protomp
-        algas   = fromMaybe [] . decode . encode $ algas' :: [Text]
-    return $ map (vertexSet.algaparse) algas
+        algas   = map algaparse $ fromMaybe [] . decode . encode $ algas' :: [Graph Int]
+        vers    = map vertexSet algas
+        morphs  = map edgeSet algas
+    return (vers,morphs)
 
 getQuantifiers :: IO [String]
 getQuantifiers = do

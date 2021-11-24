@@ -111,9 +111,12 @@ main = do
                 print objs
                 print morphs
                 let filterobjsFromSet s = filter (\o -> member (idOfData o) s) objs
-                    filteredobjs = map filterobjsFromSet algas :: [[ObjectData]]
+                    proj (i,j,k) = (i,j)
+                    filterMorphsFromSet s = filter (\m -> member (proj $ idOfMorphism m) s) morphs
+                    filteredObjs = map filterobjsFromSet $ fst algas :: [[ObjectData]]
+                    filteredMorphs = map filterMorphsFromSet $ snd algas :: [[MorphismData]]
                     qs = map readQuant qs' 
-                    ds = sequence $ map (\obj -> genDiagramFromJson obj morphs) filteredobjs
+                    ds = sequence $ zipWith genDiagramFromJson filteredObjs filteredMorphs
                 renderTexWithMacro macros . join $ diagramLanguage qs <$> ds -- diagramLanguageの戻り値はOnlineTex (Diagram PGF)であることに注意。
     else if c == "ProofTree"
     then return ()

@@ -78,19 +78,19 @@ forall     = getPGFObj "\\forall"
 exists     = getPGFObj "\\exists"
 existsOnly = getPGFObj "\\exists !"
 
-evalQF NoLine         = scale 1.2 <$> return mempty
-evalQF NoQuant        = scale 1.2 <$> return mempty
-evalQF Forall         = scale 1.2 <$> forall
-evalQF Exists         = scale 1.2 <$> exists
-evalQF Only           = scale 1.2 <$> getPGFObj "!"
-evalQF ExistsOnly     = scale 1.2 <$> existsOnly
+evalQF NoLine         = scale 1.0 <$> return mempty
+evalQF NoQuant        = scale 1.0 <$> return mempty
+evalQF Forall         = scale 1.0 <$> forall
+evalQF Exists         = scale 1.0 <$> exists
+evalQF Only           = scale 1.0 <$> getPGFObj "!"
+evalQF ExistsOnly     = scale 1.0 <$> existsOnly
 -- 罫線
     -- lは長さの値、xは上に付ける量化記号と!
     -- translateYの値は議論の余地あり
     -- 図式の列を与えられたときに罫線の長さを自動で導出させられたらいい感じなのだが。
 
 vline l q = do
-    let line l = vrule l # alignB # translateY ((-0.2 * l))
+    let line l = (vrule l <> rect 0.2 l # lw none) # alignB # translateY ((-0.2 * l)) # lw thick
     if q == NoLine
         then return mempty
         else beside (0 ^& 1) (strutY 0.1 === line l) <$> evalQF q
