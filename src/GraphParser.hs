@@ -1,9 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 module GraphParser(
     expr
+,   algaparse
 ) where
 
-import qualified Data.Attoparsec.Text as T (sepBy1,string,decimal)
+import qualified Data.Attoparsec.Text as T (sepBy1,string,decimal,parseOnly)
 --import Data.Attoparsec(Parser)
 --import qualified Data.Attoparsec.Text.Internal as PT(Parser)
 import Algebra.Graph(Graph(..),path)
@@ -16,6 +17,9 @@ import Data.Attoparsec.Combinator(choice,(<?>))
 import Data.Attoparsec.Types(Parser)
 
 type G = Graph Int
+
+algaparse :: Text -> Graph Int
+algaparse = fromRight Empty . T.parseOnly expr
 
 expr :: Parser Text G
 expr = buildExpressionParser 

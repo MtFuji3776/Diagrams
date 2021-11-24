@@ -95,7 +95,15 @@ vline l q = do
         then return mempty
         else beside (0 ^& 1) (strutY 0.1 === line l) <$> evalQF q
 
-                    
+readQuant :: String -> Quantification
+readQuant "noline"    = NoLine
+readQuant "noquant"   = NoQuant
+readQuant "forall"    = Forall
+readQuant "exists"    = Exists
+readQuant "only"      = Only
+readQuant "existonly" = ExistsOnly
+readQuant _           = NoLine
+
 
 -- 量化記号はboxedTextで定義
     -- サイズはとりあえず0.2で様子見

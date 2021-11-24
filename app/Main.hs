@@ -7,7 +7,7 @@ import Parts(genTree,genBCDia)
 -- import DiagramLanguage()
 import PGFSurface(renderPDF,renderTex,renderTexWithMacro)
 import ProofTree(getFormula,genProofTree)
-import DiagramLanguage(Quantification,genDiagram,genDiagramFromJson)
+import DiagramLanguage(Quantification,genDiagram,genDiagramFromJson,readQuant,diagramLanguage)
 import Algebra.Graph(Graph(..)) -- hiding(at,(===))
 import Data.Yaml(decodeFileEither,ParseException)
 import Data.Aeson(FromJSON,decode,ToJSON,encode)
@@ -19,6 +19,9 @@ import Aeson
 import Data.Text (Text,pack)
 import Data.Attoparsec.Text(skipSpace,parseOnly,anyChar,sepBy)
 import qualified Data.ByteString.Lazy as BL(readFile)
+import Data.Set(member)
+import Control.Monad.IO.Class (liftIO)
+import Control.Monad(join)
 
 data SizeOfImage = SI {
     widthOfI :: Int,
@@ -90,12 +93,28 @@ main = do
     c <- getContent
     if c == "CommutativeDiagram"
     then do
-        objs <- getObjectData
-        morphs <- getMorphismData
-        macros <- getMacros
-        print objs
-        print morphs
-        renderTexWithMacro macros $ genDiagramFromJson objs morphs
+        t <- getDiagramType
+        if t == "single diagram"
+            then do
+                objs <- getObjectData
+                morphs <- getMorphismData
+                macros <- getMacros
+                print objs
+                print morphs
+                renderTexWithMacro macros $ genDiagramFromJson objs morphs
+            else do
+                qs' <- getQuantifiers
+                algas <- getAlgas
+                objs <- getObjectData
+                morphs <- getMorphismData
+                macros <- getMacros
+                print objs
+                print morphs
+                let filterobjsFromSet s = filter (\o -> member (idOfData o) s) objs
+                    filteredobjs = map filterobjsFromSet algas :: [[ObjectData]]
+                    qs = map readQuant qs' 
+                    ds = sequence $ map (\obj -> genDiagramFromJson obj morphs) filteredobjs
+                renderTexWithMacro macros . join $ diagramLanguage qs <$> ds -- diagramLanguageの戻り値はOnlineTex (Diagram PGF)であることに注意。
     else if c == "ProofTree"
     then return ()
     else return ()

@@ -6,7 +6,11 @@ import qualified Data.ByteString.Lazy as BL (readFile,writeFile,ByteString)
 import qualified Data.Map as M (toList,empty,Map(..),singleton,fromList,mapKeys,lookup)
 import Data.Maybe(fromMaybe)
 import Data.String(fromString)
+import GraphParser
 import GHC.Generics
+import Algebra.Graph(Graph(..),vertexSet)
+import Data.Set(Set(..))
+import Data.Text (Text)
 
 
 -- type ObjectData = (Int,((Double,Double),String))
@@ -83,3 +87,27 @@ getContent = do
         content' = fromMaybe Null . M.lookup "content" $ protomp
         content  = fromMaybe "" . decode . encode $ content' :: String
     return content
+
+getDiagramType :: IO String
+getDiagramType = do
+    bs <- BL.readFile "data.json"
+    let protomp = fromMaybe M.empty $ decode bs :: M.Map String Value
+        diagramtype' = fromMaybe Null . M.lookup "diagramtype" $ protomp
+        diagramtype  = fromMaybe "" . decode . encode $ diagramtype' :: String
+    return diagramtype
+
+getAlgas :: IO [(Set Int)]
+getAlgas = do
+    bs <- BL.readFile "data.json"
+    let protomp = fromMaybe M.empty $ decode bs :: M.Map String Value
+        algas'  = fromMaybe Null . M.lookup "algas" $ protomp
+        algas   = fromMaybe [] . decode . encode $ algas' :: [Text]
+    return $ map (vertexSet.algaparse) algas
+
+getQuantifiers :: IO [String]
+getQuantifiers = do
+    bs <- BL.readFile "data.json"
+    let protomp = fromMaybe M.empty $ decode bs :: M.Map String Value
+        quantifiers' = fromMaybe Null . M.lookup "quantifiers" $ protomp
+        quantifiers  = fromMaybe [] . decode . encode $ quantifiers' :: [String]
+    return quantifiers
