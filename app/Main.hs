@@ -119,7 +119,14 @@ main = do
                     ds = sequence $ zipWith genDiagramFromJson filteredObjs filteredMorphs
                 renderTexWithMacro macros . join $ diagramLanguage qs <$> ds -- diagramLanguageの戻り値はOnlineTex (Diagram PGF)であることに注意。
     else if c == "ProofTree"
-    then return ()
+    then do
+        nodes  <- getNodes
+        alga'  <- getAlga
+        macros <- getMacros
+        -- objs   <- getFormula nodes
+        let alga = fromRight Algebra.Graph.Empty . parseOnly expr $ alga'
+            tree = genTree 1 alga
+        renderTexWithMacro macros $ (\x -> genProofTree id x tree) <$> getFormula nodes
     else return ()
         
     --     ns = nodes x
