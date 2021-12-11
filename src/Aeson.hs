@@ -113,3 +113,19 @@ getQuantifiers = do
         quantifiers' = fromMaybe Null . M.lookup "quantifiers" $ protomp
         quantifiers  = fromMaybe [] . decode . encode $ quantifiers' :: [String]
     return quantifiers
+
+getNodes :: IO [String]
+getNodes = do
+    bs <- BL.readFile "data.json"
+    let protomp = fromMaybe M.empty $ decode bs :: M.Map String Value
+        nodes' = fromMaybe Null . M.lookup "nodes" $ protomp
+        nodes = fromMaybe [] . decode . encode $ nodes' :: [String]
+    return nodes
+
+getAlga :: IO Text
+getAlga = do
+    bs <- BL.readFile "data.json"
+    let protomp = fromMaybe M.empty $ decode bs :: M.Map String Value
+        alga' = fromMaybe Null . M.lookup "alga" $ protomp
+        alga = fromMaybe "0" . decode . encode $ alga' :: Text
+    return alga
